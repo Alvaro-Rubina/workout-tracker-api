@@ -3,6 +3,7 @@ package org.alvarub.workouttrackerproject.persistence.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -26,8 +27,8 @@ public class Sesion {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "day_order", nullable = false)
-    private Integer dayOrder;
+    @Column(name = "day_of_week", nullable = false)
+    private DayOfWeek dayOfWeek;
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default
