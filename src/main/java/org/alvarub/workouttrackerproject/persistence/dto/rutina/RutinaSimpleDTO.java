@@ -23,9 +23,9 @@ public class RutinaSimpleDTO {
 
     private Dificultad difficulty;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
 
     private CategoriaResponseDTO category;
 

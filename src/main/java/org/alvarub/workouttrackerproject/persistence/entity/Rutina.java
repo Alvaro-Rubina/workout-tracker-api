@@ -46,6 +46,7 @@ public class Rutina {
     @OneToMany(mappedBy = "routine",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             orphanRemoval = true)
+    @Builder.Default
     private List<Sesion> sessions = new ArrayList<>();
 
     @ManyToOne

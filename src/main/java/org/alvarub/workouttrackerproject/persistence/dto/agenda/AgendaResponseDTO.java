@@ -14,9 +14,9 @@ public class AgendaResponseDTO {
 
     private Long id;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
 
     private LocalDateTime startDate;
 
