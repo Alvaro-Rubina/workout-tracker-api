@@ -8,6 +8,7 @@ import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioSimpleDTO;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -30,5 +31,6 @@ public class ComentarioResponseDTO {
     private ComentarioSimpleDTO replyTo;
 
     // NOTE: Acá no estoy seguro de si ponerlo de tipo ResponseDTO o SimpleDTO.
-    private ComentarioResponseDTO replies;
+    // En ComentarioResponseDTO
+    private List<ComentarioResponseDTO> replies;
 }
