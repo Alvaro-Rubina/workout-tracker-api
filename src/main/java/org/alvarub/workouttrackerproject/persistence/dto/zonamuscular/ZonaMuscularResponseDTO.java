@@ -1,0 +1,22 @@
+package org.alvarub.workouttrackerproject.persistence.dto.zonamuscular;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoSimpleDTO;
+
+import java.util.Set;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ZonaMuscularResponseDTO {
+
+    private Long id;
+
+    private String name;
+
+    private Set<MusculoSimpleDTO> muscles;
+}
