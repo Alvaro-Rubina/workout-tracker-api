@@ -50,6 +50,7 @@ public class Sesion {
     @OneToMany(mappedBy = "session",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             orphanRemoval = true)
+    @Builder.Default
     private Set<SesionEjercicio> sessionExercises = new LinkedHashSet<>();
 
 }

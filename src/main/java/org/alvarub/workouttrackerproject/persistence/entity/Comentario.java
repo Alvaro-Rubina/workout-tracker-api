@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -46,5 +47,6 @@ public class Comentario {
     private Comentario replyTo;
 
     @OneToMany(mappedBy = "replyTo", orphanRemoval = true)
-    private java.util.List<Comentario> replies = new ArrayList<>();
+    @Builder.Default
+    private List<Comentario> replies = new ArrayList<>();
 }
