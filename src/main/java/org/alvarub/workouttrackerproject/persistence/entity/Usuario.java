@@ -73,6 +73,9 @@ public class Usuario {
             inverseJoinColumns = @JoinColumn(name = "routine_id"))
     private Set<Rutina> savedRoutines = new HashSet<>();
 
+    @Column(name = "completed_routines")
+    private Long completedRoutines;
+
     @ManyToMany
     @JoinTable(name = "user_favorite_exercises",
             joinColumns = @JoinColumn(name = "user_id"),

@@ -32,6 +32,12 @@ public class Agenda {
     @Column(name = "reminder_minutes")
     private Integer reminderMinutes;
 
+    @Column(name = "completed")
+    private Boolean completed;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
     @Column(name = "comment")
     private String comment;
 

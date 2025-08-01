@@ -28,8 +28,8 @@ public class Rutina {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "dificultad", nullable = false)
-    private Dificultad dificultad;
+    @Column(name = "difficulty", nullable = false)
+    private Dificultad difficulty;
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default

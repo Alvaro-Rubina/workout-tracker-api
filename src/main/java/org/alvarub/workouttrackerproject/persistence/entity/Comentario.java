@@ -30,6 +30,9 @@ public class Comentario {
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Column(name = "likes")
+    private Long likes;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private Usuario user;
