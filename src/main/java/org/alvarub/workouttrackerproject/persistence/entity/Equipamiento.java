@@ -17,4 +17,7 @@ public class Equipamiento {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "active", nullable = false)
+    private Boolean active;
 }

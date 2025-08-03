@@ -22,8 +22,7 @@ public class ZonaMuscular {
     private String name;
 
     @OneToMany(mappedBy = "muscleGroup",
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
-            orphanRemoval = true)
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @Builder.Default
     private Set<Musculo> muscles = new HashSet<>();
 
