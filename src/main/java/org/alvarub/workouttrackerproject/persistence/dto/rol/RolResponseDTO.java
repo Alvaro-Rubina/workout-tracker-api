@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioSimpleDTO;
 import java.util.Set;
 
 @Data
@@ -19,5 +19,5 @@ public class RolResponseDTO {
 
     private String description;
 
-    private Set<UsuarioStatsDTO> users;
+    private Set<UsuarioSimpleDTO> users;
 }

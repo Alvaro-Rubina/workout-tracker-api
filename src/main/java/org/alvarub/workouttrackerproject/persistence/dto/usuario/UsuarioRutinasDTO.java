@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
 
 import java.util.Set;
@@ -23,7 +22,7 @@ public class UsuarioRutinasDTO {
 
     private Long completedRoutines;
 
-    private Set<RutinaResponseDTO> createdRoutines;
+    private Set<RutinaSimpleDTO> createdRoutines;
 
     private Set<RutinaSimpleDTO> likedRoutines;
 

@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioSimpleDTO;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -21,5 +20,5 @@ public class UsuarioEjerciciosDTO {
 
     private String email;
 
-    private Set<EjercicioSimpleDTO> favouriteExercises;
+    private Set<EjercicioSimpleDTO> favoriteExercises;
 }

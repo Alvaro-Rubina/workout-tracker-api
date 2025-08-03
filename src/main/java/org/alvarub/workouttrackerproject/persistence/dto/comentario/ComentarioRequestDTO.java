@@ -8,8 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import org.alvarub.workouttrackerproject.persistence.entity.Rutina;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -25,7 +23,7 @@ public class ComentarioRequestDTO {
 
     @NotNull(message = "El campo userId es obligatorio")
     @Positive(message = "El campo routineId debe ser mayor a 0")
-    private Rutina routine;
+    private Long routineId;
 
     @NotNull(message = "El campo replyToId es obligatorio")
     @Positive(message = "El campo replyToId debe ser mayor a 0")

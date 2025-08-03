@@ -1,9 +1,10 @@
 package org.alvarub.workouttrackerproject.persistence.dto.agenda;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioSimpleDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AgendaResponseDTO {
+public class AgendaRutinaDTO {
 
     private Long id;
 
@@ -26,7 +27,4 @@ public class AgendaResponseDTO {
     private String comment;
 
     private RutinaSimpleDTO routine;
-
-    private UsuarioSimpleDTO user;
-
 }

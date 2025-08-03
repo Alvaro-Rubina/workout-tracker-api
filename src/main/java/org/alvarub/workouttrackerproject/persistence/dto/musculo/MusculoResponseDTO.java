@@ -16,5 +16,5 @@ public class MusculoResponseDTO {
 
     private String name;
 
-    private ZonaMuscularSimpleDTO zonaMuscular;
+    private ZonaMuscularSimpleDTO muscleGroup;
 }

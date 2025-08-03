@@ -21,8 +21,8 @@ public class RutinaRequestDTO {
 
     private String description;
 
-    @NotNull(message = "El campo dificultad es obligatorio")
-    private Dificultad dificultad;
+    @NotNull(message = "El campo difficulty es obligatorio")
+    private Dificultad difficulty;
 
     @NotNull(message = "El campo categoryId es obligatorio")
     @Positive(message = "El campo categoryId debe ser mayor a 0")

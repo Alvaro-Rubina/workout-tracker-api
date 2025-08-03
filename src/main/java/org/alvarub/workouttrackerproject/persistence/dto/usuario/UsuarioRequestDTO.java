@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.alvarub.workouttrackerproject.persistence.entity.Rol;
 
 import java.util.Set;
 
@@ -26,5 +25,5 @@ public class UsuarioRequestDTO {
 
     private Boolean active;
 
-    private Set<Rol> roles;
+    private Set<Long> roleIds;
 }

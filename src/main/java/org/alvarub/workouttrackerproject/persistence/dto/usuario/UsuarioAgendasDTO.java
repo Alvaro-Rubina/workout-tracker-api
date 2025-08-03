@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaResponseDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaRutinaDTO;
 
 import java.util.List;
 
@@ -22,5 +22,5 @@ public class UsuarioAgendasDTO {
 
     private Long completedRoutines;
 
-    private List<AgendaResponseDTO> schedules;
+    private List<AgendaRutinaDTO> schedules;
 }

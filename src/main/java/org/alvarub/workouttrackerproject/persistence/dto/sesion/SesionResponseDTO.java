@@ -31,5 +31,5 @@ public class SesionResponseDTO {
 
     private CategoriaResponseDTO category;
 
-    private Set<SesionEjercicioResponseDTO> ejercicios;
+    private Set<SesionEjercicioResponseDTO> sessionExercises;
 }
