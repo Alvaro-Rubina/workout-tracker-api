@@ -6,7 +6,7 @@ import org.alvarub.workouttrackerproject.persistence.dto.rol.RolSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Rol;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring", uses = {UsuarioMapper.class})
+@Mapper(componentModel = "spring")
 public interface RolMapper {
 
     Rol toEntity(RolRequestDTO dto);

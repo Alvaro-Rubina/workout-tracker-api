@@ -6,7 +6,7 @@ import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoSimpleDT
 import org.alvarub.workouttrackerproject.persistence.entity.Musculo;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring", uses = {ZonaMuscularMapper.class})
+@Mapper(componentModel = "spring")
 public interface MusculoMapper {
 
     Musculo toEntity(MusculoRequestDTO dto);
