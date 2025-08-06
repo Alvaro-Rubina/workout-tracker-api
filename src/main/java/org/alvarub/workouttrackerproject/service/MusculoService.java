@@ -7,6 +7,7 @@ import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoRequestD
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Musculo;
+import org.alvarub.workouttrackerproject.persistence.entity.ZonaMuscular;
 import org.alvarub.workouttrackerproject.persistence.repository.MusculoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +26,15 @@ public class MusculoService {
     public MusculoResponseDTO save(MusculoRequestDTO dto) {
         Musculo musculo = musculoMapper.toEntity(dto);
 
-        musculo.setMuscleGroup(zonaMuscularService.getZonaMuscularOrThrow(dto.getMuscleGroupId()));
+        ZonaMuscular muscleGroup = zonaMuscularService.getZonaMuscularOrThrow(dto.getMuscleGroupId());
 
-        return musculoMapper.toResponseDTO(musculo);
+        if (!muscleGroup.getActive()) {
+            throw new NotFoundException("Zona muscular con ID " + dto.getMuscleGroupId() + " no disponible o inactiva.");
+        }
+
+        musculo.setMuscleGroup(muscleGroup);
+
+        return musculoMapper.toResponseDTO(musculoRepository.save(musculo));
     }
 
     @Transactional(readOnly = true)
