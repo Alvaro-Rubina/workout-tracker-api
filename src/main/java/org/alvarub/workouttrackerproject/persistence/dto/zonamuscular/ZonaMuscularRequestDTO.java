@@ -19,7 +19,7 @@ public class ZonaMuscularRequestDTO {
     @NotBlank(message = "El campo name es obligatorio")
     private String name;
 
-    private Boolean active;
+    private Boolean active = true;
 
     private Set<MusculoRequestDTO> muscles;
 
