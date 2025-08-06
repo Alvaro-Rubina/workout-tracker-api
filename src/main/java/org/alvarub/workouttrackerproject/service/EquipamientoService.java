@@ -47,6 +47,11 @@ public class EquipamientoService {
     @Transactional
     public EquipamientoResponseDTO softDelete(Long id) {
         Equipamiento equipamiento = findEquipamientoById(id);
+
+        if (!equipamiento.getActive()) {
+            return equipamientoMapper.toResponseDTO(equipamiento);
+        }
+
         equipamiento.setActive(false);
         return equipamientoMapper.toResponseDTO(equipamientoRepository.save(equipamiento));
     }

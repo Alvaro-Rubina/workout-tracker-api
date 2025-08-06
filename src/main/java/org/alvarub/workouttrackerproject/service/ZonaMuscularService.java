@@ -67,6 +67,11 @@ public class ZonaMuscularService {
     @Transactional
     public ZonaMuscularSimpleDTO softDelete(Long id) {
         ZonaMuscular zonaMuscular = findZonaMuscularById(id);
+
+        if (!zonaMuscular.getActive()) {
+            return zonaMuscularMapper.toSimpleDTO(zonaMuscular);
+        }
+
         zonaMuscular.setActive(false);
         return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
     }

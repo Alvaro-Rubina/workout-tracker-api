@@ -73,6 +73,11 @@ public class EjercicioService {
     @Transactional
     public EjercicioSimpleDTO softDelete(Long id) {
         Ejercicio ejercicio = findEjercicioById(id);
+
+        if (!ejercicio.getActive()) {
+            return ejercicioMapper.toSimpleDTO(ejercicio);
+        }
+
         ejercicio.setActive(false);
         return ejercicioMapper.toSimpleDTO(ejercicioRepository.save(ejercicio));
     }

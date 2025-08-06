@@ -66,6 +66,11 @@ public class MusculoService {
     @Transactional
     public MusculoSimpleDTO softDelete(Long id) {
         Musculo musculo = findMusculoById(id);
+
+        if (!musculo.getActive()) {
+            return musculoMapper.toSimpleDTO(musculo);
+        }
+
         musculo.setActive(false);
         return musculoMapper.toSimpleDTO(musculoRepository.save(musculo));
     }
