@@ -27,11 +27,11 @@ public class EjercicioService {
         Ejercicio ejercicio = ejercicioMapper.toEntity(dto);
 
         dto.getEquipmentIds().forEach(equipmentId ->
-            ejercicio.getEquipment().add(equipamientoService.findEquipamientoById(equipmentId))
+            ejercicio.getEquipment().add(equipamientoService.getEjercicioOrThrow(equipmentId))
         );
 
         dto.getTargetMuscleIds().forEach(targetMuscleId ->
-                ejercicio.getTargetMuscles().add(musculoService.findMusculoById(targetMuscleId))
+                ejercicio.getTargetMuscles().add(musculoService.getMusculoOrThrow(targetMuscleId))
         );
 
         return ejercicioMapper.toResponseDTO(ejercicioRepository.save(ejercicio));
@@ -39,13 +39,13 @@ public class EjercicioService {
 
     @Transactional(readOnly = true)
     public EjercicioResponseDTO findById(Long id) {
-        Ejercicio ejercicio = findEjercicioById(id);
+        Ejercicio ejercicio = getEjercicioOrThrow(id);
         return ejercicioMapper.toResponseDTO(ejercicio);
     }
 
     @Transactional(readOnly = true)
     public EjercicioSimpleDTO findByIdSimple(Long id) {
-        Ejercicio ejercicio = findEjercicioById(id);
+        Ejercicio ejercicio = getEjercicioOrThrow(id);
         return ejercicioMapper.toSimpleDTO(ejercicio);
     }
 
@@ -65,14 +65,14 @@ public class EjercicioService {
 
     @Transactional
     public EjercicioSimpleDTO toggleActive(Long id) {
-        Ejercicio ejercicio = findEjercicioById(id);
+        Ejercicio ejercicio = getEjercicioOrThrow(id);
         ejercicio.setActive(!ejercicio.getActive());
         return ejercicioMapper.toSimpleDTO(ejercicioRepository.save(ejercicio));
     }
 
     @Transactional
     public EjercicioSimpleDTO softDelete(Long id) {
-        Ejercicio ejercicio = findEjercicioById(id);
+        Ejercicio ejercicio = getEjercicioOrThrow(id);
 
         if (!ejercicio.getActive()) {
             return ejercicioMapper.toSimpleDTO(ejercicio);
@@ -83,7 +83,7 @@ public class EjercicioService {
     }
 
     // Métodos auxiliares
-    public Ejercicio findEjercicioById(Long id) {
+    public Ejercicio getEjercicioOrThrow(Long id) {
         return ejercicioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ejercicio con el ID " + id + " no encontrado"));
     }

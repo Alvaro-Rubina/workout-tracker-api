@@ -3,11 +3,9 @@ package org.alvarub.workouttrackerproject.service;
 import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.ZonaMuscularMapper;
-import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularSimpleDTO;
-import org.alvarub.workouttrackerproject.persistence.entity.Equipamiento;
 import org.alvarub.workouttrackerproject.persistence.entity.ZonaMuscular;
 import org.alvarub.workouttrackerproject.persistence.repository.ZonaMuscularRepository;
 import org.springframework.stereotype.Service;
@@ -33,13 +31,13 @@ public class ZonaMuscularService {
 
     @Transactional(readOnly = true)
     public ZonaMuscularResponseDTO findById(Long id) {
-        ZonaMuscular zonaMuscular = findZonaMuscularById(id);
+        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id);
         return zonaMuscularMapper.toResponseDTO(zonaMuscular);
     }
 
     @Transactional(readOnly = true)
     public ZonaMuscularSimpleDTO findByIdSimple(Long id) {
-        ZonaMuscular zonaMuscular = findZonaMuscularById(id);
+        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id);
         return zonaMuscularMapper.toSimpleDTO(zonaMuscular);
     }
 
@@ -59,14 +57,14 @@ public class ZonaMuscularService {
 
     @Transactional
     public ZonaMuscularSimpleDTO toggleActive(Long id) {
-        ZonaMuscular zonaMuscular = findZonaMuscularById(id);
+        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id);
         zonaMuscular.setActive(!zonaMuscular.getActive());
         return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
     }
 
     @Transactional
     public ZonaMuscularSimpleDTO softDelete(Long id) {
-        ZonaMuscular zonaMuscular = findZonaMuscularById(id);
+        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id);
 
         if (!zonaMuscular.getActive()) {
             return zonaMuscularMapper.toSimpleDTO(zonaMuscular);
@@ -77,7 +75,7 @@ public class ZonaMuscularService {
     }
 
     // Métodos auxiliares
-    public ZonaMuscular findZonaMuscularById(Long id) {
+    public ZonaMuscular getZonaMuscularOrThrow(Long id) {
         return zonaMuscularRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Zona Muscular con el ID " + id + " no encontrada"));
     }

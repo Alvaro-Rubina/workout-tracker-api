@@ -25,20 +25,20 @@ public class MusculoService {
     public MusculoResponseDTO save(MusculoRequestDTO dto) {
         Musculo musculo = musculoMapper.toEntity(dto);
 
-        musculo.setMuscleGroup(zonaMuscularService.findZonaMuscularById(dto.getMuscleGroupId()));
+        musculo.setMuscleGroup(zonaMuscularService.getZonaMuscularOrThrow(dto.getMuscleGroupId()));
 
         return musculoMapper.toResponseDTO(musculo);
     }
 
     @Transactional(readOnly = true)
     public MusculoResponseDTO findById(Long id) {
-        Musculo musculo = findMusculoById(id);
+        Musculo musculo = getMusculoOrThrow(id);
         return musculoMapper.toResponseDTO(musculo);
     }
 
     @Transactional(readOnly = true)
     public MusculoSimpleDTO findByIdSimple(Long id) {
-        Musculo musculo = findMusculoById(id);
+        Musculo musculo = getMusculoOrThrow(id);
         return musculoMapper.toSimpleDTO(musculo);
     }
 
@@ -58,14 +58,14 @@ public class MusculoService {
 
     @Transactional
     public MusculoSimpleDTO toggleActive(Long id) {
-        Musculo musculo = findMusculoById(id);
+        Musculo musculo = getMusculoOrThrow(id);
         musculo.setActive(!musculo.getActive());
         return musculoMapper.toSimpleDTO(musculoRepository.save(musculo));
     }
 
     @Transactional
     public MusculoSimpleDTO softDelete(Long id) {
-        Musculo musculo = findMusculoById(id);
+        Musculo musculo = getMusculoOrThrow(id);
 
         if (!musculo.getActive()) {
             return musculoMapper.toSimpleDTO(musculo);
@@ -76,7 +76,7 @@ public class MusculoService {
     }
 
     // Métodos auxiliares
-    public Musculo findMusculoById(Long id) {
+    public Musculo getMusculoOrThrow(Long id) {
         return musculoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Musculo con el ID " + id + " no encontrado"));
     }
