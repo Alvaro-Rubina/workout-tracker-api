@@ -18,6 +18,10 @@ public class Musculo {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "active", nullable = false)
+    @Builder.Default
+    private Boolean active = true;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "muscle_group_id", nullable = false)
     private ZonaMuscular muscleGroup;

@@ -25,6 +25,10 @@ public class Ejercicio {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Column(name = "active", nullable = false)
+    @Builder.Default
+    private Boolean active = true;
+
     @Column(name = "tips")
     private String tips;
 

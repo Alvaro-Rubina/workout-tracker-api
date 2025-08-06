@@ -21,6 +21,8 @@ public class EjercicioSimpleDTO {
 
     private String description;
 
+    private Boolean active;
+
     private String tips;
 
     private LocalDateTime createdAt;

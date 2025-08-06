@@ -23,6 +23,8 @@ public class EjercicioResponseDTO {
 
     private String description;
 
+    private Boolean active;
+
     private String tips;
 
     private LocalDateTime createdAt;

@@ -14,4 +14,6 @@ public class MusculoSimpleDTO {
     private Long id;
 
     private String name;
+
+    private Boolean active;
 }

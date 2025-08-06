@@ -21,6 +21,8 @@ public class EjercicioRequestDTO implements Serializable {
     @NotBlank(message = "El campo description es obligatorio")
     private String description;
 
+    private Boolean active;
+
     private String tips;
 
     @NotNull(message = "El campo instructions es obligatorio")
