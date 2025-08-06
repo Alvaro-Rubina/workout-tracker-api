@@ -50,10 +50,9 @@ public class EjercicioController {
         return ResponseEntity.ok(ejercicioService.toggleActive(id));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEjercicioSoft(@PathVariable Long id) {
-        ejercicioService.softDelete(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<EjercicioSimpleDTO> deactivateEjercicio(@PathVariable Long id) {
+        return ResponseEntity.ok(ejercicioService.softDelete(id));
     }
 
 }

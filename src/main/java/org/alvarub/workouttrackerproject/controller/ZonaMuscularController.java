@@ -49,11 +49,9 @@ public class ZonaMuscularController {
         return ResponseEntity.ok(zonaMuscularService.toggleActive(id));
     }
 
-    // TODO: esto después ver si lo cambio a PatchMapping
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteZonaMuscularSoft(@PathVariable Long id) {
-        zonaMuscularService.softDelete(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<ZonaMuscularSimpleDTO> deactivateZonaMuscular(@PathVariable Long id) {
+        return ResponseEntity.ok(zonaMuscularService.softDelete(id));
     }
 
 }

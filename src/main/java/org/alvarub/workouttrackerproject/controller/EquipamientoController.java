@@ -39,9 +39,8 @@ public class EquipamientoController {
         return ResponseEntity.ok(equipamientoService.toggleActive(id));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEquipamientoSoft(@PathVariable Long id) {
-        equipamientoService.softDelete(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<EquipamientoResponseDTO> deactivateEquipamiento(@PathVariable Long id) {
+        return ResponseEntity.ok(equipamientoService.softDelete(id));
     }
 }

@@ -49,9 +49,8 @@ public class MusculoController {
         return ResponseEntity.ok(musculoService.toggleActive(id));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMusculoSoft(@PathVariable Long id) {
-        musculoService.softDelete(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<MusculoSimpleDTO> deactivateMusculo(@PathVariable Long id) {
+        return ResponseEntity.ok(musculoService.softDelete(id));
     }
 }
