@@ -11,6 +11,7 @@ import org.alvarub.workouttrackerproject.persistence.entity.Equipamiento;
 import org.alvarub.workouttrackerproject.persistence.entity.ZonaMuscular;
 import org.alvarub.workouttrackerproject.persistence.repository.ZonaMuscularRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class ZonaMuscularService {
     private final ZonaMuscularRepository zonaMuscularRepository;
     private final ZonaMuscularMapper zonaMuscularMapper;
 
+    @Transactional
     public ZonaMuscularResponseDTO save(ZonaMuscularRequestDTO dto) {
         ZonaMuscular zonaMuscular = zonaMuscularMapper.toEntity(dto);
 
@@ -29,40 +31,45 @@ public class ZonaMuscularService {
         return zonaMuscularMapper.toResponseDTO(zonaMuscularRepository.save(zonaMuscular));
     }
 
+    @Transactional(readOnly = true)
     public ZonaMuscularResponseDTO findById(Long id) {
         ZonaMuscular zonaMuscular = findZonaMuscularById(id);
         return zonaMuscularMapper.toResponseDTO(zonaMuscular);
     }
 
+    @Transactional(readOnly = true)
     public ZonaMuscularSimpleDTO findByIdSimple(Long id) {
         ZonaMuscular zonaMuscular = findZonaMuscularById(id);
         return zonaMuscularMapper.toSimpleDTO(zonaMuscular);
     }
 
+    @Transactional(readOnly = true)
     public List<ZonaMuscularResponseDTO> findAll() {
         return zonaMuscularRepository.findAll().stream()
                 .map(zonaMuscularMapper::toResponseDTO)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ZonaMuscularSimpleDTO> findAllSimple() {
         return zonaMuscularRepository.findAll().stream()
                 .map(zonaMuscularMapper::toSimpleDTO)
                 .toList();
     }
 
-    public ZonaMuscularResponseDTO toggleActive(Long id) {
+    @Transactional
+    public ZonaMuscularSimpleDTO toggleActive(Long id) {
         ZonaMuscular zonaMuscular = findZonaMuscularById(id);
         zonaMuscular.setActive(!zonaMuscular.getActive());
-        return zonaMuscularMapper.toResponseDTO(zonaMuscularRepository.save(zonaMuscular));
+        return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
     }
 
-    public ZonaMuscularResponseDTO softDelete(Long id) {
+    @Transactional
+    public ZonaMuscularSimpleDTO softDelete(Long id) {
         ZonaMuscular zonaMuscular = findZonaMuscularById(id);
         zonaMuscular.setActive(false);
-        return zonaMuscularMapper.toResponseDTO(zonaMuscularRepository.save(zonaMuscular));
+        return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
     }
-
 
     // Métodos auxiliares
     public ZonaMuscular findZonaMuscularById(Long id) {
