@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/musculos")
+@RequestMapping("/muscles")
 @RequiredArgsConstructor
 public class MusculoController {
 
