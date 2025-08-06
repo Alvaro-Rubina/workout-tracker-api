@@ -18,5 +18,7 @@ public class ZonaMuscularResponseDTO {
 
     private String name;
 
+    private Boolean active;
+
     private Set<MusculoSimpleDTO> muscles;
 }

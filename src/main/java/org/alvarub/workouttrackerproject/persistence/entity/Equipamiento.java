@@ -19,5 +19,6 @@ public class Equipamiento {
     private String name;
 
     @Column(name = "active", nullable = false)
-    private Boolean active;
+    @Builder.Default
+    private Boolean active = true;
 }

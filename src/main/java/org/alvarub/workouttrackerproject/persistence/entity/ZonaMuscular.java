@@ -21,6 +21,10 @@ public class ZonaMuscular {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
+    @Column(name = "active", nullable = false)
+    @Builder.Default
+    private Boolean active = true;
+
     @OneToMany(mappedBy = "muscleGroup",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @Builder.Default

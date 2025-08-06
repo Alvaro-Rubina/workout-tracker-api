@@ -34,5 +34,5 @@ public class RutinaResponseDTO {
 
     private List<SesionResponseDTO> sessions;
 
-    private UsuarioStatsDTO user;
+    private UsuarioStatsDTO user; // NOTE: Esto podría cambiar a UsuarioSimpleDTO. Después veo
 }
