@@ -59,6 +59,10 @@ public class ZonaMuscularService {
     public ZonaMuscularSimpleDTO toggleActive(Long id) {
         ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id);
         zonaMuscular.setActive(!zonaMuscular.getActive());
+
+        zonaMuscular.getMuscles()
+                .forEach(m -> m.setActive(zonaMuscular.getActive()));
+
         return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
     }
 
@@ -71,6 +75,9 @@ public class ZonaMuscularService {
         }
 
         zonaMuscular.setActive(false);
+        zonaMuscular.getMuscles()
+                .forEach(m -> m.setActive(false));
+
         return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
     }
 
