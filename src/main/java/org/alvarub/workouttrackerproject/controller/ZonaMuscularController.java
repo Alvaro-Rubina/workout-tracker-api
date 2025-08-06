@@ -26,7 +26,8 @@ public class ZonaMuscularController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getZonaMuscularById(@PathVariable Long id, @RequestParam(defaultValue = "false") Boolean relations) {
+    public ResponseEntity<Object> getZonaMuscularById(@PathVariable Long id,
+                                                      @RequestParam(defaultValue = "false") Boolean relations) {
         Object response = relations
                 ? zonaMuscularService.findById(id)
                 : zonaMuscularService.findByIdSimple(id);
@@ -43,7 +44,7 @@ public class ZonaMuscularController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/toggle-active/{id}")
+    @PatchMapping("/{id}/toggle-active")
     public ResponseEntity<ZonaMuscularSimpleDTO> toggleZonaMuscularActiveStatus(@PathVariable Long id) {
         return ResponseEntity.ok(zonaMuscularService.toggleActive(id));
     }
