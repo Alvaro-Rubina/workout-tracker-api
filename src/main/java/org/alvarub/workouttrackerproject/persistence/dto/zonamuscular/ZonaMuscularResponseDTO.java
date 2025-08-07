@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoSimpleDTO;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -19,6 +20,10 @@ public class ZonaMuscularResponseDTO {
     private String name;
 
     private Boolean active;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
     private Set<MusculoSimpleDTO> muscles;
 }
