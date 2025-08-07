@@ -24,7 +24,7 @@ public class Sesion {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, length = 500)
     private String description;
 
     @Column(name = "day_of_week", nullable = false)

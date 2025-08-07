@@ -38,7 +38,7 @@ public class Agenda {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
-    @Column(name = "comment")
+    @Column(name = "comment", length = 500)
     private String comment;
 
     @ManyToOne

@@ -22,14 +22,14 @@ public class Ejercicio {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, length = 1000)
     private String description;
 
     @Column(name = "active", nullable = false)
     @Builder.Default
     private Boolean active = true;
 
-    @Column(name = "tips")
+    @Column(name = "tips", length = 300)
     private String tips;
 
     @Column(name = "created_at", updatable = false)

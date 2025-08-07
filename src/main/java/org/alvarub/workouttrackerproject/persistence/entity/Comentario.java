@@ -20,7 +20,7 @@ public class Comentario {
     @Column(nullable = false)
     private Long id;
 
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, length = 1000)
     private String content;
 
     @Column(name = "created_at", updatable = false)

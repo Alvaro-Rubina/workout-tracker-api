@@ -22,7 +22,7 @@ public class Rol {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @Column(name = "description", nullable = false, unique = true)
+    @Column(name = "description", length = 500)
     private String description;
 
     @ManyToMany(mappedBy = "roles")
