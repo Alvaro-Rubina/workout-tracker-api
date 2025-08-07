@@ -2,9 +2,9 @@ package org.alvarub.workouttrackerproject.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.alvarub.workouttrackerproject.persistence.enums.Dificultad;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,9 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @Entity
-public class Rutina {
+public class Rutina extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,14 +30,6 @@ public class Rutina {
     @Enumerated(EnumType.STRING)
     @Column(name = "difficulty", nullable = false)
     private Dificultad difficulty;
-
-    @Column(name = "created_at", updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "updated_at")
-    @Builder.Default
-    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)

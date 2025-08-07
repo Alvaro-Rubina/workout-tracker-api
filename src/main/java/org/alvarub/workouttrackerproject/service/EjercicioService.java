@@ -7,13 +7,11 @@ import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioRequ
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Ejercicio;
-import org.alvarub.workouttrackerproject.persistence.entity.Equipamiento;
 import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -68,7 +66,9 @@ public class EjercicioService {
     @Transactional
     public EjercicioSimpleDTO toggleActive(Long id) {
         Ejercicio ejercicio = getEjercicioOrThrow(id, false);
+
         ejercicio.setActive(!ejercicio.getActive());
+
         return ejercicioMapper.toSimpleDTO(ejercicioRepository.save(ejercicio));
     }
 

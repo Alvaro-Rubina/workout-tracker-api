@@ -2,15 +2,15 @@ package org.alvarub.workouttrackerproject.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @Entity
 public class Ejercicio {
 
@@ -31,14 +31,6 @@ public class Ejercicio {
 
     @Column(name = "tips", length = 300)
     private String tips;
-
-    @Column(name = "created_at", updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "updated_at")
-    @Builder.Default
-    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @ElementCollection
     @CollectionTable(name = "exercise_instructions", joinColumns = @JoinColumn(name = "exercise_id"))

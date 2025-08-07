@@ -3,6 +3,7 @@ package org.alvarub.workouttrackerproject.persistence.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,9 +12,9 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @Entity
-public class Rol {
+public class Rol extends Auditable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

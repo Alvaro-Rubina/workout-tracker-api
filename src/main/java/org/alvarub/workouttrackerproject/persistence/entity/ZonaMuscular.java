@@ -2,6 +2,7 @@ package org.alvarub.workouttrackerproject.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,9 +11,9 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @Entity
-public class ZonaMuscular {
+public class ZonaMuscular extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

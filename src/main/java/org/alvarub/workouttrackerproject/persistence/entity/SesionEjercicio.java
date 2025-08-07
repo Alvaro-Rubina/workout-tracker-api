@@ -2,14 +2,15 @@ package org.alvarub.workouttrackerproject.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @Entity
-public class SesionEjercicio {
+public class SesionEjercicio extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
