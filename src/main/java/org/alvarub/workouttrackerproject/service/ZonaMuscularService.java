@@ -31,13 +31,13 @@ public class ZonaMuscularService {
 
     @Transactional(readOnly = true)
     public ZonaMuscularResponseDTO findById(Long id) {
-        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id);
+        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, false);
         return zonaMuscularMapper.toResponseDTO(zonaMuscular);
     }
 
     @Transactional(readOnly = true)
     public ZonaMuscularSimpleDTO findByIdSimple(Long id) {
-        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id);
+        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, false);
         return zonaMuscularMapper.toSimpleDTO(zonaMuscular);
     }
 
@@ -57,7 +57,7 @@ public class ZonaMuscularService {
 
     @Transactional
     public ZonaMuscularSimpleDTO toggleActive(Long id) {
-        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id);
+        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, false);
         zonaMuscular.setActive(!zonaMuscular.getActive());
 
         zonaMuscular.getMuscles()
@@ -68,7 +68,7 @@ public class ZonaMuscularService {
 
     @Transactional
     public ZonaMuscularSimpleDTO softDelete(Long id) {
-        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id);
+        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, false);
 
         if (!zonaMuscular.getActive()) {
             return zonaMuscularMapper.toSimpleDTO(zonaMuscular);
@@ -82,9 +82,15 @@ public class ZonaMuscularService {
     }
 
     // Métodos auxiliares
-    public ZonaMuscular getZonaMuscularOrThrow(Long id) {
-        return zonaMuscularRepository.findById(id)
+    public ZonaMuscular getZonaMuscularOrThrow(Long id, boolean verifyActive) {
+        ZonaMuscular zonaMuscular = zonaMuscularRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Zona Muscular con el ID " + id + " no encontrada"));
+
+        if (verifyActive && !zonaMuscular.getActive()) {
+                throw new NotFoundException("Zona Muscular con el ID " + id + " inactiva");
+        }
+
+        return zonaMuscular;
     }
 
 }

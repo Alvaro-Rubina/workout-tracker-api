@@ -26,26 +26,20 @@ public class MusculoService {
     public MusculoResponseDTO save(MusculoRequestDTO dto) {
         Musculo musculo = musculoMapper.toEntity(dto);
 
-        ZonaMuscular muscleGroup = zonaMuscularService.getZonaMuscularOrThrow(dto.getMuscleGroupId());
-
-        if (!muscleGroup.getActive()) {
-            throw new NotFoundException("Zona muscular con ID " + dto.getMuscleGroupId() + " no disponible o inactiva.");
-        }
-
-        musculo.setMuscleGroup(muscleGroup);
+        musculo.setMuscleGroup(zonaMuscularService.getZonaMuscularOrThrow(dto.getMuscleGroupId(), true));
 
         return musculoMapper.toResponseDTO(musculoRepository.save(musculo));
     }
 
     @Transactional(readOnly = true)
     public MusculoResponseDTO findById(Long id) {
-        Musculo musculo = getMusculoOrThrow(id);
+        Musculo musculo = getMusculoOrThrow(id, false);
         return musculoMapper.toResponseDTO(musculo);
     }
 
     @Transactional(readOnly = true)
     public MusculoSimpleDTO findByIdSimple(Long id) {
-        Musculo musculo = getMusculoOrThrow(id);
+        Musculo musculo = getMusculoOrThrow(id, false);
         return musculoMapper.toSimpleDTO(musculo);
     }
 
@@ -65,14 +59,14 @@ public class MusculoService {
 
     @Transactional
     public MusculoSimpleDTO toggleActive(Long id) {
-        Musculo musculo = getMusculoOrThrow(id);
+        Musculo musculo = getMusculoOrThrow(id, false);
         musculo.setActive(!musculo.getActive());
         return musculoMapper.toSimpleDTO(musculoRepository.save(musculo));
     }
 
     @Transactional
     public MusculoSimpleDTO softDelete(Long id) {
-        Musculo musculo = getMusculoOrThrow(id);
+        Musculo musculo = getMusculoOrThrow(id, false);
 
         if (!musculo.getActive()) {
             return musculoMapper.toSimpleDTO(musculo);
@@ -83,9 +77,17 @@ public class MusculoService {
     }
 
     // Métodos auxiliares
-    public Musculo getMusculoOrThrow(Long id) {
-        return musculoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Musculo con el ID " + id + " no encontrado"));
+    public Musculo getMusculoOrThrow(Long id, boolean verifyActive) {
+        Musculo musculo = musculoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Músculo con el ID " + id + " no encontrado"));
+
+        if (verifyActive && !musculo.getActive()) {
+            throw new NotFoundException("Músculo con el ID " + id + " inactivo");
+        }
+
+        return musculo;
+
+
     }
 
 }

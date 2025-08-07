@@ -7,11 +7,13 @@ import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioRequ
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Ejercicio;
+import org.alvarub.workouttrackerproject.persistence.entity.Equipamiento;
 import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +29,11 @@ public class EjercicioService {
         Ejercicio ejercicio = ejercicioMapper.toEntity(dto);
 
         dto.getEquipmentIds().forEach(equipmentId ->
-            ejercicio.getEquipment().add(equipamientoService.getEjercicioOrThrow(equipmentId))
+            ejercicio.getEquipment().add(equipamientoService.getEjercicioOrThrow(equipmentId, true))
         );
 
         dto.getTargetMuscleIds().forEach(targetMuscleId ->
-                ejercicio.getTargetMuscles().add(musculoService.getMusculoOrThrow(targetMuscleId))
+                ejercicio.getTargetMuscles().add(musculoService.getMusculoOrThrow(targetMuscleId, true))
         );
 
         return ejercicioMapper.toResponseDTO(ejercicioRepository.save(ejercicio));
@@ -39,13 +41,13 @@ public class EjercicioService {
 
     @Transactional(readOnly = true)
     public EjercicioResponseDTO findById(Long id) {
-        Ejercicio ejercicio = getEjercicioOrThrow(id);
+        Ejercicio ejercicio = getEjercicioOrThrow(id, false);
         return ejercicioMapper.toResponseDTO(ejercicio);
     }
 
     @Transactional(readOnly = true)
     public EjercicioSimpleDTO findByIdSimple(Long id) {
-        Ejercicio ejercicio = getEjercicioOrThrow(id);
+        Ejercicio ejercicio = getEjercicioOrThrow(id, false);
         return ejercicioMapper.toSimpleDTO(ejercicio);
     }
 
@@ -65,14 +67,14 @@ public class EjercicioService {
 
     @Transactional
     public EjercicioSimpleDTO toggleActive(Long id) {
-        Ejercicio ejercicio = getEjercicioOrThrow(id);
+        Ejercicio ejercicio = getEjercicioOrThrow(id, false);
         ejercicio.setActive(!ejercicio.getActive());
         return ejercicioMapper.toSimpleDTO(ejercicioRepository.save(ejercicio));
     }
 
     @Transactional
     public EjercicioSimpleDTO softDelete(Long id) {
-        Ejercicio ejercicio = getEjercicioOrThrow(id);
+        Ejercicio ejercicio = getEjercicioOrThrow(id, false);
 
         if (!ejercicio.getActive()) {
             return ejercicioMapper.toSimpleDTO(ejercicio);
@@ -82,9 +84,22 @@ public class EjercicioService {
         return ejercicioMapper.toSimpleDTO(ejercicioRepository.save(ejercicio));
     }
 
+    @Transactional
+    public void hardDelete(Long id) {
+        Ejercicio ejercicio = getEjercicioOrThrow(id, false);
+        ejercicioRepository.delete(ejercicio);
+    }
+
     // Métodos auxiliares
-    public Ejercicio getEjercicioOrThrow(Long id) {
-        return ejercicioRepository.findById(id)
+    @Transactional(readOnly = true)
+    public Ejercicio getEjercicioOrThrow(Long id, boolean verifyActive) {
+        Ejercicio ejercicio = ejercicioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ejercicio con el ID " + id + " no encontrado"));
+
+        if (verifyActive && !ejercicio.getActive()) {
+            throw new NotFoundException("Ejercicio con el ID " + id + " inactivo");
+        }
+
+        return ejercicio;
     }
 }
