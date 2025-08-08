@@ -16,7 +16,6 @@ public class EquipamientoRequestDTO {
     @NotBlank(message = "El campo name es obligatorio")
     private String name;
 
-    @NotNull(message = "El campo active es obligatorio")
-    private Boolean active;
+    private Boolean active = true;
 
 }

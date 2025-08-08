@@ -86,8 +86,6 @@ public class MusculoService {
         }
 
         return musculo;
-
-
     }
 
 }

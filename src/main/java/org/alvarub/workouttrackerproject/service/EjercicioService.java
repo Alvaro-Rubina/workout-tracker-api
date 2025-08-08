@@ -27,7 +27,7 @@ public class EjercicioService {
         Ejercicio ejercicio = ejercicioMapper.toEntity(dto);
 
         dto.getEquipmentIds().forEach(equipmentId ->
-            ejercicio.getEquipment().add(equipamientoService.getEjercicioOrThrow(equipmentId, true))
+            ejercicio.getEquipment().add(equipamientoService.getEquipamientoOrThrow(equipmentId, true))
         );
 
         dto.getTargetMuscleIds().forEach(targetMuscleId ->

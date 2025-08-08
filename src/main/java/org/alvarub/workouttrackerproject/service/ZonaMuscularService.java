@@ -87,7 +87,7 @@ public class ZonaMuscularService {
                 .orElseThrow(() -> new NotFoundException("Zona Muscular con el ID " + id + " no encontrada"));
 
         if (verifyActive && !zonaMuscular.getActive()) {
-                throw new NotFoundException("Zona Muscular con el ID " + id + " inactiva");
+            throw new NotFoundException("Zona Muscular con el ID " + id + " inactiva");
         }
 
         return zonaMuscular;

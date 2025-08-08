@@ -27,7 +27,7 @@ public class EquipamientoService {
 
     @Transactional(readOnly = true)
     public EquipamientoResponseDTO findById (Long id) {
-        return equipamientoMapper.toResponseDTO(getEjercicioOrThrow(id, false));
+        return equipamientoMapper.toResponseDTO(getEquipamientoOrThrow(id, false));
     }
 
     @Transactional(readOnly = true)
@@ -39,14 +39,14 @@ public class EquipamientoService {
 
     @Transactional
     public EquipamientoResponseDTO toggleActive(Long id) {
-        Equipamiento equipamiento = getEjercicioOrThrow(id, false);
+        Equipamiento equipamiento = getEquipamientoOrThrow(id, false);
         equipamiento.setActive(!equipamiento.getActive());
         return equipamientoMapper.toResponseDTO(equipamientoRepository.save(equipamiento));
     }
 
     @Transactional
     public EquipamientoResponseDTO softDelete(Long id) {
-        Equipamiento equipamiento = getEjercicioOrThrow(id, false);
+        Equipamiento equipamiento = getEquipamientoOrThrow(id, false);
 
         if (!equipamiento.getActive()) {
             return equipamientoMapper.toResponseDTO(equipamiento);
@@ -56,8 +56,14 @@ public class EquipamientoService {
         return equipamientoMapper.toResponseDTO(equipamientoRepository.save(equipamiento));
     }
 
+    @Transactional
+    public void hardDelete(Long id) {
+        Equipamiento equipamiento = getEquipamientoOrThrow(id, false);
+        equipamientoRepository.delete(equipamiento);
+    }
+
     // Métodos auxiliares
-    public Equipamiento getEjercicioOrThrow(Long id, boolean verifyActive) {
+    public Equipamiento getEquipamientoOrThrow(Long id, boolean verifyActive) {
         Equipamiento equipamiento = equipamientoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Equipamiento con el ID " + id + " no encontrado"));
 
