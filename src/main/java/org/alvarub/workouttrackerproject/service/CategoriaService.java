@@ -1,16 +1,23 @@
 package org.alvarub.workouttrackerproject.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.CategoriaMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.categoria.CategoriaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.categoria.CategoriaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Categoria;
+import org.alvarub.workouttrackerproject.persistence.entity.Rutina;
+import org.alvarub.workouttrackerproject.persistence.entity.Sesion;
 import org.alvarub.workouttrackerproject.persistence.repository.CategoriaRepository;
+import org.alvarub.workouttrackerproject.persistence.repository.RutinaRepository;
+import org.alvarub.workouttrackerproject.persistence.repository.SesionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static org.alvarub.workouttrackerproject.utils.Constants.DEFAULT_CATEGORY_NAME;
 
 @Service
 @AllArgsConstructor
@@ -18,6 +25,20 @@ public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
     private final CategoriaMapper categoriaMapper;
+    private final SesionRepository sesionRepository;
+    private final RutinaRepository rutinaRepository;
+
+    // Método para crear la categoría por defecto si es que no existe
+    @PostConstruct
+    public void initDefaultCategoria() {
+        if (!categoriaRepository.existsByName(DEFAULT_CATEGORY_NAME)) {
+            Categoria categoria = Categoria.builder()
+                    .name(DEFAULT_CATEGORY_NAME)
+                    .active(true)
+                    .build();
+            categoriaRepository.save(categoria);
+        }
+    }
 
     @Transactional
     public CategoriaResponseDTO save(CategoriaRequestDTO dto) {
@@ -40,6 +61,11 @@ public class CategoriaService {
     @Transactional
     public CategoriaResponseDTO toggleActive(Long id) {
         Categoria categoria = getCategoriaOrThrow(id, false);
+
+        if (categoria.getName().equalsIgnoreCase(DEFAULT_CATEGORY_NAME)) {
+            throw new IllegalStateException("No es posible actualizar el estado de la categoría por defecto");
+        }
+
         categoria.setActive(!categoria.getActive());
         return categoriaMapper.toResponseDTO(categoriaRepository.save(categoria));
     }
@@ -47,6 +73,10 @@ public class CategoriaService {
     @Transactional
     public CategoriaResponseDTO softDelete(Long id) {
         Categoria categoria = getCategoriaOrThrow(id, false);
+
+        if (categoria.getName().equalsIgnoreCase(DEFAULT_CATEGORY_NAME)) {
+            throw new IllegalStateException("No es posible desactivar la categoría ya que es la categoría por defecto");
+        }
 
         if (!categoria.getActive()) {
             return categoriaMapper.toResponseDTO(categoria);
@@ -58,8 +88,23 @@ public class CategoriaService {
 
     @Transactional
     public void hardDelete(Long id) {
-        Categoria categoria = getCategoriaOrThrow(id, false);
-        categoriaRepository.delete(categoria);
+        Categoria categoriaAEliminar = getCategoriaOrThrow(id, false);
+
+        if (categoriaAEliminar.getName().equalsIgnoreCase(DEFAULT_CATEGORY_NAME)) {
+            throw new IllegalStateException("No es posible eliminar la categoría por defecto");
+        }
+
+        Categoria categoriaDefault = getDefaultCategoriaOrThrow();
+
+        sesionRepository.findAllByCategory(categoriaAEliminar).forEach(categoria -> {
+            categoria.setCategory(categoriaDefault);
+        });
+
+        rutinaRepository.findAllByCategory(categoriaAEliminar).forEach(rutina -> {
+            rutina.setCategory(categoriaDefault);
+        });
+
+        categoriaRepository.delete(categoriaAEliminar);
     }
 
     // Métodos auxiliares
@@ -72,5 +117,10 @@ public class CategoriaService {
         }
 
         return categoria;
+    }
+
+    private Categoria getDefaultCategoriaOrThrow() {
+        return categoriaRepository.findByName(DEFAULT_CATEGORY_NAME)
+                .orElseThrow(() -> new NotFoundException("Categoría por defecto no encontrada"));
     }
 }
