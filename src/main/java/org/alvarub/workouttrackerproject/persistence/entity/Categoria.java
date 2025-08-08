@@ -19,4 +19,8 @@ public class Categoria extends Auditable {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "active", nullable = false)
+    @Builder.Default
+    private Boolean active = true;
 }
