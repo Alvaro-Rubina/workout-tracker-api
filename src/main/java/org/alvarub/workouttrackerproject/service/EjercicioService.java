@@ -84,12 +84,6 @@ public class EjercicioService {
         return ejercicioMapper.toSimpleDTO(ejercicioRepository.save(ejercicio));
     }
 
-    @Transactional
-    public void hardDelete(Long id) {
-        Ejercicio ejercicio = getEjercicioOrThrow(id, false);
-        ejercicioRepository.delete(ejercicio);
-    }
-
     // Métodos auxiliares
     @Transactional(readOnly = true)
     public Ejercicio getEjercicioOrThrow(Long id, boolean verifyActive) {
