@@ -63,11 +63,9 @@ public class EquipamientoService {
     public void hardDelete(Long id) {
         Equipamiento equipamiento = getEquipamientoOrThrow(id, false);
 
-        // Elimino toda relación con ejercicio
-        List<Ejercicio> ejerciciosConEsteEquipamiento = ejercicioRepository.findAllByEquipmentContains(equipamiento);
-        for (Ejercicio ejercicio : ejerciciosConEsteEquipamiento) {
+        ejercicioRepository.findAllByEquipmentContains(equipamiento).forEach(ejercicio -> {
             ejercicio.getEquipment().remove(equipamiento);
-        }
+        });
 
         equipamientoRepository.delete(equipamiento);
     }
