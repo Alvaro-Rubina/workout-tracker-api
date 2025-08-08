@@ -43,4 +43,10 @@ public class EquipamientoController {
     public ResponseEntity<EquipamientoResponseDTO> deactivateEquipamiento(@PathVariable Long id) {
         return ResponseEntity.ok(equipamientoService.softDelete(id));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEquipamiento(@PathVariable Long id) {
+        equipamientoService.hardDelete(id);
+        return ResponseEntity.noContent().build();
+    }
 }
