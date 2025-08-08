@@ -5,7 +5,9 @@ import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.EquipamientoMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoResponseDTO;
+import org.alvarub.workouttrackerproject.persistence.entity.Ejercicio;
 import org.alvarub.workouttrackerproject.persistence.entity.Equipamiento;
+import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.EquipamientoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ public class EquipamientoService {
 
     private final EquipamientoRepository equipamientoRepository;
     private final EquipamientoMapper equipamientoMapper;
+    private final EjercicioRepository ejercicioRepository;
 
     @Transactional
     public EquipamientoResponseDTO save (EquipamientoRequestDTO requestDTO) {
@@ -59,6 +62,13 @@ public class EquipamientoService {
     @Transactional
     public void hardDelete(Long id) {
         Equipamiento equipamiento = getEquipamientoOrThrow(id, false);
+
+        // Elimino toda relación con ejercicio
+        List<Ejercicio> ejerciciosConEsteEquipamiento = ejercicioRepository.findAllByEquipmentContains(equipamiento);
+        for (Ejercicio ejercicio : ejerciciosConEsteEquipamiento) {
+            ejercicio.getEquipment().remove(equipamiento);
+        }
+
         equipamientoRepository.delete(equipamiento);
     }
 
