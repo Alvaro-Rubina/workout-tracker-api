@@ -27,6 +27,13 @@ public class Rutina extends Auditable {
     @Column(name = "description", nullable = false, length = 500)
     private String description;
 
+    @Column(name = "is_public", nullable = false)
+    private Boolean isPublic;
+
+    @Column(name = "favorites_count")
+    @Builder.Default
+    private Long likesCount = 0L;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "difficulty", nullable = false)
     private Dificultad difficulty;
@@ -36,7 +43,7 @@ public class Rutina extends Auditable {
     private Categoria category;
 
     @OneToMany(mappedBy = "routine",
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            cascade = {CascadeType.ALL},
             orphanRemoval = true)
     @Builder.Default
     private List<Sesion> sessions = new ArrayList<>();

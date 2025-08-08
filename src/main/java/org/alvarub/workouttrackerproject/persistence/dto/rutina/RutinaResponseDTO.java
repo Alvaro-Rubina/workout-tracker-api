@@ -24,6 +24,10 @@ public class RutinaResponseDTO {
 
     private String description;
 
+    private Boolean isPublic;
+
+    private Long likesCount;
+
     private Dificultad difficulty;
 
     private LocalDateTime createdAt;

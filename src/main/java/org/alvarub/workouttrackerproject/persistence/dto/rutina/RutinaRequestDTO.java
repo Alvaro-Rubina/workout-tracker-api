@@ -21,6 +21,9 @@ public class RutinaRequestDTO {
 
     private String description;
 
+    @NotNull(message = "El campo isPublic es obligatorio")
+    private Boolean isPublic;
+
     @NotNull(message = "El campo difficulty es obligatorio")
     private Dificultad difficulty;
 
