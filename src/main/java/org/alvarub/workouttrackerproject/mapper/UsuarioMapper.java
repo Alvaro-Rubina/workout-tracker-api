@@ -16,12 +16,6 @@ public interface UsuarioMapper {
     @Mapping(target = "favoriteExercises", ignore = true)
     UsuarioStatsDTO toStatsDTO(Usuario entity);
 
-    UsuarioSimpleDTO toSimpleDTO(Usuario entity);
-
-    UsuarioAgendasDTO toAgendasDTO(Usuario entity);
-
-    UsuarioRutinasDTO toRutinasDTO(Usuario entity);
-
-    UsuarioEjerciciosDTO toEjerciciosDTO(Usuario entity);
+    UsuarioResponseDTO toSimpleDTO(Usuario entity);
 
 }
