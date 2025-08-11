@@ -1,12 +1,8 @@
 package org.alvarub.workouttrackerproject.persistence.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,9 +22,8 @@ public class Rol extends Auditable{
     @Column(name = "description", length = 500)
     private String description;
 
-    @ManyToMany(mappedBy = "roles")
-    @JsonIgnore
+    @Column(name = "active", nullable = false)
     @Builder.Default
-    private Set<Usuario> users = new HashSet<>();
+    private Boolean active = true;
 
 }
