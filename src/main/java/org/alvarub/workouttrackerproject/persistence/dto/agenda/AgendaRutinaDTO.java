@@ -26,5 +26,9 @@ public class AgendaRutinaDTO {
 
     private String comment;
 
+    private Boolean completed;
+
+    private LocalDateTime completedAt;
+
     private RutinaSimpleDTO routine;
 }

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @SuperBuilder
 @Entity
-public class Agenda extends Auditable{
+public class Agenda extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +26,8 @@ public class Agenda extends Auditable{
     private Integer reminderMinutes;
 
     @Column(name = "completed")
-    private Boolean completed;
+    @Builder.Default
+    private Boolean completed = false;
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;

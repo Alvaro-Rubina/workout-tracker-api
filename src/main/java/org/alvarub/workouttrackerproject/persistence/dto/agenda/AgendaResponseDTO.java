@@ -24,6 +24,10 @@ public class AgendaResponseDTO {
 
     private String comment;
 
+    private Boolean completed;
+
+    private LocalDateTime completedAt;
+
     private RutinaSimpleDTO routine;
 
     private UsuarioResponseDTO user;
