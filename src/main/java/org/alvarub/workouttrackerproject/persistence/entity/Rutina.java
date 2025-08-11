@@ -30,6 +30,9 @@ public class Rutina extends Auditable {
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic;
 
+    @Column(name = "previous_public_state")
+    private Boolean previousPublicState;
+
     @Column(name = "favorites_count")
     @Builder.Default
     private Long likesCount = 0L;

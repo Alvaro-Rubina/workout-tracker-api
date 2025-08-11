@@ -24,12 +24,15 @@ public class RutinaService {
     private final RutinaMapper rutinaMapper;
     private final EjercicioService ejercicioService;
     private final CategoriaService categoriaService;
+    private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
     private final AgendaRepository agendaRepository;
 
     @Transactional
     public RutinaResponseDTO save(RutinaRequestDTO dto) {
         Rutina rutina = rutinaMapper.toEntity(dto);
+
+        rutina.setUser(usuarioService.getUsuarioOrThrow(dto.getUserId(), true));
 
         rutina.setCategory(categoriaService.getCategoriaOrThrow(dto.getCategoryId(), true));
 
