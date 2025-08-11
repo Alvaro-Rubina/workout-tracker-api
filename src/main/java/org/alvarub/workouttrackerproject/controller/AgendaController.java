@@ -2,6 +2,7 @@ package org.alvarub.workouttrackerproject.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaCompleteRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaResponseDTO;
 import org.alvarub.workouttrackerproject.service.AgendaService;
@@ -30,6 +31,13 @@ public class AgendaController {
                 : agendaService.findByIdSimple(id);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/complete")
+    public ResponseEntity<AgendaResponseDTO> markAsCompleted(@PathVariable Long id,
+                                                             @Valid @RequestBody(required = false) AgendaCompleteRequestDTO dto) {
+        AgendaResponseDTO updatedAgenda = agendaService.markAsCompleted(id, dto);
+        return ResponseEntity.ok(updatedAgenda);
     }
 
 }
