@@ -2,8 +2,7 @@ package org.alvarub.workouttrackerproject.persistence.dto.agenda;
 
 import lombok.*;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioSimpleDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 
 import java.time.LocalDateTime;
 
@@ -27,6 +26,6 @@ public class AgendaResponseDTO {
 
     private RutinaSimpleDTO routine;
 
-    private UsuarioSimpleDTO user;
+    private UsuarioResponseDTO user;
 
 }

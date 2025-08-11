@@ -17,6 +17,7 @@ public class CategoriaRequestDTO implements Serializable {
     @NotBlank(message = "El campo name es obligatorio")
     private String name;
 
+    @Builder.Default
     private Boolean active = true;
 
 }

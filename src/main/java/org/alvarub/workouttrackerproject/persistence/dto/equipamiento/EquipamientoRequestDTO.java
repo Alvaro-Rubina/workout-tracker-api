@@ -16,6 +16,7 @@ public class EquipamientoRequestDTO {
     @NotBlank(message = "El campo name es obligatorio")
     private String name;
 
+    @Builder.Default
     private Boolean active = true;
 
 }

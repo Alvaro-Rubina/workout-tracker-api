@@ -17,6 +17,7 @@ public class MusculoRequestDTO {
     @NotBlank(message = "El campo name es obligatorio")
     private String name;
 
+    @Builder.Default
     private Boolean active = true;
 
     @NotNull(message = "El campo muscleGroupId es obligatorio")
