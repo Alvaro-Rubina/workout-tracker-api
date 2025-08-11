@@ -30,12 +30,14 @@ public class Usuario extends Auditable {
     private Long bodyWeight;
 
     @Column(name = "completed_workouts")
-    private Long completedWorkouts;
+    @Builder.Default
+    private Long completedWorkouts = 0L;
 
     /*private String auth0Id;*/
 
     @Column(name = "active", nullable = false)
-    private Boolean active;
+    @Builder.Default
+    private Boolean active = true;
 
     @Column(name = "last_access")
     @Builder.Default

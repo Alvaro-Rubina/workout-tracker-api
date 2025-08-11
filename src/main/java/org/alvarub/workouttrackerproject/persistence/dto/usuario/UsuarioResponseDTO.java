@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.rol.RolResponseDTO;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -14,7 +13,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsuarioStatsDTO implements Serializable {
+public class UsuarioResponseDTO {
 
     private Long id;
 
@@ -22,29 +21,18 @@ public class UsuarioStatsDTO implements Serializable {
 
     private String email;
 
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
     private Long bodyWeight;
 
     private Long completedWorkouts;
 
     private Boolean active;
 
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
     private LocalDateTime lastAccess;
 
-    private Long createdRoutines;
-
-    private Long likedRoutines;
-
-    private Long savedRoutines;
-
-    private Long completedRoutines;
-
-    private Long favoriteExercises;
-
-    // Tema agendas y comentarios no se si sea relevante poner
-
     private Set<RolResponseDTO> roles;
+
 }

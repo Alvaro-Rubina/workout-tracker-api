@@ -23,7 +23,5 @@ public class UsuarioRequestDTO {
     // TODO: Este campo está comentado en la entidad, en todo caso no se si se tenga que mandar en el DTO
     /*private String auth0Id;*/
 
-    private Boolean active;
-
     private Set<Long> roleIds;
 }
