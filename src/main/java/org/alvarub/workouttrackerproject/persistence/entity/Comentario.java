@@ -39,7 +39,7 @@ public class Comentario extends Auditable {
     @JoinColumn(name = "reply_to_id")
     private Comentario replyTo;
 
-    @OneToMany(mappedBy = "replyTo", orphanRemoval = true)
+    @OneToMany(mappedBy = "replyTo")
     @Builder.Default
     private List<Comentario> replies = new ArrayList<>();
 }

@@ -26,7 +26,7 @@ public class ComentarioController {
                 .body(comentarioService.save(dto));
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/users/{userId}")
     public ResponseEntity<List<?>> getComentariosByUserId(@PathVariable Long userId,
                                         @RequestParam(defaultValue = "false") Boolean relations) {
         List<?> response = relations
@@ -36,7 +36,7 @@ public class ComentarioController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{routineId}")
+    @GetMapping("/routines/{routineId}")
     public ResponseEntity<List<ComentarioResponseDTO>> getComentariosByRoutineId(@PathVariable Long routineId) {
         return ResponseEntity.ok(comentarioService.findAllByRoutineId(routineId));
     }
@@ -46,4 +46,11 @@ public class ComentarioController {
                                                                        @Valid @RequestBody ComentarioContentRequestDTO dto) {
         return ResponseEntity.ok(comentarioService.updateComentario(id, dto));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteComentario(@PathVariable Long id) {
+        comentarioService.hardDelete(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

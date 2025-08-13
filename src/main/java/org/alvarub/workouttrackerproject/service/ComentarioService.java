@@ -34,9 +34,11 @@ public class ComentarioService {
         // TODO: cambiar la excepcion por una más adecuada
         if (dto.getReplyToId() != null) {
             Comentario replyTo = getComentarioOrThrow(dto.getReplyToId());
+
             if (!replyTo.getRoutine().equals(comentario.getRoutine())) {
                 throw new ForbiddenOperationException("No es posible responder un comentario de una rutina distinta");
             }
+            comentario.setReplyTo(replyTo);
         }
 
         return comentarioMapper.toResponseDTO(comentarioRepository.save(comentario));
