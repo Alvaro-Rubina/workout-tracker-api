@@ -20,6 +20,8 @@ public class ComentarioResponseDTO {
 
     private String content;
 
+    private Long likes;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
