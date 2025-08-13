@@ -24,7 +24,8 @@ public class Comentario {
     private String content;
 
     @Column(name = "likes")
-    private Long likes;
+    @Builder.Default
+    private Long likes = 0L;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
