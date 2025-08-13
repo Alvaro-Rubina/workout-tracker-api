@@ -43,8 +43,7 @@ public class ComentarioController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<ComentarioSimpleDTO> updateComentarioContent(@PathVariable Long id,
-                                                                       @RequestHeader("X-User-Id") Long userId,
                                                                        @Valid @RequestBody ComentarioContentRequestDTO dto) {
-        return ResponseEntity.ok(comentarioService.updateComentario(id, userId, dto));
+        return ResponseEntity.ok(comentarioService.updateComentario(id, dto));
     }
 }

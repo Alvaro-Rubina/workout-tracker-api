@@ -57,17 +57,18 @@ public class ComentarioService {
     }
 
     @Transactional
-    public ComentarioSimpleDTO updateComentario(Long id, Long userId, ComentarioContentRequestDTO dto) {
+    public ComentarioSimpleDTO updateComentario(Long id, ComentarioContentRequestDTO dto) {
         Comentario comentario = getComentarioOrThrow(id);
-
-        if (!comentario.getUser().getId().equals(userId)) {
-            throw new ForbiddenOperationException("Usuario con id " + userId + " sin permisos para editar el comentario");
-        }
 
         comentario.setContent(dto.content());
         comentarioRepository.save(comentario);
 
         return comentarioMapper.toSimpleDTO(comentario);
+    }
+
+    @Transactional
+    public void hardDelete(Long id) {
+
     }
 
     // Métodos auxiliares
