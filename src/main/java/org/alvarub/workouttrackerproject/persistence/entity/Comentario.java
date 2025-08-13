@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 @SuperBuilder
 @Entity
-public class Comentario {
+public class Comentario extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

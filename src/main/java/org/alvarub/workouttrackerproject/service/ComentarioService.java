@@ -13,7 +13,6 @@ import org.alvarub.workouttrackerproject.persistence.repository.ComentarioReposi
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @Service
@@ -31,6 +30,14 @@ public class ComentarioService {
 
         comentario.setUser(usuarioService.getUsuarioOrThrow(dto.getUserId(), true));
         comentario.setRoutine(rutinaService.getRutinaOrThrow(dto.getRoutineId()));
+
+        // TODO: cambiar la excepcion por una más adecuada
+        if (dto.getReplyToId() != null) {
+            Comentario replyTo = getComentarioOrThrow(dto.getReplyToId());
+            if (!replyTo.getRoutine().equals(comentario.getRoutine())) {
+                throw new ForbiddenOperationException("No es posible responder un comentario de una rutina distinta");
+            }
+        }
 
         return comentarioMapper.toResponseDTO(comentarioRepository.save(comentario));
     }
@@ -68,12 +75,18 @@ public class ComentarioService {
 
     @Transactional
     public void hardDelete(Long id) {
+        Comentario comentario = getComentarioOrThrow(id);
 
+        comentario.getReplies().forEach(replie -> {
+            replie.setReplyTo(null);
+        });
+
+        comentarioRepository.delete(comentario);
     }
 
     // Métodos auxiliares
     public Comentario getComentarioOrThrow(Long id) {
         return comentarioRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Comentario con el ID" + id + " no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Comentario con el ID " + id + " no encontrado"));
     }
 }
