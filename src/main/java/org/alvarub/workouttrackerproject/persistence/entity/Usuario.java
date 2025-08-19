@@ -1,6 +1,5 @@
 package org.alvarub.workouttrackerproject.persistence.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -26,32 +25,30 @@ public class Usuario extends Auditable {
     @Column(name = "email", unique = true ,nullable = false)
     private String email;
 
-    @Column(name = "body_weigh")
+    @Column(name = "body_weight")
     private Long bodyWeight;
 
     @Column(name = "completed_workouts")
     @Builder.Default
     private Long completedWorkouts = 0L;
 
-    /*private String auth0Id;*/
+    @Column(name = "auth0_id", unique = true, nullable = false)
+    private String auth0Id;
 
     @Column(name = "active", nullable = false)
     @Builder.Default
     private Boolean active = true;
 
+    @Column(name = "picture") // Avatar de Auth0
+    private String picture;
+
     @Column(name = "last_access")
     @Builder.Default
     private LocalDateTime lastAccess = LocalDateTime.now();
 
-    @ManyToMany
-    @JsonIgnoreProperties("users")
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "rol_id")
-    )
-    @Builder.Default
-    private Set<Rol> roles = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Rol role;
 
     // RUTINAS CREADAS - FAVORITAS - GUARDADAS
     @OneToMany(mappedBy = "user", orphanRemoval = true)

@@ -18,5 +18,6 @@ public class RolRequestDTO {
     @NotBlank(message = "El campo description es obligatorio")
     private String description;
 
-    private Boolean active;
+    @Builder.Default
+    private Boolean active = true;
 }
