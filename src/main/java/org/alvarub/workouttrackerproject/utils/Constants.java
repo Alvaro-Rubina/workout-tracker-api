@@ -1,8 +1,17 @@
 package org.alvarub.workouttrackerproject.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Constants {
 
     public static final String DEFAULT_CATEGORY_NAME = "General";
-    public static final String ADMIN_ROL_NAME = "Administrador";
-    public static final String USER_ROL_NAME = "Usuario";
+
+    public static final String USER_ROL_NAME = "USUARIO";
+    public static final String ADMIN_ROL_NAME = "ADMIN";
+
+    public static final Map<String, String> ROLES = new HashMap<>() {{
+        put(ADMIN_ROL_NAME, "Rol con permisos extendidos para administradores.");
+        put(USER_ROL_NAME, "Rol con permisos limitados para usuarios.");
+    }};
 }
