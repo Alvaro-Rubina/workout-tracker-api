@@ -37,59 +37,20 @@ public class UsuarioService {
     private final RolService rolService;
 
     @Transactional
-    public UsuarioResponseDTO save(UsuarioRequestDTO dto, Jwt jwt) throws Auth0Exception {
-        Usuario usuario = usuarioMapper.toEntity(dto);
+    public UsuarioResponseDTO saveUser(UsuarioRequestDTO dto, Jwt jwt) throws Auth0Exception {
         Rol rol = rolService.getRolByNameOrThrow(USER_ROL_NAME, true);
-
-        usuario.setAuth0Id(jwt.getSubject());
-        usuario.setRole(rol);
-
-        try {
-            // Seteo el rol también en auth0 antes de guardar en el repo
-            usuarioServiceAuth0.setRole(jwt.getSubject(), rol.getAuth0RoleId());
-            usuarioRepository.save(usuario);
-
-        } catch (DataAccessException e) {
-            // Si falla en la BD, elimino el usuario en Auth0
-            usuarioServiceAuth0.deleteUser(jwt.getSubject());
-            throw new UserRegistrationException("Error guardando usuario en la base de datos", e);
-
-        } catch (Auth0Exception e) {
-            usuarioServiceAuth0.deleteUser(jwt.getSubject());
-            throw new UserRegistrationException("Error asignando rol en Auth0", e);
-        }
-
-        return usuarioMapper.toResponseDTO(usuario);
+        return save(dto, jwt, rol);
     }
 
     @Transactional
     public UsuarioResponseDTO saveAdmin(UsuarioRequestDTO dto, Jwt jwt) throws Auth0Exception {
-        Usuario usuario = usuarioMapper.toEntity(dto);
         Rol rol = rolService.getRolByNameOrThrow(ADMIN_ROL_NAME, true);
-
-        usuario.setAuth0Id(jwt.getSubject());
-        usuario.setRole(rol);
-
-        try {
-            // Seteo el rol también en auth0 antes de guardar en el repo
-            usuarioServiceAuth0.setRole(jwt.getSubject(), rol.getAuth0RoleId());
-            usuarioRepository.save(usuario);
-
-        } catch (DataAccessException e) {
-            usuarioServiceAuth0.deleteUser(jwt.getSubject());
-            throw new UserRegistrationException("Error guardando usuario en la base de datos", e);
-
-        } catch (Auth0Exception e) {
-            usuarioServiceAuth0.deleteUser(jwt.getSubject());
-            throw new UserRegistrationException("Error asignando rol en Auth0", e);
-        }
-
-        return usuarioMapper.toResponseDTO(usuario);
+        return save(dto, jwt, rol);
     }
 
     @Transactional(readOnly = true)
     public UsuarioResponseDTO findById(Long id) {
-        Usuario usuario = getUsuarioOrThrow (id, false);
+        Usuario usuario = getUsuarioOrThrow(id, false);
         return usuarioMapper.toResponseDTO(usuario);
     }
 
@@ -116,6 +77,7 @@ public class UsuarioService {
                             .active(true)
                             .build();
 
+                    log.info("Creando usuario desde token {}", email);
                     return usuarioMapper.toResponseDTO(usuarioRepository.save(newUser));
                 });
     }
@@ -153,7 +115,6 @@ public class UsuarioService {
                 }
             });
         }
-
         // Activar usuario: restaurar rutinas públicas anteriores
         else {
             usuario.getCreatedRoutines().forEach(rutina -> {
@@ -164,15 +125,8 @@ public class UsuarioService {
             });
         }
 
-        // Actualizo tambien en auth0
+        log.info("Actualizando estado activo del usuario {} a {}", usuario.getEmail(), !usuario.getActive());
         usuarioServiceAuth0.toggleActive(usuario.getAuth0Id(), usuario.getActive());
-
-        // auditoria por ahora opcional
-        /*
-        if (jwt != null) {
-            String adminAuth0Id = jwt.getSubject();
-            log.info("Admin {} cambió el estado del usuario {}", adminAuth0Id, usuario.getId());
-        }*/
 
         return usuarioMapper.toResponseDTO(usuario);
     }
@@ -183,9 +137,42 @@ public class UsuarioService {
                 .orElseThrow(() -> new NotFoundException("Usuario con el ID " + id + " no encontrado"));
 
         if (verifyActive && !usuario.getActive()) {
-            throw new NotFoundException("Usuario el ID " + id + " inactivo");
+            throw new NotFoundException("Usuario con el ID " + id + " inactivo");
         }
 
         return usuario;
+    }
+
+    /**
+     * Método privado para evitar duplicación entre saveUser y saveAdmin
+     */
+    private UsuarioResponseDTO save(UsuarioRequestDTO dto, Jwt jwt, Rol rol) throws Auth0Exception {
+        Usuario usuario = usuarioMapper.toEntity(dto);
+        usuario.setAuth0Id(jwt.getSubject());
+        usuario.setRole(rol);
+
+        log.info("Creando usuario {} con rol {}", usuario.getEmail(), rol.getName());
+
+        try {
+            // Seteo el rol en Auth0 antes de guardar en BD
+            log.info("Asignando rol en Auth0 al usuario {}", usuario.getAuth0Id());
+            usuarioServiceAuth0.setRole(jwt.getSubject(), rol.getAuth0RoleId());
+
+            log.info("Guardando usuario en base de datos {}", usuario.getEmail());
+            usuarioRepository.save(usuario);
+            log.info("Usuario {} creado exitosamente", usuario.getEmail());
+
+        } catch (DataAccessException e) {
+            log.error("Error guardando usuario en BD, eliminando usuario en Auth0 {}", usuario.getAuth0Id(), e);
+            usuarioServiceAuth0.deleteUser(jwt.getSubject());
+            throw new UserRegistrationException("Error guardando usuario en la base de datos", e);
+
+        } catch (Auth0Exception e) {
+            log.error("Error asignando rol en Auth0, eliminando usuario {}", usuario.getAuth0Id(), e);
+            usuarioServiceAuth0.deleteUser(jwt.getSubject());
+            throw new UserRegistrationException("Error asignando rol en Auth0", e);
+        }
+
+        return usuarioMapper.toResponseDTO(usuario);
     }
 }
