@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,9 +17,4 @@ public class UsuarioRequestDTO {
 
     @NotBlank(message = "El campo email es obligatorio")
     private String email;
-
-    // TODO: Este campo está comentado en la entidad, en todo caso no se si se tenga que mandar en el DTO
-    /*private String auth0Id;*/
-
-    private Set<Long> roleIds;
 }
