@@ -32,6 +32,7 @@ public class RolService {
 
     // Método para guardar los roles predefinidos
     @PostConstruct
+    @Transactional
     public void initDefaultRoles() throws Auth0Exception {
         ROLES.forEach((rol, description) -> {
             try {

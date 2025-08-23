@@ -17,8 +17,7 @@ public class RolServiceAuth0 {
         Role rolAuth0 = new Role();
         rolAuth0.setName(name);
         rolAuth0.setDescription(description);
-        managementAPI.roles().create(rolAuth0).execute();
-        return rolAuth0;
+        return managementAPI.roles().create(rolAuth0).execute();
     }
 
 }
