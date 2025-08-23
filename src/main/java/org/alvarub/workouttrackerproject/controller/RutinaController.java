@@ -49,6 +49,12 @@ public class RutinaController {
         return ResponseEntity.ok(rutinaService.toggleIsPublic(id));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<RutinaResponseDTO> updateRutina(@PathVariable Long id,
+                                                          @Valid @RequestBody RutinaRequestDTO dto) {
+        return ResponseEntity.ok(rutinaService.update(id, dto));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRutina(@PathVariable Long id) {
         rutinaService.hardDelete(id);

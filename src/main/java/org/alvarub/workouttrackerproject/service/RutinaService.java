@@ -6,8 +6,9 @@ import org.alvarub.workouttrackerproject.mapper.RutinaMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
-import org.alvarub.workouttrackerproject.persistence.entity.Rutina;
-import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
+import org.alvarub.workouttrackerproject.persistence.dto.sesion.SesionRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.sesionejercicio.SesionEjercicioRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.entity.*;
 import org.alvarub.workouttrackerproject.persistence.repository.AgendaRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.RutinaRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.UsuarioRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.LinkedHashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -116,5 +118,50 @@ public class RutinaService {
     public Rutina getRutinaOrThrow(Long id) {
         return rutinaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Rutina con el ID " + id + " no encontrada"));
+    }
+
+    @Transactional
+    public RutinaResponseDTO update(Long id, RutinaRequestDTO dto) {
+        Rutina rutina = getRutinaOrThrow(id);
+
+        // Campos básicos
+        rutina.setName(dto.getName());
+        rutina.setDescription(dto.getDescription());
+        rutina.setIsPublic(dto.getIsPublic());
+        rutina.setDifficulty(dto.getDifficulty());
+
+        // Relaciones directas
+        rutina.setCategory(categoriaService.getCategoriaOrThrow(dto.getCategoryId(), true));
+        rutina.setUser(usuarioService.getUsuarioOrThrow(dto.getUserId(), true));
+
+        // Reemplazo completo de sesiones y ejercicios de sesión
+        rutina.getSessions().clear();
+
+        dto.getSessions().forEach(sDto -> {
+            Sesion sesion = new Sesion();
+            sesion.setName(sDto.getName());
+            sesion.setDescription(sDto.getDescription());
+            sesion.setDayOfWeek(sDto.getDayOfWeek());
+            sesion.setCategory(categoriaService.getCategoriaOrThrow(sDto.getCategoryId(), true));
+            sesion.setRoutine(rutina);
+
+            sesion.setSessionExercises(new LinkedHashSet<>());
+
+            sDto.getSessionExercises().forEach(seDto -> {
+                SesionEjercicio se = new SesionEjercicio();
+                se.setSets(seDto.getSets());
+                se.setReps(seDto.getReps());
+                se.setRestBetweenSets(seDto.getRestBetweenSets());
+                se.setComment(seDto.getComment());
+                se.setSession(sesion);
+                se.setExercise(ejercicioService.getEjercicioOrThrow(seDto.getExerciseId(), true));
+
+                sesion.getSessionExercises().add(se);
+            });
+
+            rutina.getSessions().add(sesion);
+        });
+
+        return rutinaMapper.toResponseDTO(rutinaRepository.save(rutina));
     }
 }
