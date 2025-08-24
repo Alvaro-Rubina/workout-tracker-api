@@ -6,6 +6,7 @@ import org.alvarub.workouttrackerproject.mapper.RutinaMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.sesion.SesionRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.sesionejercicio.SesionEjercicioRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.*;
@@ -121,46 +122,57 @@ public class RutinaService {
     }
 
     @Transactional
-    public RutinaResponseDTO update(Long id, RutinaRequestDTO dto) {
+    public RutinaResponseDTO update(Long id, RutinaUpdateRequestDTO dto) {
         Rutina rutina = getRutinaOrThrow(id);
 
-        // Campos básicos
-        rutina.setName(dto.getName());
-        rutina.setDescription(dto.getDescription());
-        rutina.setIsPublic(dto.getIsPublic());
-        rutina.setDifficulty(dto.getDifficulty());
+        if (dto.getName() != null){
+            rutina.setName(dto.getName());
+        }
 
-        // Relaciones directas
-        rutina.setCategory(categoriaService.getCategoriaOrThrow(dto.getCategoryId(), true));
-        rutina.setUser(usuarioService.getUsuarioOrThrow(dto.getUserId(), true));
+        if (dto.getDescription() != null) {
+            rutina.setDescription(dto.getDescription());
+        }
 
-        // Reemplazo completo de sesiones y ejercicios de sesión
-        rutina.getSessions().clear();
+        if (dto.getIsPublic() != null) {
+            rutina.setIsPublic(dto.getIsPublic());
+        }
 
-        dto.getSessions().forEach(sDto -> {
-            Sesion sesion = new Sesion();
-            sesion.setName(sDto.getName());
-            sesion.setDescription(sDto.getDescription());
-            sesion.setDayOfWeek(sDto.getDayOfWeek());
-            sesion.setCategory(categoriaService.getCategoriaOrThrow(sDto.getCategoryId(), true));
-            sesion.setRoutine(rutina);
+        if (dto.getDifficulty() != null) {
+            rutina.setDifficulty(dto.getDifficulty());
+        }
 
-            sesion.setSessionExercises(new LinkedHashSet<>());
+        if ((dto.getCategoryId() != null) && (!dto.getCategoryId().equals(rutina.getCategory().getId()))) {
+            rutina.setCategory(categoriaService.getCategoriaOrThrow(dto.getCategoryId(), true));
+        }
 
-            sDto.getSessionExercises().forEach(seDto -> {
-                SesionEjercicio se = new SesionEjercicio();
-                se.setSets(seDto.getSets());
-                se.setReps(seDto.getReps());
-                se.setRestBetweenSets(seDto.getRestBetweenSets());
-                se.setComment(seDto.getComment());
-                se.setSession(sesion);
-                se.setExercise(ejercicioService.getEjercicioOrThrow(seDto.getExerciseId(), true));
+        if (dto.getSessions() != null && !dto.getSessions().isEmpty()) {
+            rutina.getSessions().clear();
 
-                sesion.getSessionExercises().add(se);
+            dto.getSessions().forEach(sesionDTO -> {
+                Sesion sesion = new Sesion();
+                sesion.setName(sesionDTO.getName());
+                sesion.setDescription(sesionDTO.getDescription());
+                sesion.setDayOfWeek(sesionDTO.getDayOfWeek());
+                sesion.setRoutine(rutina);
+                sesion.setCategory(categoriaService.getCategoriaOrThrow(sesionDTO.getCategoryId(), true));
+
+                if (sesionDTO.getSessionExercises() != null) {
+                    sesionDTO.getSessionExercises().forEach(ejercicioDTO -> {
+                        SesionEjercicio sesionEjercicio = new SesionEjercicio();
+                        sesionEjercicio.setSets(ejercicioDTO.getSets());
+                        sesionEjercicio.setReps(ejercicioDTO.getReps());
+                        sesionEjercicio.setRestBetweenSets(ejercicioDTO.getRestBetweenSets());
+                        sesionEjercicio.setComment(ejercicioDTO.getComment());
+                        sesionEjercicio.setSession(sesion);
+                        sesionEjercicio.setExercise(ejercicioService.getEjercicioOrThrow(ejercicioDTO.getExerciseId(), true));
+
+                        sesion.getSessionExercises().add(sesionEjercicio);
+                    });
+                }
+
+                rutina.getSessions().add(sesion);
             });
-
-            rutina.getSessions().add(sesion);
-        });
+        }
 
         return rutinaMapper.toResponseDTO(rutinaRepository.save(rutina));
     }
