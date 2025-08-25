@@ -3,6 +3,7 @@ package org.alvarub.workouttrackerproject.service;
 import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.RutinaMapper;
+import org.alvarub.workouttrackerproject.mapper.SesionMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
@@ -30,6 +31,7 @@ public class RutinaService {
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
     private final AgendaRepository agendaRepository;
+    private final SesionMapper sesionMapper;
 
     @Transactional
     public RutinaResponseDTO save(RutinaRequestDTO dto) {
@@ -149,26 +151,17 @@ public class RutinaService {
             rutina.getSessions().clear();
 
             dto.getSessions().forEach(sesionDTO -> {
-                Sesion sesion = new Sesion();
-                sesion.setName(sesionDTO.getName());
-                sesion.setDescription(sesionDTO.getDescription());
-                sesion.setDayOfWeek(sesionDTO.getDayOfWeek());
+                Sesion sesion = sesionMapper.toEntity(sesionDTO);
                 sesion.setRoutine(rutina);
                 sesion.setCategory(categoriaService.getCategoriaOrThrow(sesionDTO.getCategoryId(), true));
 
-                if (sesionDTO.getSessionExercises() != null) {
-                    sesionDTO.getSessionExercises().forEach(ejercicioDTO -> {
-                        SesionEjercicio sesionEjercicio = new SesionEjercicio();
-                        sesionEjercicio.setSets(ejercicioDTO.getSets());
-                        sesionEjercicio.setReps(ejercicioDTO.getReps());
-                        sesionEjercicio.setRestBetweenSets(ejercicioDTO.getRestBetweenSets());
-                        sesionEjercicio.setComment(ejercicioDTO.getComment());
-                        sesionEjercicio.setSession(sesion);
-                        sesionEjercicio.setExercise(ejercicioService.getEjercicioOrThrow(ejercicioDTO.getExerciseId(), true));
+                // A cada SesionEjercicio de la sesion le seteo la sesión y el ejercicio (validando este último)
+                sesion.getSessionExercises().forEach(sesionEjercicio -> {
+                    sesionEjercicio.setSession(sesion);
 
-                        sesion.getSessionExercises().add(sesionEjercicio);
-                    });
-                }
+                    Long ejercicioId = sesionEjercicio.getExercise().getId();
+                    sesionEjercicio.setExercise(ejercicioService.getEjercicioOrThrow(ejercicioId, true));
+                });
 
                 rutina.getSessions().add(sesion);
             });
