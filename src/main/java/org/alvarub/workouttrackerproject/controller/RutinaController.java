@@ -52,7 +52,7 @@ public class RutinaController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<RutinaResponseDTO> updateRutina(@PathVariable Long id,
-                                                          @Valid @RequestBody RutinaUpdateRequestDTO dto) {
+                                                          @RequestBody RutinaUpdateRequestDTO dto) {
         return ResponseEntity.ok(rutinaService.update(id, dto));
     }
 

@@ -86,7 +86,7 @@ public class RutinaService {
     public RutinaSimpleDTO toggleIsPublic(Long id) {
         Rutina rutina = getRutinaOrThrow(id);
         rutina.setIsPublic(!rutina.getIsPublic());
-        return rutinaMapper.toSimpleDTO(rutinaRepository.save(rutina));
+        return rutinaMapper.toSimpleDTO(rutina);
     }
 
     @Transactional
@@ -115,12 +115,6 @@ public class RutinaService {
         });
 
         rutinaRepository.delete(rutina);
-    }
-
-    // Métodos auxiliares
-    public Rutina getRutinaOrThrow(Long id) {
-        return rutinaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Rutina con el ID " + id + " no encontrada"));
     }
 
     @Transactional
@@ -167,6 +161,32 @@ public class RutinaService {
             });
         }
 
-        return rutinaMapper.toResponseDTO(rutinaRepository.save(rutina));
+        return rutinaMapper.toResponseDTO(rutina);
+    }
+
+    @Transactional
+    public RutinaResponseDTO addSessionToRoutine(Long id, SesionRequestDTO sesionRequestDTO) {
+        Rutina rutina = getRutinaOrThrow(id);
+
+        Sesion sesion = sesionMapper.toEntity(sesionRequestDTO);
+
+        sesion.setCategory(categoriaService.getCategoriaOrThrow(sesionRequestDTO.getCategoryId(), true));
+
+        // A cada SesionEjercicio de la sesion le seteo la sesión y el ejercicio (validando este último)
+        sesion.getSessionExercises().forEach(sesionEjercicio -> {
+            sesionEjercicio.setSession(sesion);
+
+            Long ejercicioId = sesionEjercicio.getExercise().getId();
+            sesionEjercicio.setExercise(ejercicioService.getEjercicioOrThrow(ejercicioId, true));
+        });
+
+        rutina.getSessions().add(sesion);
+        return rutinaMapper.toResponseDTO(rutina);
+    }
+
+    // Métodos auxiliares
+    public Rutina getRutinaOrThrow(Long id) {
+        return rutinaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Rutina con el ID " + id + " no encontrada"));
     }
 }
