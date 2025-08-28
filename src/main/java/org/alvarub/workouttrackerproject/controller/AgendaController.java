@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaCompleteRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaResponseDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.service.AgendaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,14 @@ public class AgendaController {
                 .body(agendaService.save(dto));
     }
 
+    @GetMapping
+    public ResponseEntity<Object> getAllAgendas(@RequestParam(defaultValue = "false") Boolean includeUser) {
+        Object response = includeUser
+                ? agendaService.findAll()
+                : agendaService.findAllSimple();
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Object> getAgendaById(@PathVariable Long id,
                                                 @RequestParam(defaultValue = "false") Boolean includeUser) {
@@ -38,6 +47,13 @@ public class AgendaController {
                                                              @Valid @RequestBody(required = false) AgendaCompleteRequestDTO dto) {
         AgendaResponseDTO updatedAgenda = agendaService.markAsCompleted(id, dto);
         return ResponseEntity.ok(updatedAgenda);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<AgendaResponseDTO> updateAgenda(@PathVariable Long id,
+                                                          @Valid @RequestBody AgendaUpdateRequestDTO dto) {
+        AgendaResponseDTO updated = agendaService.update(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
 }
