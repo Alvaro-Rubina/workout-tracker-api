@@ -3,10 +3,16 @@ package org.alvarub.workouttrackerproject.service.auth0;
 import com.auth0.client.mgmt.ManagementAPI;
 import com.auth0.exception.Auth0Exception;
 import com.auth0.json.mgmt.Role;
+import com.auth0.json.mgmt.RolesPage;
+import com.auth0.net.Request;
 import lombok.RequiredArgsConstructor;
-import org.alvarub.workouttrackerproject.persistence.dto.rol.RolRequestDTO;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RolServiceAuth0 {
@@ -14,10 +20,36 @@ public class RolServiceAuth0 {
     private final ManagementAPI managementAPI;
 
     public Role createRol(String name, String description) throws Auth0Exception {
+        Role existing = getRoleByName(name);
+        if (existing != null) {
+            log.info("El rol '{}' ya existe en Auth0.", name);
+            return existing;
+        }
+
         Role rolAuth0 = new Role();
         rolAuth0.setName(name);
         rolAuth0.setDescription(description);
-        return managementAPI.roles().create(rolAuth0).execute();
+
+        Role createdRole = managementAPI.roles().create(rolAuth0).execute();
+        log.info("Rol '{}' creado exitosamente en Auth0 con ID '{}'.", name, createdRole.getId());
+        return createdRole;
+    }
+
+    public Role getRoleByName(String name) throws Auth0Exception {
+        Request<RolesPage> request = managementAPI.roles().list(null);
+        List<Role> roles = request.execute().getItems();
+
+        Role foundRole = roles.stream()
+                .filter(r -> r.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
+
+        if (foundRole != null) {
+            log.info("Rol '{}' encontrado en Auth0 con ID '{}'.", name, foundRole.getId());
+        } else {
+            log.info("Rol '{}' no encontrado en Auth0.", name);
+        }
+        return foundRole;
     }
 
 }
