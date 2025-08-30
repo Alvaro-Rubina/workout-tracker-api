@@ -12,8 +12,6 @@ import org.alvarub.workouttrackerproject.persistence.dto.rol.RolResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Rol;
 import org.alvarub.workouttrackerproject.persistence.repository.RolRepository;
 import org.alvarub.workouttrackerproject.service.auth0.RolServiceAuth0;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,10 +31,10 @@ public class RolService {
     // Método para guardar los roles predefinidos
     @PostConstruct
     @Transactional
-    public void initDefaultRoles() throws Auth0Exception {
+    public void initDefaultRoles() {
+        log.info("Verificando que los roles por defecto existan en Auth0 y en base de datos...");
         ROLES.forEach((rol, description) -> {
             try {
-                log.info("Verificando que los roles por defecto existan en Auth y en base de datos...");
                 createRoleIfNotExists(rol, description);
             } catch (Auth0Exception e) {
                 log.error("Error creando rol por defecto en Auth0: {}", rol, e);
