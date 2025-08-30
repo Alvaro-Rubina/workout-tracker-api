@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface AgendaRepository extends JpaRepository<Agenda, Long> {
     List<Agenda> findAllByRoutine(Rutina rutina);
+    List<Agenda> findByUserId(Long id);
 }

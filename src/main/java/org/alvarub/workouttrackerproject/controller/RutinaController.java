@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.service.RutinaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,12 @@ public class RutinaController {
     @PatchMapping("/{id}/toggle-public")
     public ResponseEntity<RutinaSimpleDTO> toggleRutinaIsPublicStatus(@PathVariable Long id) {
         return ResponseEntity.ok(rutinaService.toggleIsPublic(id));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<RutinaResponseDTO> updateRutina(@PathVariable Long id,
+                                                          @RequestBody RutinaUpdateRequestDTO dto) {
+        return ResponseEntity.ok(rutinaService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")

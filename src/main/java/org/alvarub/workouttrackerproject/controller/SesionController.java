@@ -17,6 +17,7 @@ public class SesionController {
     private final SesionService sesionService;
 
     @PostMapping
+    // TODO: Metodo createSesion debería borrarlo. Las mismas se crean a través de la rutina
     public ResponseEntity<SesionResponseDTO> createSesion(@Valid @RequestBody SesionRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(sesionService.save(dto));

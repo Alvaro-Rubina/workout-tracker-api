@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioSimpleDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.service.EjercicioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,12 @@ public class EjercicioController {
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<EjercicioSimpleDTO> deactivateEjercicio(@PathVariable Long id) {
         return ResponseEntity.ok(ejercicioService.softDelete(id));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<EjercicioResponseDTO> updateEjercicio(@PathVariable Long id,
+                                                                @Valid @RequestBody EjercicioUpdateRequestDTO dto) {
+        return ResponseEntity.ok(ejercicioService.update(id, dto));
     }
 
 }

@@ -3,11 +3,14 @@ package org.alvarub.workouttrackerproject.service;
 import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.RutinaMapper;
+import org.alvarub.workouttrackerproject.mapper.SesionMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
-import org.alvarub.workouttrackerproject.persistence.entity.Rutina;
-import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
+import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaUpdateRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.sesion.SesionRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.sesionejercicio.SesionEjercicioRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.entity.*;
 import org.alvarub.workouttrackerproject.persistence.repository.AgendaRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.RutinaRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.UsuarioRepository;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.LinkedHashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class RutinaService {
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
     private final AgendaRepository agendaRepository;
+    private final SesionMapper sesionMapper;
 
     @Transactional
     public RutinaResponseDTO save(RutinaRequestDTO dto) {
@@ -81,7 +86,7 @@ public class RutinaService {
     public RutinaSimpleDTO toggleIsPublic(Long id) {
         Rutina rutina = getRutinaOrThrow(id);
         rutina.setIsPublic(!rutina.getIsPublic());
-        return rutinaMapper.toSimpleDTO(rutinaRepository.save(rutina));
+        return rutinaMapper.toSimpleDTO(rutina);
     }
 
     @Transactional
@@ -110,6 +115,73 @@ public class RutinaService {
         });
 
         rutinaRepository.delete(rutina);
+    }
+
+    @Transactional
+    public RutinaResponseDTO update(Long id, RutinaUpdateRequestDTO dto) {
+        Rutina rutina = getRutinaOrThrow(id);
+
+        if (dto.getName() != null){
+            rutina.setName(dto.getName());
+        }
+
+        if (dto.getDescription() != null) {
+            rutina.setDescription(dto.getDescription());
+        }
+
+        if (dto.getIsPublic() != null) {
+            rutina.setIsPublic(dto.getIsPublic());
+        }
+
+        if (dto.getDifficulty() != null) {
+            rutina.setDifficulty(dto.getDifficulty());
+        }
+
+        if ((dto.getCategoryId() != null) && (!dto.getCategoryId().equals(rutina.getCategory().getId()))) {
+            rutina.setCategory(categoriaService.getCategoriaOrThrow(dto.getCategoryId(), true));
+        }
+
+        if (dto.getSessions() != null && !dto.getSessions().isEmpty()) {
+            rutina.getSessions().clear();
+
+            dto.getSessions().forEach(sesionDTO -> {
+                Sesion sesion = sesionMapper.toEntity(sesionDTO);
+                sesion.setRoutine(rutina);
+                sesion.setCategory(categoriaService.getCategoriaOrThrow(sesionDTO.getCategoryId(), true));
+
+                // A cada SesionEjercicio de la sesion le seteo la sesión y el ejercicio (validando este último)
+                sesion.getSessionExercises().forEach(sesionEjercicio -> {
+                    sesionEjercicio.setSession(sesion);
+
+                    Long ejercicioId = sesionEjercicio.getExercise().getId();
+                    sesionEjercicio.setExercise(ejercicioService.getEjercicioOrThrow(ejercicioId, true));
+                });
+
+                rutina.getSessions().add(sesion);
+            });
+        }
+
+        return rutinaMapper.toResponseDTO(rutina);
+    }
+
+    @Transactional
+    public RutinaResponseDTO addSessionToRoutine(Long id, SesionRequestDTO sesionRequestDTO) {
+        Rutina rutina = getRutinaOrThrow(id);
+
+        Sesion sesion = sesionMapper.toEntity(sesionRequestDTO);
+
+        sesion.setCategory(categoriaService.getCategoriaOrThrow(sesionRequestDTO.getCategoryId(), true));
+
+        // A cada SesionEjercicio de la sesion le seteo la sesión y el ejercicio (validando este último)
+        sesion.getSessionExercises().forEach(sesionEjercicio -> {
+            sesionEjercicio.setSession(sesion);
+
+            Long ejercicioId = sesionEjercicio.getExercise().getId();
+            sesionEjercicio.setExercise(ejercicioService.getEjercicioOrThrow(ejercicioId, true));
+        });
+
+        rutina.getSessions().add(sesion);
+        return rutinaMapper.toResponseDTO(rutina);
     }
 
     // Métodos auxiliares

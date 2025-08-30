@@ -6,12 +6,13 @@ import org.alvarub.workouttrackerproject.mapper.EjercicioMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioSimpleDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Ejercicio;
 import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -82,6 +83,51 @@ public class EjercicioService {
 
         ejercicio.setActive(false);
         return ejercicioMapper.toSimpleDTO(ejercicioRepository.save(ejercicio));
+    }
+
+    @Transactional
+    public EjercicioResponseDTO update(Long id, EjercicioUpdateRequestDTO dto) {
+        Ejercicio ejercicio = getEjercicioOrThrow(id, false);
+
+        if (dto.getName() != null) {
+            ejercicio.setName(dto.getName());
+        }
+
+        if (dto.getDescription() != null) {
+            ejercicio.setDescription(dto.getDescription());
+        }
+
+        if (dto.getActive() != null) {
+            ejercicio.setActive(dto.getActive());
+        }
+
+        if (dto.getTips() != null) {
+            ejercicio.setTips(dto.getTips());
+        }
+
+        if (dto.getInstructions() != null) {
+            ejercicio.setInstructions(new LinkedHashMap<>(dto.getInstructions()));
+        }
+
+        if (dto.getSampleVideos() != null) {
+            ejercicio.setSampleVideos(new HashSet<>(dto.getSampleVideos()));
+        }
+
+        if (dto.getEquipmentIds() != null) {
+            ejercicio.getEquipment().clear();
+            dto.getEquipmentIds().forEach(equipmentId ->
+                    ejercicio.getEquipment().add(equipamientoService.getEquipamientoOrThrow(equipmentId, true))
+            );
+        }
+
+        if (dto.getTargetMuscleIds() != null) {
+            ejercicio.getTargetMuscles().clear();
+            dto.getTargetMuscleIds().forEach(targetMuscleId ->
+                    ejercicio.getTargetMuscles().add(musculoService.getMusculoOrThrow(targetMuscleId, true))
+            );
+        }
+
+        return ejercicioMapper.toResponseDTO(ejercicioRepository.save(ejercicio));
     }
 
     // Métodos auxiliares
