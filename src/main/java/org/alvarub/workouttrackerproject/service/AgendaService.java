@@ -50,19 +50,11 @@ public class AgendaService {
     }
 
     @Transactional(readOnly = true)
-    public List<AgendaResponseDTO> findAll() {
-        return agendaRepository.findAll()
-                .stream()
-                .map(agendaMapper::toResponseDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<AgendaRutinaDTO> findAllSimple() {
-        return agendaRepository.findAll()
+    public List<AgendaRutinaDTO> findAllByUserId(Long userId) {
+        return agendaRepository.findByUserId(userId)
                 .stream()
                 .map(agendaMapper::toRutinaDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
@@ -91,15 +83,19 @@ public class AgendaService {
         if (dto.getStartDate() != null) {
             agenda.setStartDate(dto.getStartDate());
         }
+
         if (dto.getReminderMinutes() != null) {
             agenda.setReminderMinutes(dto.getReminderMinutes());
         }
+
         if (dto.getComment() != null) {
             agenda.setComment(dto.getComment());
         }
+
         if (dto.getUserId() != null) {
             agenda.setUser(usuarioService.getUsuarioOrThrow(dto.getUserId(), true));
         }
+
         if (dto.getRoutineId() != null) {
             agenda.setRoutine(rutinaService.getRutinaOrThrow(dto.getRoutineId()));
         }

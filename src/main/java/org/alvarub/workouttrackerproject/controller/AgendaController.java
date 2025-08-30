@@ -2,14 +2,13 @@ package org.alvarub.workouttrackerproject.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaCompleteRequestDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaRequestDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaResponseDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaUpdateRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.agenda.*;
 import org.alvarub.workouttrackerproject.service.AgendaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/schedules")
@@ -24,14 +23,6 @@ public class AgendaController {
                 .body(agendaService.save(dto));
     }
 
-    @GetMapping
-    public ResponseEntity<Object> getAllAgendas(@RequestParam(defaultValue = "false") Boolean includeUser) {
-        Object response = includeUser
-                ? agendaService.findAll()
-                : agendaService.findAllSimple();
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<Object> getAgendaById(@PathVariable Long id,
                                                 @RequestParam(defaultValue = "false") Boolean includeUser) {
@@ -40,6 +31,11 @@ public class AgendaController {
                 : agendaService.findByIdSimple(id);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<AgendaRutinaDTO>> getAllAgendasByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(agendaService.findAllByUserId(userId));
     }
 
     @PatchMapping("/{id}/complete")

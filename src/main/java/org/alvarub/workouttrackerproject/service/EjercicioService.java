@@ -92,27 +92,34 @@ public class EjercicioService {
         if (dto.getName() != null) {
             ejercicio.setName(dto.getName());
         }
+
         if (dto.getDescription() != null) {
             ejercicio.setDescription(dto.getDescription());
         }
+
         if (dto.getActive() != null) {
             ejercicio.setActive(dto.getActive());
         }
+
         if (dto.getTips() != null) {
             ejercicio.setTips(dto.getTips());
         }
+
         if (dto.getInstructions() != null) {
             ejercicio.setInstructions(new LinkedHashMap<>(dto.getInstructions()));
         }
+
         if (dto.getSampleVideos() != null) {
             ejercicio.setSampleVideos(new HashSet<>(dto.getSampleVideos()));
         }
+
         if (dto.getEquipmentIds() != null) {
             ejercicio.getEquipment().clear();
             dto.getEquipmentIds().forEach(equipmentId ->
                     ejercicio.getEquipment().add(equipamientoService.getEquipamientoOrThrow(equipmentId, true))
             );
         }
+
         if (dto.getTargetMuscleIds() != null) {
             ejercicio.getTargetMuscles().clear();
             dto.getTargetMuscleIds().forEach(targetMuscleId ->
