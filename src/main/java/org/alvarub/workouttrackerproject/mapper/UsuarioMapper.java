@@ -8,8 +8,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = {RolMapper.class, RutinaMapper.class, EjercicioMapper.class, AgendaMapper.class, ComentarioMapper.class})
 public interface UsuarioMapper {
 
-    Usuario toEntity(UsuarioRequestDTO dto);
-
     @Mapping(target = "createdRoutines", ignore = true)
     @Mapping(target = "likedRoutines", ignore = true)
     @Mapping(target = "savedRoutines", ignore = true)

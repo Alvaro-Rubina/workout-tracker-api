@@ -1,12 +1,11 @@
 package org.alvarub.workouttrackerproject.controller;
 
 import com.auth0.exception.Auth0Exception;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
 import org.alvarub.workouttrackerproject.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +22,9 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
+    @Value("${auth0.audience}")
+    private String audience;
+
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UsuarioResponseDTO> getCurrentUsuario(@AuthenticationPrincipal Jwt jwt) {
@@ -30,10 +32,11 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> createUsuario(@AuthenticationPrincipal Jwt jwt,
-                                                            @Valid @RequestBody UsuarioRequestDTO dto) throws Auth0Exception {
+    public ResponseEntity<UsuarioResponseDTO> createUsuario(@AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
+        String auth0UserId = jwt.getSubject();
+        String auth0UserEmail = jwt.getClaim(audience + "/email");
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(usuarioService.saveUser(dto, jwt));
+                .body(usuarioService.saveUser(auth0UserId, auth0UserEmail));
     }
 
     @GetMapping("/{id}")
@@ -60,10 +63,11 @@ public class UsuarioController {
     // ENDPOINTS ADMIN
     @PostMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')") // Solo ADMIN puede crear otro ADMIN
-    public ResponseEntity<UsuarioResponseDTO> createAdmin(@AuthenticationPrincipal Jwt jwt,
-                                                          @Valid @RequestBody UsuarioRequestDTO dto) throws Auth0Exception {
-        UsuarioResponseDTO saved = usuarioService.saveAdmin(dto, jwt);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    public ResponseEntity<UsuarioResponseDTO> createAdmin(@AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
+        String auth0UserId = jwt.getSubject();
+        String auth0UserEmail = jwt.getClaim(audience + "/email");
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(usuarioService.saveAdmin(auth0UserId, auth0UserEmail));
     }
 
     @PatchMapping("/{id}/toggle-active")

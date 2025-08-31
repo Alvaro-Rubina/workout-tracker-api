@@ -2,19 +2,17 @@ package org.alvarub.workouttrackerproject.service;
 
 import com.auth0.exception.Auth0Exception;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.alvarub.workouttrackerproject.exception.ExistingResourceException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.exception.UserRegistrationException;
 import org.alvarub.workouttrackerproject.mapper.UsuarioMapper;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Rol;
 import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
 import org.alvarub.workouttrackerproject.persistence.repository.UsuarioRepository;
 import org.alvarub.workouttrackerproject.service.auth0.UsuarioServiceAuth0;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -25,11 +23,10 @@ import java.util.List;
 import static org.alvarub.workouttrackerproject.utils.Constants.ADMIN_ROL_NAME;
 import static org.alvarub.workouttrackerproject.utils.Constants.USER_ROL_NAME;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
-
-    private static final Logger log = LoggerFactory.getLogger(UsuarioService.class);
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioServiceAuth0 usuarioServiceAuth0;
@@ -37,15 +34,15 @@ public class UsuarioService {
     private final RolService rolService;
 
     @Transactional
-    public UsuarioResponseDTO saveUser(UsuarioRequestDTO dto, Jwt jwt) throws Auth0Exception {
+    public UsuarioResponseDTO saveUser(String auth0UserId, String auth0UserEmail) throws Auth0Exception {
         Rol rol = rolService.getRolByNameOrThrow(USER_ROL_NAME, true);
-        return save(dto, jwt, rol);
+        return save(auth0UserId, auth0UserEmail, rol);
     }
 
     @Transactional
-    public UsuarioResponseDTO saveAdmin(UsuarioRequestDTO dto, Jwt jwt) throws Auth0Exception {
+    public UsuarioResponseDTO saveAdmin(String auth0UserId, String auth0UserEmail) throws Auth0Exception {
         Rol rol = rolService.getRolByNameOrThrow(ADMIN_ROL_NAME, true);
-        return save(dto, jwt, rol);
+        return save(auth0UserId, auth0UserEmail, rol);
     }
 
     @Transactional(readOnly = true)
@@ -144,20 +141,35 @@ public class UsuarioService {
         return usuario;
     }
 
+    public Usuario getUsuarioByAuth0IdOrThrow(String auth0UserId, boolean verifyActive) {
+        Usuario usuario = usuarioRepository.findByAuth0Id(auth0UserId)
+                .orElseThrow(() -> new NotFoundException("Usuario con el auth0Id proporcionado no encontrado"));
+
+        if (verifyActive && !usuario.getActive()) {
+            throw new NotFoundException("Usuario con el auth0Id proporcionado inactivo");
+        }
+
+        return usuario;
+    }
+
     /**
      * Método privado para evitar duplicación entre saveUser y saveAdmin
      */
-    private UsuarioResponseDTO save(UsuarioRequestDTO dto, Jwt jwt, Rol rol) throws Auth0Exception {
-        Usuario usuario = usuarioMapper.toEntity(dto);
-        usuario.setAuth0Id(jwt.getSubject());
-        usuario.setRole(rol);
+    private UsuarioResponseDTO save(String auth0UserId, String auth0UserEmail, Rol rol) throws Auth0Exception {
+        // TODO: POR AHORA EL NOMBRE QUEDA PENDIENTE, HAY QUE VER SI SE PUEDE SETEAR EN AUTH0
+        Usuario usuario = Usuario.builder()
+                .name(auth0UserEmail)
+                .auth0Id(auth0UserId)
+                .email(auth0UserEmail)
+                .role(rol)
+                .build();
 
         log.info("Creando usuario {} con rol {}", usuario.getEmail(), rol.getName());
 
         try {
             // Seteo el rol en Auth0 antes de guardar en BD
             log.info("Asignando rol en Auth0 al usuario {}", usuario.getAuth0Id());
-            usuarioServiceAuth0.setRole(jwt.getSubject(), rol.getAuth0RoleId());
+            usuarioServiceAuth0.setRole(auth0UserId, rol.getAuth0RoleId());
 
             log.info("Guardando usuario en base de datos {}", usuario.getEmail());
             usuarioRepository.save(usuario);
@@ -165,12 +177,12 @@ public class UsuarioService {
 
         } catch (DataAccessException e) {
             log.error("Error guardando usuario en BD, eliminando usuario en Auth0 {}", usuario.getAuth0Id(), e);
-            usuarioServiceAuth0.deleteUser(jwt.getSubject());
+            usuarioServiceAuth0.deleteUser(auth0UserId);
             throw new UserRegistrationException("Error guardando usuario en la base de datos", e);
 
         } catch (Auth0Exception e) {
             log.error("Error asignando rol en Auth0, eliminando usuario {}", usuario.getAuth0Id(), e);
-            usuarioServiceAuth0.deleteUser(jwt.getSubject());
+            usuarioServiceAuth0.deleteUser(auth0UserId);
             throw new UserRegistrationException("Error asignando rol en Auth0", e);
         }
 

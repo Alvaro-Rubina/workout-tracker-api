@@ -5,17 +5,17 @@ import com.auth0.exception.Auth0Exception;
 import com.auth0.json.mgmt.users.User;
 import com.auth0.net.Request;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UsuarioServiceAuth0 {
-
-    private static final Logger log = LoggerFactory.getLogger(UsuarioServiceAuth0.class);
 
     private final ManagementAPI managementAPI;
 
