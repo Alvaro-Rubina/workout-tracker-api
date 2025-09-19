@@ -1,5 +1,6 @@
 package org.alvarub.workouttrackerproject.persistence.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -24,9 +25,6 @@ public class Usuario extends Auditable {
 
     @Column(name = "email", unique = true ,nullable = false)
     private String email;
-
-    @Column(name = "body_weight")
-    private Long bodyWeight;
 
     @Column(name = "completed_workouts")
     @Builder.Default
@@ -71,6 +69,9 @@ public class Usuario extends Auditable {
 
     @Column(name = "completed_routines")
     private Long completedRoutines;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Peso> pesosHistoricos = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(name = "user_favorite_exercises",

@@ -5,7 +5,7 @@ import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {RolMapper.class, RutinaMapper.class, EjercicioMapper.class, AgendaMapper.class, ComentarioMapper.class})
+@Mapper(componentModel = "spring", uses = {RolMapper.class, RutinaMapper.class, EjercicioMapper.class, AgendaMapper.class, ComentarioMapper.class, PesoMapper.class })
 public interface UsuarioMapper {
 
     @Mapping(target = "createdRoutines", ignore = true)
