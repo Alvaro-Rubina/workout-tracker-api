@@ -74,7 +74,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponseDTO> toggleUsuarioActiveStatus(@PathVariable Long id,
                                                                         @AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
-        return ResponseEntity.ok(usuarioService.toggleActive(id, jwt));
+        return ResponseEntity.ok(usuarioService.toggleActive(id));
     }
 
 }

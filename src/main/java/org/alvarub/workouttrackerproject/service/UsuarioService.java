@@ -48,7 +48,11 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public UsuarioResponseDTO findById(Long id) {
         Usuario usuario = getUsuarioOrThrow(id, false);
-        return usuarioMapper.toResponseDTO(usuario);
+
+        UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
+        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+
+        return response;
     }
 
     @Transactional
@@ -58,7 +62,11 @@ public class UsuarioService {
         String name = jwt.getClaimAsString("name");
 
         return usuarioRepository.findByAuth0Id(auth0Id)
-                .map(usuarioMapper::toResponseDTO)
+                .map(usuario -> {
+                    UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
+                    response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+                    return response;
+                })
                 .orElseGet(() -> {
                     // Verificar si el email ya existe
                     if (usuarioRepository.existsByEmail(email)) {
@@ -82,25 +90,37 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public UsuarioStatsDTO findStatsById(Long id) {
         Usuario usuario = getUsuarioOrThrow(id, false);
-        return usuarioMapper.toStatsDTO(usuario);
+
+        UsuarioStatsDTO response = usuarioMapper.toStatsDTO(usuario);
+        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+
+        return response;
     }
 
     @Transactional(readOnly = true)
     public List<UsuarioResponseDTO> findAll() {
         return usuarioRepository.findAll().stream()
-                .map(usuarioMapper::toResponseDTO)
+                .map(usuario -> {
+                    UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
+                    response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+                    return response;
+                })
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<UsuarioStatsDTO> findAllStats() {
         return usuarioRepository.findAll().stream()
-                .map(usuarioMapper::toStatsDTO)
+                .map(usuario -> {
+                    UsuarioStatsDTO response = usuarioMapper.toStatsDTO(usuario);
+                    response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+                    return response;
+                })
                 .toList();
     }
 
     @Transactional
-    public UsuarioResponseDTO toggleActive(Long id, Jwt jwt) throws Auth0Exception {
+    public UsuarioResponseDTO toggleActive(Long id) throws Auth0Exception {
         Usuario usuario = getUsuarioOrThrow(id, false);
 
         // Desactivar usuario: pasar rutinas a privadas
@@ -152,7 +172,7 @@ public class UsuarioService {
         return usuario;
     }
 
-    /**
+    /*
      * Método privado para evitar duplicación entre saveUser y saveAdmin
      */
     private UsuarioResponseDTO save(String auth0UserId, String auth0UserEmail, Rol rol) throws Auth0Exception {

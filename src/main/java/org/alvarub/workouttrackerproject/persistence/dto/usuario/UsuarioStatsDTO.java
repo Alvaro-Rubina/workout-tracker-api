@@ -21,7 +21,7 @@ public class UsuarioStatsDTO implements Serializable {
 
     private String email;
 
-    private Long bodyWeight;
+    private Double bodyWeight;
 
     private Long completedWorkouts;
 

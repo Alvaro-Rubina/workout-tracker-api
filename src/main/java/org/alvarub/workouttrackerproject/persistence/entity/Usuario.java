@@ -1,6 +1,5 @@
 package org.alvarub.workouttrackerproject.persistence.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -71,7 +70,7 @@ public class Usuario extends Auditable {
     private Long completedRoutines;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Peso> pesosHistoricos = new ArrayList<>();
+    private List<Peso> historialPeso = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(name = "user_favorite_exercises",

@@ -24,7 +24,7 @@ public class UsuarioResponseDTO {
 
     private LocalDateTime updatedAt;
 
-    private Long bodyWeight;
+    private Double bodyWeight;
 
     private Long completedWorkouts;
 
