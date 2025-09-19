@@ -23,8 +23,8 @@ public class PesoService {
     private final UsuarioService usuarioService;
 
     @Transactional
-    public PesoResponseDTO save(Long userId, PesoRequestDTO dto) {
-        Usuario usuario = usuarioService.getUsuarioOrThrow(userId, true);
+    public PesoResponseDTO save(String auth0UserId, PesoRequestDTO dto) {
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
         Peso peso = pesoMapper.toEntity(dto);
 
         usuario.getHistorialPeso().add(peso);
@@ -34,8 +34,8 @@ public class PesoService {
     }
 
     @Transactional
-    public PesoResponseDTO update(Long userId, Long id, PesoRequestDTO dto) {
-        Usuario usuario = usuarioService.getUsuarioOrThrow(userId, true);
+    public PesoResponseDTO update(String auth0UserId, Long id, PesoRequestDTO dto) {
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
         Peso peso = getPesoOrThrow(id);
 
         Peso ultimoPeso = usuario.getHistorialPeso()
