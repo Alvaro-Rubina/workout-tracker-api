@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.rol.RolResponseDTO;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Data
 @Builder
@@ -25,7 +24,7 @@ public class UsuarioResponseDTO {
 
     private LocalDateTime updatedAt;
 
-    private Long bodyWeight;
+    private Double bodyWeight;
 
     private Long completedWorkouts;
 
@@ -33,6 +32,6 @@ public class UsuarioResponseDTO {
 
     private LocalDateTime lastAccess;
 
-    private Set<RolResponseDTO> roles;
+    private RolResponseDTO role;
 
 }

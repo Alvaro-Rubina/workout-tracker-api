@@ -1,6 +1,7 @@
 package org.alvarub.workouttrackerproject.service;
 
 import lombok.RequiredArgsConstructor;
+import org.alvarub.workouttrackerproject.exception.ForbiddenOperationException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.AgendaMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaCompleteRequestDTO;
@@ -9,13 +10,14 @@ import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaResponseDT
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaRutinaDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Agenda;
+import org.alvarub.workouttrackerproject.persistence.entity.Rutina;
+import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
 import org.alvarub.workouttrackerproject.persistence.repository.AgendaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,13 +29,21 @@ public class AgendaService {
     private final RutinaService rutinaService;
 
     @Transactional
-    public AgendaResponseDTO save(AgendaRequestDTO dto) {
+    public AgendaResponseDTO save(AgendaRequestDTO dto, String auth0UserId) {
         Agenda agenda = agendaMapper.toEntity(dto);
 
-        agenda.setUser(usuarioService.getUsuarioOrThrow(dto.getUserId(), true));
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+        Rutina rutina = rutinaService.getRutinaOrThrow(dto.getRoutineId());
 
-        agenda.setRoutine(rutinaService.getRutinaOrThrow(dto.getRoutineId()));
+        if (!usuario.getCreatedRoutines().contains(rutina)) {
+            throw new ForbiddenOperationException("Usuario sin permiso para agendar una rutina que no ha creado");
 
+        } else if (!rutina.getIsPublic()) {
+            throw new ForbiddenOperationException("Usuario sin permiso para agendar una rutina ajena que no es pública.");
+        }
+
+        agenda.setUser(usuario);
+        agenda.setRoutine(rutina);
         return agendaMapper.toResponseDTO(agendaRepository.save(agenda));
     }
 

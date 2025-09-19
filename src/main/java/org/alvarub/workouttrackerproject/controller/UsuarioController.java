@@ -1,13 +1,16 @@
 package org.alvarub.workouttrackerproject.controller;
 
-import jakarta.validation.Valid;
+import com.auth0.exception.Auth0Exception;
 import lombok.RequiredArgsConstructor;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
 import org.alvarub.workouttrackerproject.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,10 +22,21 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
+    @Value("${auth0.audience}")
+    private String audience;
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UsuarioResponseDTO> getCurrentUsuario(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(usuarioService.getUsuarioFromToken(jwt));
+    }
+
     @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> createUsuario(@Valid @RequestBody UsuarioRequestDTO dto) {
+    public ResponseEntity<UsuarioResponseDTO> createUsuario(@AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
+        String auth0UserId = jwt.getSubject();
+        String auth0UserEmail = jwt.getClaim(audience + "/email");
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(usuarioService.save(dto));
+                .body(usuarioService.saveUser(auth0UserId, auth0UserEmail));
     }
 
     @GetMapping("/{id}")
@@ -45,8 +59,22 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.findAllStats());
     }
 
+
+    // ENDPOINTS ADMIN
+    @PostMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')") // Solo ADMIN puede crear otro ADMIN
+    public ResponseEntity<UsuarioResponseDTO> createAdmin(@AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
+        String auth0UserId = jwt.getSubject();
+        String auth0UserEmail = jwt.getClaim(audience + "/email");
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(usuarioService.saveAdmin(auth0UserId, auth0UserEmail));
+    }
+
     @PatchMapping("/{id}/toggle-active")
-    public ResponseEntity<UsuarioResponseDTO> toggleUsuarioActiveStatus(@PathVariable Long id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UsuarioResponseDTO> toggleUsuarioActiveStatus(@PathVariable Long id,
+                                                                        @AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
         return ResponseEntity.ok(usuarioService.toggleActive(id));
     }
+
 }

@@ -6,6 +6,8 @@ import org.alvarub.workouttrackerproject.persistence.dto.agenda.*;
 import org.alvarub.workouttrackerproject.service.AgendaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,9 +20,11 @@ public class AgendaController {
     private final AgendaService agendaService;
 
     @PostMapping
-    public ResponseEntity<AgendaResponseDTO> createAgenda(@Valid @RequestBody AgendaRequestDTO dto) {
+    public ResponseEntity<AgendaResponseDTO> createAgenda(@AuthenticationPrincipal Jwt jwt,
+                                                          @Valid @RequestBody AgendaRequestDTO dto) {
+        String auth0UserId = jwt.getSubject();
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(agendaService.save(dto));
+                .body(agendaService.save(dto, auth0UserId));
     }
 
     @GetMapping("/{id}")

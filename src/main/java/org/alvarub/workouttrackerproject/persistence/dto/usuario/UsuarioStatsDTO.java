@@ -8,7 +8,6 @@ import org.alvarub.workouttrackerproject.persistence.dto.rol.RolResponseDTO;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Data
 @Builder
@@ -22,7 +21,7 @@ public class UsuarioStatsDTO implements Serializable {
 
     private String email;
 
-    private Long bodyWeight;
+    private Double bodyWeight;
 
     private Long completedWorkouts;
 
@@ -46,5 +45,5 @@ public class UsuarioStatsDTO implements Serializable {
 
     // Tema agendas y comentarios no se si sea relevante poner
 
-    private Set<RolResponseDTO> roles;
+    private RolResponseDTO role;
 }

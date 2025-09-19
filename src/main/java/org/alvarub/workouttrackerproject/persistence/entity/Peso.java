@@ -20,7 +20,7 @@ public class Peso extends Auditable {
     private Long id;
 
     @Column(name = "body_weight")
-    private Long bodyWeight;
+    private Double bodyWeight;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
