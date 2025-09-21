@@ -6,18 +6,54 @@ import com.auth0.json.mgmt.users.User;
 import com.auth0.net.Request;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.alvarub.workouttrackerproject.exception.UserRegistrationException;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.Auth0SignupRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.Auth0SignupResponseDTO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UsuarioServiceAuth0 {
 
+    @Value("${auth0.domain}")
+    private String auth0Domain;
+
+    @Value("${auth0.client.id}")
+    private String clientId;
+
+    @Value("${auth0.connection}")
+    private String connection; /*Username-Password-Authentication*/
+
     private final ManagementAPI managementAPI;
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    public Auth0SignupResponseDTO signup(Auth0SignupRequestDTO request) {
+        String url = "https://" + auth0Domain + "/dbconnections/signup";
+
+        Map<String, String> body = new HashMap<>();
+        body.put("client_id", clientId);
+        body.put("email", request.getEmail());
+        body.put("password", request.getPassword());
+        body.put("connection", connection);
+        if (request.getName() != null) {
+            body.put("name", request.getName());
+        }
+
+        try {
+            log.info("Registrando usuario {} en Auth0 vía Authentication API", request.getEmail());
+            return restTemplate.postForObject(url, body, Auth0SignupResponseDTO.class);
+        } catch (Exception e) {
+            log.error("Error registrando usuario {} en Auth0", request.getEmail(), e);
+            throw new UserRegistrationException(e.getMessage());
+        }
+    }
 
     /**
      * Activa o desactiva un usuario en Auth0
