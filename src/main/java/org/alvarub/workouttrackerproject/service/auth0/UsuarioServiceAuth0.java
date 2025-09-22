@@ -29,11 +29,12 @@ public class UsuarioServiceAuth0 {
     private String clientId;
 
     @Value("${auth0.connection}")
-    private String connection; /*Username-Password-Authentication*/
+        private String connection; /*Username-Password-Authentication*/
 
     private final ManagementAPI managementAPI;
     private final RestTemplate restTemplate = new RestTemplate();
 
+    // TODO: excepciones con mensajes mas claros
     public Auth0SignupResponseDTO signup(Auth0SignupRequestDTO request) {
         String url = "https://" + auth0Domain + "/dbconnections/signup";
 

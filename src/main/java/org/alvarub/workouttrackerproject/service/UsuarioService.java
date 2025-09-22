@@ -9,6 +9,8 @@ import org.alvarub.workouttrackerproject.exception.UserRegistrationException;
 import org.alvarub.workouttrackerproject.mapper.UsuarioMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.Auth0SignupResponseDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.Auth0SignupRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Rol;
 import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
 import org.alvarub.workouttrackerproject.persistence.repository.UsuarioRepository;
@@ -38,6 +40,33 @@ public class UsuarioService {
         Rol rol = rolService.getRolByNameOrThrow(USER_ROL_NAME, true);
         return save(auth0UserId, auth0UserEmail, rol);
     }
+
+    @Transactional
+    public UsuarioResponseDTO registerManual(Auth0SignupRequestDTO signupRequest) {
+        // Creo el usuario en Auth0
+        Auth0SignupResponseDTO auth0User = usuarioServiceAuth0.signup(signupRequest);
+
+        // Verifico si ya existe en BD
+        if (usuarioRepository.existsByEmail(auth0User.getEmail())) {
+            throw new ExistingResourceException("El email ya está registrado en la base de datos");
+        }
+
+        Rol rol = rolService.getRolByNameOrThrow(USER_ROL_NAME, true);
+
+        Usuario usuario = Usuario.builder()
+                .auth0Id(auth0User.getAuth0Id())
+                .email(auth0User.getEmail())
+                .name(signupRequest.getName() != null ? signupRequest.getName() : auth0User.getEmail())
+                .role(rol)
+                .active(true)
+                .build();
+
+        log.info("Guardando usuario manual {} en BD", usuario.getEmail());
+        usuarioRepository.save(usuario);
+
+        return usuarioMapper.toResponseDTO(usuario);
+    }
+
 
     @Transactional
     public UsuarioResponseDTO saveAdmin(String auth0UserId, String auth0UserEmail) throws Auth0Exception {

@@ -4,6 +4,7 @@ import com.auth0.exception.Auth0Exception;
 import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.Auth0SignupRequestDTO;
 import org.alvarub.workouttrackerproject.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,12 @@ public class UsuarioController {
         String auth0UserEmail = jwt.getClaim(audience + "/email");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(usuarioService.saveUser(auth0UserId, auth0UserEmail));
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<UsuarioResponseDTO> signup(@RequestBody Auth0SignupRequestDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(usuarioService.registerManual(request));
     }
 
     @GetMapping("/{id}")
