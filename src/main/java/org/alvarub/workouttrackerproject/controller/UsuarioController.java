@@ -32,16 +32,8 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.getUsuarioFromToken(jwt));
     }
 
-    @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> createUsuario(@AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
-        String auth0UserId = jwt.getSubject();
-        String auth0UserEmail = jwt.getClaim(audience + "/email");
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(usuarioService.saveUser(auth0UserId, auth0UserEmail));
-    }
-
     @PostMapping("/signup")
-    public ResponseEntity<UsuarioResponseDTO> signup(@RequestBody Auth0SignupRequestDTO request) {
+    public ResponseEntity<UsuarioResponseDTO> signup(@RequestBody Auth0SignupRequestDTO request) throws Auth0Exception {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(usuarioService.registerManual(request));
     }
@@ -68,13 +60,11 @@ public class UsuarioController {
 
 
     // ENDPOINTS ADMIN
-    @PostMapping("/admin")
+    @PostMapping("/signup/admin")
     @PreAuthorize("hasRole('ADMIN')") // Solo ADMIN puede crear otro ADMIN
-    public ResponseEntity<UsuarioResponseDTO> createAdmin(@AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
-        String auth0UserId = jwt.getSubject();
-        String auth0UserEmail = jwt.getClaim(audience + "/email");
+    public ResponseEntity<UsuarioResponseDTO> signupAdmin(@RequestBody Auth0SignupRequestDTO request) throws Auth0Exception {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(usuarioService.saveAdmin(auth0UserId, auth0UserEmail));
+                .body(usuarioService.registerManual(request));
     }
 
     @PatchMapping("/{id}/toggle-active")

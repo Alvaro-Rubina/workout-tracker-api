@@ -10,6 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Auth0SignupResponseDTO {
-    private String auth0Id;
+
+    private String userId;
+
     private String email;
+
+    private String name;
 }
