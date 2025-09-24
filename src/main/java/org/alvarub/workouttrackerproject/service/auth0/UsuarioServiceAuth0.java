@@ -6,8 +6,8 @@ import com.auth0.json.mgmt.users.User;
 import com.auth0.net.Request;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.Auth0SignupRequestDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.Auth0SignupResponseDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,7 @@ public class UsuarioServiceAuth0 {
     /**
      * Crea un usuario en Auth0 usando Management API
      */
-    public Auth0SignupResponseDTO signup(Auth0SignupRequestDTO request) throws Auth0Exception {
+    public SignupResponseDTO signup(SignupRequestDTO request) throws Auth0Exception {
         User user = new User(connection);
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword().toCharArray());
@@ -38,7 +38,7 @@ public class UsuarioServiceAuth0 {
             log.info("Creando usuario {} en Auth0 vía Management API", request.getEmail());
             User createdUser = managementAPI.users().create(user).execute();
 
-            return Auth0SignupResponseDTO.builder()
+            return SignupResponseDTO.builder()
                     .userId(createdUser.getId())
                     .email(createdUser.getEmail())
                     .name(createdUser.getName())

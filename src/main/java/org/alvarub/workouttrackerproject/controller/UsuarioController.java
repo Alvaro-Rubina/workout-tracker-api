@@ -4,9 +4,8 @@ import com.auth0.exception.Auth0Exception;
 import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.Auth0SignupRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
 import org.alvarub.workouttrackerproject.service.UsuarioService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,9 +22,6 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
-    @Value("${auth0.audience}")
-    private String audience;
-
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UsuarioResponseDTO> getCurrentUsuario(@AuthenticationPrincipal Jwt jwt) {
@@ -33,9 +29,9 @@ public class UsuarioController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UsuarioResponseDTO> signup(@RequestBody Auth0SignupRequestDTO request) throws Auth0Exception {
+    public ResponseEntity<UsuarioResponseDTO> signup(@RequestBody SignupRequestDTO request) throws Auth0Exception {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(usuarioService.registerManual(request));
+                .body(usuarioService.signup(request));
     }
 
     @GetMapping("/{id}")
@@ -62,9 +58,9 @@ public class UsuarioController {
     // ENDPOINTS ADMIN
     @PostMapping("/signup/admin")
     @PreAuthorize("hasRole('ADMIN')") // Solo ADMIN puede crear otro ADMIN
-    public ResponseEntity<UsuarioResponseDTO> signupAdmin(@RequestBody Auth0SignupRequestDTO request) throws Auth0Exception {
+    public ResponseEntity<UsuarioResponseDTO> signupAdmin(@RequestBody SignupRequestDTO request) throws Auth0Exception {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(usuarioService.registerManual(request));
+                .body(usuarioService.signupAdmin(request));
     }
 
     @PatchMapping("/{id}/toggle-active")

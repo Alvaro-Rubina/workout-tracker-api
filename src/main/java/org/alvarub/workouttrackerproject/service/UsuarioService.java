@@ -9,8 +9,8 @@ import org.alvarub.workouttrackerproject.exception.UserRegistrationException;
 import org.alvarub.workouttrackerproject.mapper.UsuarioMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.Auth0SignupResponseDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.Auth0SignupRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupResponseDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Rol;
 import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
 import org.alvarub.workouttrackerproject.persistence.repository.UsuarioRepository;
@@ -36,13 +36,13 @@ public class UsuarioService {
     private final RolService rolService;
 
     @Transactional
-    public UsuarioResponseDTO registerManual(Auth0SignupRequestDTO signupRequest) throws Auth0Exception {
+    public UsuarioResponseDTO signup(SignupRequestDTO signupRequest) throws Auth0Exception {
         Rol rol = rolService.getRolByNameOrThrow(USER_ROL_NAME, true);
         return save(signupRequest, rol);
     }
 
     @Transactional
-    public UsuarioResponseDTO registerManualAdmin(Auth0SignupRequestDTO signupRequest) throws Auth0Exception {
+    public UsuarioResponseDTO signupAdmin(SignupRequestDTO signupRequest) throws Auth0Exception {
         Rol rol = rolService.getRolByNameOrThrow(ADMIN_ROL_NAME, true);
         return save(signupRequest, rol);
     }
@@ -52,7 +52,10 @@ public class UsuarioService {
         Usuario usuario = getUsuarioOrThrow(id, false);
 
         UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
-        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+
+        if (!usuario.getHistorialPeso().isEmpty()) {
+            response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+        }
 
         return response;
     }
@@ -66,16 +69,20 @@ public class UsuarioService {
         return usuarioRepository.findByAuth0Id(auth0Id)
                 .map(usuario -> {
                     UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
-                    response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+
+                    if (!usuario.getHistorialPeso().isEmpty()) {
+                        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+                    }
+
                     return response;
                 })
                 .orElseGet(() -> {
-                    // Verificar si el email ya existe
+                    // Verifico si el email ya existe
                     if (usuarioRepository.existsByEmail(email)) {
                         throw new ExistingResourceException("El email ya está registrado con otro método de autenticación");
                     }
 
-                    // Crear nuevo usuario
+                    // Creo nuevo usuario
                     Usuario newUser = Usuario.builder()
                             .auth0Id(auth0Id)
                             .email(email)
@@ -104,7 +111,11 @@ public class UsuarioService {
         return usuarioRepository.findAll().stream()
                 .map(usuario -> {
                     UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
-                    response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+
+                    if (!usuario.getHistorialPeso().isEmpty()) {
+                        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+                    }
+
                     return response;
                 })
                 .toList();
@@ -115,7 +126,11 @@ public class UsuarioService {
         return usuarioRepository.findAll().stream()
                 .map(usuario -> {
                     UsuarioStatsDTO response = usuarioMapper.toStatsDTO(usuario);
-                    response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+
+                    if (!usuario.getHistorialPeso().isEmpty()) {
+                        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+                    }
+
                     return response;
                 })
                 .toList();
@@ -177,16 +192,13 @@ public class UsuarioService {
     /*
      * Método privado para evitar duplicación entre saveUser y saveAdmin
      */
-    private UsuarioResponseDTO save(Auth0SignupRequestDTO dto, Rol rol) throws Auth0Exception {
+    private UsuarioResponseDTO save(SignupRequestDTO dto, Rol rol) throws Auth0Exception {
 
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
             throw new ExistingResourceException("El email ya está registrado en la base de datos");
         }
 
-        // TODO: Verificar tambien si está en auth0, si es que no está registrarlo en auth0 pero no bd
-
-        // Crear usuario en Auth0
-        Auth0SignupResponseDTO auth0User = usuarioServiceAuth0.signup(dto);
+        SignupResponseDTO auth0User = usuarioServiceAuth0.signup(dto);
 
         Usuario usuario = Usuario.builder()
                 .auth0Id(auth0User.getUserId())
