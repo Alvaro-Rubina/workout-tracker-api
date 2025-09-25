@@ -6,6 +6,7 @@ import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponse
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
 import org.alvarub.workouttrackerproject.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,9 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
+    @Value("${auth0.audience}")
+    private String audience;
+
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UsuarioResponseDTO> getCurrentUsuario(@AuthenticationPrincipal Jwt jwt) {
@@ -29,9 +33,12 @@ public class UsuarioController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UsuarioResponseDTO> signup(@RequestBody SignupRequestDTO request) throws Auth0Exception {
+    public ResponseEntity<UsuarioResponseDTO> registerUsuario(@AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
+        String auth0UserId = jwt.getSubject();
+        String auth0UserEmail = jwt.getClaim(audience + "/email");
+        String auth0UserName = jwt.getClaim(audience + "/name");
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(usuarioService.signup(request));
+                .body(usuarioService.registerUser(auth0UserId, auth0UserEmail, auth0UserName));
     }
 
     @GetMapping("/{id}")
@@ -58,9 +65,9 @@ public class UsuarioController {
     // ENDPOINTS ADMIN
     @PostMapping("/signup/admin")
     @PreAuthorize("hasRole('ADMIN')") // Solo ADMIN puede crear otro ADMIN
-    public ResponseEntity<UsuarioResponseDTO> signupAdmin(@RequestBody SignupRequestDTO request) throws Auth0Exception {
+    public ResponseEntity<UsuarioResponseDTO> registerAdmin(@RequestBody SignupRequestDTO request) throws Auth0Exception {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(usuarioService.signupAdmin(request));
+                .body(usuarioService.registerAdmin(request));
     }
 
     @PatchMapping("/{id}/toggle-active")

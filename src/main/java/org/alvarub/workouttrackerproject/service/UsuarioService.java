@@ -36,15 +36,82 @@ public class UsuarioService {
     private final RolService rolService;
 
     @Transactional
-    public UsuarioResponseDTO signup(SignupRequestDTO signupRequest) throws Auth0Exception {
+    public UsuarioResponseDTO registerUser(String auth0UserId, String auth0UserEmail, String auth0UserName) throws Auth0Exception {
         Rol rol = rolService.getRolByNameOrThrow(USER_ROL_NAME, true);
-        return save(signupRequest, rol);
+
+        Usuario usuario = Usuario.builder()
+                .name(auth0UserEmail)
+                .auth0Id(auth0UserId)
+                .email(auth0UserEmail)
+                .name(auth0UserName)
+                .role(rol)
+                .build();
+
+        log.info("Creando administrador {}", usuario.getEmail());
+
+        try {
+            // Seteo el rol en Auth0 antes de guardar en BD
+            log.info("Asignando rol en Auth0 al administrador {}", usuario.getAuth0Id());
+            usuarioServiceAuth0.setRole(auth0UserId, rol.getAuth0RoleId());
+
+            log.info("Guardando administrador en base de datos {}", usuario.getEmail());
+            usuarioRepository.save(usuario);
+            log.info("Administrador {} creado exitosamente", usuario.getEmail());
+
+        } catch (DataAccessException e) {
+            log.error("Error guardando administrador en BD, eliminando usuario en Auth0 {}", usuario.getAuth0Id(), e);
+            usuarioServiceAuth0.deleteUser(auth0UserId);
+            throw new UserRegistrationException("Error guardando usuario en la base de datos", e);
+
+        } catch (Auth0Exception e) {
+            log.error("Error asignando rol en Auth0, eliminando usuario {}", usuario.getAuth0Id(), e);
+            usuarioServiceAuth0.deleteUser(auth0UserId);
+            throw new UserRegistrationException("Error asignando rol en Auth0", e);
+        }
+
+        return usuarioMapper.toResponseDTO(usuario);
     }
 
     @Transactional
-    public UsuarioResponseDTO signupAdmin(SignupRequestDTO signupRequest) throws Auth0Exception {
+    public UsuarioResponseDTO registerAdmin(SignupRequestDTO dto) throws Auth0Exception {
         Rol rol = rolService.getRolByNameOrThrow(ADMIN_ROL_NAME, true);
-        return save(signupRequest, rol);
+
+        if (usuarioRepository.existsByEmail(dto.getEmail())) {
+            throw new ExistingResourceException("El email ya está registrado en la base de datos");
+        }
+
+        SignupResponseDTO auth0User = usuarioServiceAuth0.signup(dto);
+
+        Usuario usuario = Usuario.builder()
+                .auth0Id(auth0User.getUserId())
+                .email(auth0User.getEmail())
+                .name(auth0User.getName() != null ? auth0User.getName() : dto.getEmail())
+                .role(rol)
+                .build();
+
+        log.info("Creando usuario {} con rol {}", usuario.getEmail(), rol.getName());
+
+        try {
+            // Asignar rol en Auth0
+            log.info("Asignando rol en Auth0 al usuario {}", usuario.getAuth0Id());
+            usuarioServiceAuth0.setRole(auth0User.getUserId(), rol.getAuth0RoleId());
+
+            // Guardar en BD
+            usuarioRepository.save(usuario);
+            log.info("Usuario {} creado exitosamente", usuario.getEmail());
+
+        } catch (DataAccessException e) {
+            log.error("Error guardando usuario en BD, eliminando usuario en Auth0 {}", usuario.getAuth0Id(), e);
+            usuarioServiceAuth0.deleteUser(auth0User.getUserId());
+            throw new UserRegistrationException("Error guardando usuario en la base de datos", e);
+
+        } catch (Auth0Exception e) {
+            log.error("Error asignando rol en Auth0, eliminando usuario {}", usuario.getAuth0Id(), e);
+            usuarioServiceAuth0.deleteUser(auth0User.getUserId());
+            throw new UserRegistrationException("Error asignando rol en Auth0", e);
+        }
+
+        return usuarioMapper.toResponseDTO(usuario);
     }
 
     @Transactional(readOnly = true)
@@ -187,48 +254,6 @@ public class UsuarioService {
         }
 
         return usuario;
-    }
-
-    /*
-     * Método privado para evitar duplicación entre saveUser y saveAdmin
-     */
-    private UsuarioResponseDTO save(SignupRequestDTO dto, Rol rol) throws Auth0Exception {
-
-        if (usuarioRepository.existsByEmail(dto.getEmail())) {
-            throw new ExistingResourceException("El email ya está registrado en la base de datos");
-        }
-
-        SignupResponseDTO auth0User = usuarioServiceAuth0.signup(dto);
-
-        Usuario usuario = Usuario.builder()
-                .auth0Id(auth0User.getUserId())
-                .email(auth0User.getEmail())
-                .name(auth0User.getName() != null ? auth0User.getName() : dto.getEmail())
-                .role(rol)
-                .build();
-
-        log.info("Creando usuario {} con rol {}", usuario.getEmail(), rol.getName());
-
-        try {
-            // Asignar rol en Auth0
-            usuarioServiceAuth0.setRole(auth0User.getUserId(), rol.getAuth0RoleId());
-
-            // Guardar en BD
-            usuarioRepository.save(usuario);
-            log.info("Usuario {} creado exitosamente", usuario.getEmail());
-
-        } catch (DataAccessException e) {
-            log.error("Error guardando usuario en BD, eliminando usuario en Auth0 {}", usuario.getAuth0Id(), e);
-            usuarioServiceAuth0.deleteUser(auth0User.getUserId());
-            throw new UserRegistrationException("Error guardando usuario en la base de datos", e);
-
-        } catch (Auth0Exception e) {
-            log.error("Error asignando rol en Auth0, eliminando usuario {}", usuario.getAuth0Id(), e);
-            usuarioServiceAuth0.deleteUser(auth0User.getUserId());
-            throw new UserRegistrationException("Error asignando rol en Auth0", e);
-        }
-
-        return usuarioMapper.toResponseDTO(usuario);
     }
 
 }
