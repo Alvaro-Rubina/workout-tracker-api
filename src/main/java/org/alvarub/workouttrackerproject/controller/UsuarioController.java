@@ -4,6 +4,7 @@ import com.auth0.exception.Auth0Exception;
 import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
 import org.alvarub.workouttrackerproject.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -31,12 +32,13 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.getUsuarioFromToken(jwt));
     }
 
-    @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> createUsuario(@AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
+    @PostMapping("/signup")
+    public ResponseEntity<UsuarioResponseDTO> registerUsuario(@AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
         String auth0UserId = jwt.getSubject();
         String auth0UserEmail = jwt.getClaim(audience + "/email");
+        String auth0UserName = jwt.getClaim(audience + "/name");
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(usuarioService.saveUser(auth0UserId, auth0UserEmail));
+                .body(usuarioService.registerUser(auth0UserId, auth0UserEmail, auth0UserName));
     }
 
     @GetMapping("/{id}")
@@ -61,13 +63,11 @@ public class UsuarioController {
 
 
     // ENDPOINTS ADMIN
-    @PostMapping("/admin")
+    @PostMapping("/signup/admin")
     @PreAuthorize("hasRole('ADMIN')") // Solo ADMIN puede crear otro ADMIN
-    public ResponseEntity<UsuarioResponseDTO> createAdmin(@AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
-        String auth0UserId = jwt.getSubject();
-        String auth0UserEmail = jwt.getClaim(audience + "/email");
+    public ResponseEntity<UsuarioResponseDTO> registerAdmin(@RequestBody SignupRequestDTO request) throws Auth0Exception {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(usuarioService.saveAdmin(auth0UserId, auth0UserEmail));
+                .body(usuarioService.registerAdmin(request));
     }
 
     @PatchMapping("/{id}/toggle-active")

@@ -6,8 +6,9 @@ import com.auth0.json.mgmt.users.User;
 import com.auth0.net.Request;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupResponseDTO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -17,7 +18,37 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class UsuarioServiceAuth0 {
 
+    @Value("${auth0.connection}")
+    private String connection; /*Username-Password-Authentication*/
+
     private final ManagementAPI managementAPI;
+
+    /**
+     * Crea un usuario en Auth0 usando Management API
+     */
+    public SignupResponseDTO signup(SignupRequestDTO request) throws Auth0Exception {
+        User user = new User(connection);
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword().toCharArray());
+        if (request.getName() != null) {
+            user.setName(request.getName());
+        }
+
+        try {
+            log.info("Creando usuario {} en Auth0 vía Management API", request.getEmail());
+            User createdUser = managementAPI.users().create(user).execute();
+
+            return SignupResponseDTO.builder()
+                    .userId(createdUser.getId())
+                    .email(createdUser.getEmail())
+                    .name(createdUser.getName())
+                    .build();
+
+        } catch (Auth0Exception e) {
+            log.error("Error creando usuario en Auth0", e);
+            throw e;
+        }
+    }
 
     /**
      * Activa o desactiva un usuario en Auth0
