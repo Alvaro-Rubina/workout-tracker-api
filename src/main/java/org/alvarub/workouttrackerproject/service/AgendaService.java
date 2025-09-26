@@ -35,11 +35,8 @@ public class AgendaService {
         Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
         Rutina rutina = rutinaService.getRutinaOrThrow(dto.getRoutineId());
 
-        if (!usuario.getCreatedRoutines().contains(rutina)) {
-            throw new ForbiddenOperationException("Usuario sin permiso para agendar una rutina que no ha creado");
-
-        } else if (!rutina.getIsPublic()) {
-            throw new ForbiddenOperationException("Usuario sin permiso para agendar una rutina ajena que no es pública.");
+        if (!rutina.getIsPublic() && !usuario.getCreatedRoutines().contains(rutina)) {
+            throw new ForbiddenOperationException("Usuario sin permiso para agendar una rutina privada que no le pertenece");
         }
 
         agenda.setUser(usuario);
