@@ -29,7 +29,10 @@ public class UsuarioController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UsuarioResponseDTO> getCurrentUsuario(@AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(usuarioService.getUsuarioFromToken(jwt));
+        String auth0UserId = jwt.getSubject();
+        String auth0UserEmail = jwt.getClaim(audience + "/email");
+        String auth0UserName = jwt.getClaim(audience + "/name");
+        return ResponseEntity.ok(usuarioService.getCurrentUsuario(auth0UserId, auth0UserEmail, auth0UserName));
     }
 
     @PostMapping("/signup")

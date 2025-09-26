@@ -16,7 +16,6 @@ import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
 import org.alvarub.workouttrackerproject.persistence.repository.UsuarioRepository;
 import org.alvarub.workouttrackerproject.service.auth0.UsuarioServiceAuth0;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -128,12 +127,9 @@ public class UsuarioService {
     }
 
     @Transactional
-    public UsuarioResponseDTO getUsuarioFromToken(Jwt jwt) {
-        String auth0Id = jwt.getSubject();
-        String email = jwt.getClaimAsString("email");
-        String name = jwt.getClaimAsString("name");
+    public UsuarioResponseDTO getCurrentUsuario(String authoUserID, String auth0UserEmail, String auth0UserName) {
 
-        return usuarioRepository.findByAuth0Id(auth0Id)
+        return usuarioRepository.findByAuth0Id(authoUserID)
                 .map(usuario -> {
                     UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 
@@ -145,20 +141,20 @@ public class UsuarioService {
                 })
                 .orElseGet(() -> {
                     // Verifico si el email ya existe
-                    if (usuarioRepository.existsByEmail(email)) {
+                    if (usuarioRepository.existsByEmail(auth0UserEmail)) {
                         throw new ExistingResourceException("El email ya está registrado con otro método de autenticación");
                     }
 
                     // Creo nuevo usuario
                     Usuario newUser = Usuario.builder()
-                            .auth0Id(auth0Id)
-                            .email(email)
-                            .name(name)
+                            .auth0Id(authoUserID)
+                            .email(auth0UserEmail)
+                            .name(auth0UserName)
                             .role(rolService.getRolByNameOrThrow(USER_ROL_NAME, true))
                             .active(true)
                             .build();
 
-                    log.info("Creando usuario desde token {}", email);
+                    log.info("Creando usuario desde token {}", auth0UserEmail);
                     return usuarioMapper.toResponseDTO(usuarioRepository.save(newUser));
                 });
     }
@@ -231,6 +227,11 @@ public class UsuarioService {
 
         usuarioRepository.save(usuario);
         return usuarioMapper.toResponseDTO(usuario);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        Usuario usuario = getUsuarioOrThrow(id, true);
     }
 
     // Métodos auxiliares
