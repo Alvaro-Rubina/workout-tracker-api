@@ -21,17 +21,7 @@ public class UsuarioStatsDTO implements Serializable {
 
     private String email;
 
-    private Double bodyWeight;
-
     private Long completedWorkouts;
-
-    private Boolean active;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
-    private LocalDateTime lastAccess;
 
     private Long createdRoutines;
 
@@ -44,6 +34,4 @@ public class UsuarioStatsDTO implements Serializable {
     private Long favoriteExercises;
 
     // Tema agendas y comentarios no se si sea relevante poner
-
-    private RolResponseDTO role;
 }

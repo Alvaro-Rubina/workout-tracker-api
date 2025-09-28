@@ -20,18 +20,27 @@ public class UsuarioResponseDTO {
 
     private String email;
 
+    private Double bodyWeight;
+
+    private Boolean active;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
-    private Double bodyWeight;
+    private LocalDateTime lastAccess;
 
     private Long completedWorkouts;
 
-    private Boolean active;
+    private Long createdRoutines;
 
-    private LocalDateTime lastAccess;
+    private Long likedRoutines;
+
+    private Long savedRoutines;
+
+    private Long completedRoutines;
+
+    private Long favoriteExercises;
 
     private RolResponseDTO role;
-
 }
