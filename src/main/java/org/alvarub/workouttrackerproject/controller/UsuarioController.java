@@ -44,7 +44,7 @@ public class UsuarioController {
                 .body(usuarioService.registerUser(auth0UserId, auth0UserEmail, auth0UserName));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin/{id}")
     public ResponseEntity<UsuarioResponseDTO> getUsuarioById(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.findById(id));
     }
@@ -54,27 +54,25 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.findStatsById(id));
     }
 
-    @GetMapping
+    @GetMapping("/admin")
     public ResponseEntity<List<UsuarioResponseDTO>> getAllUsuarios() {
         return ResponseEntity.ok(usuarioService.findAll());
     }
 
-    @GetMapping("/stats")
+    @GetMapping("/admin/stats")
     public ResponseEntity<List<UsuarioStatsDTO>> getAllUsuariosStats() {
         return ResponseEntity.ok(usuarioService.findAllStats());
     }
 
 
     // ENDPOINTS ADMIN
-    @PostMapping("/signup/admin")
-    @PreAuthorize("hasRole('ADMIN')") // Solo ADMIN puede crear otro ADMIN
+    @PostMapping("/admin/signup")
     public ResponseEntity<UsuarioResponseDTO> registerAdmin(@RequestBody SignupRequestDTO request) throws Auth0Exception {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(usuarioService.registerAdmin(request));
     }
 
-    @PatchMapping("/{id}/toggle-active")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/admin/{id}/toggle-active")
     public ResponseEntity<UsuarioResponseDTO> toggleUsuarioActiveStatus(@PathVariable Long id,
                                                                         @AuthenticationPrincipal Jwt jwt) throws Auth0Exception {
         return ResponseEntity.ok(usuarioService.toggleActive(id));
