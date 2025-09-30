@@ -8,4 +8,6 @@ import java.util.List;
 public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
     List<Comentario> findAllByRoutineId(Long routineId);
     List<Comentario> findAllByUserId(Long userId);
+    List<Comentario> findByUser_Auth0Id(String auth0Id);
+
 }
