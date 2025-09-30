@@ -28,13 +28,21 @@ public class EquipamientoService {
     }
 
     @Transactional(readOnly = true)
-    public EquipamientoResponseDTO findById (Long id) {
-        return equipamientoMapper.toResponseDTO(getEquipamientoOrThrow(id, false));
+    public EquipamientoResponseDTO findById (Long id, boolean verifyActive) {
+        return equipamientoMapper.toResponseDTO(getEquipamientoOrThrow(id, verifyActive));
     }
 
     @Transactional(readOnly = true)
     public List<EquipamientoResponseDTO> findAll() {
         return equipamientoRepository.findAll().stream()
+                .map(equipamientoMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<EquipamientoResponseDTO> findAllActive() {
+        return equipamientoRepository.findAll().stream()
+                .filter(Equipamiento::getActive)
                 .map(equipamientoMapper::toResponseDTO)
                 .toList();
     }
