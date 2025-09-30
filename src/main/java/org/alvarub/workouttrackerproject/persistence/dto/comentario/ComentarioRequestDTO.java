@@ -18,10 +18,6 @@ public class ComentarioRequestDTO {
     private String content;
 
     @NotNull(message = "El campo userId es obligatorio")
-    @Positive(message = "El campo userId debe ser mayor a 0")
-    private Long userId;
-
-    @NotNull(message = "El campo userId es obligatorio")
     @Positive(message = "El campo routineId debe ser mayor a 0")
     private Long routineId;
 
