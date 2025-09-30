@@ -39,14 +39,14 @@ public class EjercicioService {
     }
 
     @Transactional(readOnly = true)
-    public EjercicioResponseDTO findById(Long id) {
-        Ejercicio ejercicio = getEjercicioOrThrow(id, false);
+    public EjercicioResponseDTO findById(Long id, boolean verifyActive) {
+        Ejercicio ejercicio = getEjercicioOrThrow(id, verifyActive);
         return ejercicioMapper.toResponseDTO(ejercicio);
     }
 
     @Transactional(readOnly = true)
-    public EjercicioSimpleDTO findByIdSimple(Long id) {
-        Ejercicio ejercicio = getEjercicioOrThrow(id, false);
+    public EjercicioSimpleDTO findByIdSimple(Long id, boolean verifyActive) {
+        Ejercicio ejercicio = getEjercicioOrThrow(id, verifyActive);
         return ejercicioMapper.toSimpleDTO(ejercicio);
     }
 
@@ -60,6 +60,22 @@ public class EjercicioService {
     @Transactional(readOnly = true)
     public List<EjercicioSimpleDTO> findAllSimple() {
         return ejercicioRepository.findAll().stream()
+                .map(ejercicioMapper::toSimpleDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<EjercicioResponseDTO> findAllActive() {
+        return ejercicioRepository.findAll().stream()
+                .filter(Ejercicio::getActive)
+                .map(ejercicioMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<EjercicioSimpleDTO> findAllSimpleActive() {
+        return ejercicioRepository.findAll().stream()
+                .filter(Ejercicio::getActive)
                 .map(ejercicioMapper::toSimpleDTO)
                 .toList();
     }

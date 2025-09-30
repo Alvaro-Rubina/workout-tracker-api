@@ -20,23 +20,33 @@ public class EjercicioController {
 
     private final EjercicioService ejercicioService;
 
-    @PostMapping
+    @PostMapping("/admin")
     public ResponseEntity<EjercicioResponseDTO> createEjercicio(@Valid @RequestBody EjercicioRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ejercicioService.save(dto));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin/{id}") // NOTE: Para admins (pueden obtener todos los ejercicios)
     public ResponseEntity<Object> getEjercicioById(@PathVariable Long id,
                                                    @RequestParam(defaultValue = "false") Boolean relations) {
         Object response = relations
-                ? ejercicioService.findById(id)
-                : ejercicioService.findByIdSimple(id);
+                ? ejercicioService.findById(id, false)
+                : ejercicioService.findByIdSimple(id, false);
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("/{id}") // NOTE: Para usuarios (pueden obtener solo los que estan activos)
+    public ResponseEntity<Object> getEjercicioByIdVerifyActive(@PathVariable Long id,
+                                                               @RequestParam(defaultValue = "false") Boolean relations) {
+        Object response = relations
+                ? ejercicioService.findById(id, true)
+                : ejercicioService.findByIdSimple(id, true);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin") // NOTE: Para admins (pueden obtener todos los ejercicios)
     public ResponseEntity<List<?>> getAllEjercicios(@RequestParam(defaultValue = "false") Boolean relations) {
 
         List<?> response = relations
@@ -46,17 +56,27 @@ public class EjercicioController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/toggle-active")
+    @GetMapping // NOTE: Para usuarios (pueden obtener solo los que estan activos)
+    public ResponseEntity<List<?>> getAllActiveEjercicios(@RequestParam(defaultValue = "false") Boolean relations) {
+
+        List<?> response = relations
+                ? ejercicioService.findAllActive()
+                : ejercicioService.findAllSimpleActive();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/admin/{id}/toggle-active")
     public ResponseEntity<EjercicioSimpleDTO> toggleEjercicioActiveStatus(@PathVariable Long id) {
         return ResponseEntity.ok(ejercicioService.toggleActive(id));
     }
 
-    @PatchMapping("/{id}/deactivate")
+    @PatchMapping("/admin/{id}/deactivate")
     public ResponseEntity<EjercicioSimpleDTO> deactivateEjercicio(@PathVariable Long id) {
         return ResponseEntity.ok(ejercicioService.softDelete(id));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/admin/{id}")
     public ResponseEntity<EjercicioResponseDTO> updateEjercicio(@PathVariable Long id,
                                                                 @Valid @RequestBody EjercicioUpdateRequestDTO dto) {
         return ResponseEntity.ok(ejercicioService.update(id, dto));

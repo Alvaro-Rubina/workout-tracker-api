@@ -58,7 +58,8 @@ public class CategoriaService {
 
     @Transactional(readOnly = true)
     public List<CategoriaResponseDTO> findAllActive() {
-        return categoriaRepository.findByActiveTrue().stream()
+        return categoriaRepository.findAll().stream()
+                .filter(Categoria::getActive)
                 .map(categoriaMapper::toResponseDTO)
                 .toList();
     }

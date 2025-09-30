@@ -29,17 +29,17 @@ public class CategoriaController {
         return ResponseEntity.ok(categoriaService.findById(id, false));
     }
 
-    @GetMapping("/{id}") // NOTE: Para clientes (pueden obtener solo las que estan activas)
+    @GetMapping("/{id}") // NOTE: Para usuarios (pueden obtener solo las que estan activas)
     public ResponseEntity<CategoriaResponseDTO> getCategoriaByIdVerifyActive(@PathVariable Long id) {
         return ResponseEntity.ok(categoriaService.findById(id, true));
     }
 
-    @GetMapping("/admin")
+    @GetMapping("/admin") // NOTE: Para admins (pueden obtener todas las categorias)
     public ResponseEntity<List<CategoriaResponseDTO>> getAllCategorias() {
         return ResponseEntity.ok(categoriaService.findAll());
     }
 
-    @GetMapping
+    @GetMapping // NOTE: Para usuarios (pueden obtener solo las que estan activas)
     public ResponseEntity<List<CategoriaResponseDTO>> getAllActiveCategorias() {
         return ResponseEntity.ok(categoriaService.findAllActive());
     }
