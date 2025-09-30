@@ -119,8 +119,8 @@ public class UsuarioService {
 
         UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 
-        if (!usuario.getHistorialPeso().isEmpty()) {
-            response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+        if (!usuario.getBodyWeightHistorial().isEmpty()) {
+            response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
         }
 
         return response;
@@ -133,8 +133,8 @@ public class UsuarioService {
                 .map(usuario -> {
                     UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 
-                    if (!usuario.getHistorialPeso().isEmpty()) {
-                        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+                    if (!usuario.getBodyWeightHistorial().isEmpty()) {
+                        response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
                     }
 
                     return response;
@@ -174,8 +174,8 @@ public class UsuarioService {
                 .map(usuario -> {
                     UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 
-                    if (!usuario.getHistorialPeso().isEmpty()) {
-                        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+                    if (!usuario.getBodyWeightHistorial().isEmpty()) {
+                        response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
                     }
 
                     return response;
@@ -218,8 +218,8 @@ public class UsuarioService {
 
         UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 
-        if (!usuario.getHistorialPeso().isEmpty()) {
-            response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+        if (!usuario.getBodyWeightHistorial().isEmpty()) {
+            response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
         }
         return response;
     }
