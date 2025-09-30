@@ -40,7 +40,7 @@ public class AgendaController {
     }
 
     @GetMapping("/user/me")
-    public ResponseEntity<List<AgendaRutinaDTO>> getAllAgendasByUserId(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<List<AgendaRutinaDTO>> getAllAgendasByUser(@AuthenticationPrincipal Jwt jwt) {
         String auth0UserId = jwt.getSubject();
         return ResponseEntity.ok(agendaService.findAllByUserId(auth0UserId));
     }
