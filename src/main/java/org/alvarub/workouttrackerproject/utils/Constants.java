@@ -3,7 +3,7 @@ package org.alvarub.workouttrackerproject.utils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Constants {
+public final class Constants {
 
     public static final String DEFAULT_CATEGORY_NAME = "General";
 
