@@ -7,8 +7,6 @@ import org.alvarub.workouttrackerproject.mapper.CategoriaMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.categoria.CategoriaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.categoria.CategoriaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Categoria;
-import org.alvarub.workouttrackerproject.persistence.entity.Rutina;
-import org.alvarub.workouttrackerproject.persistence.entity.Sesion;
 import org.alvarub.workouttrackerproject.persistence.repository.CategoriaRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.RutinaRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.SesionRepository;
@@ -47,13 +45,20 @@ public class CategoriaService {
     }
 
     @Transactional(readOnly = true)
-    public CategoriaResponseDTO findById(Long id) {
-        return categoriaMapper.toResponseDTO(getCategoriaOrThrow(id, false));
+    public CategoriaResponseDTO findById(Long id, boolean verifyActive) {
+        return categoriaMapper.toResponseDTO(getCategoriaOrThrow(id, verifyActive));
     }
 
     @Transactional(readOnly = true)
     public List<CategoriaResponseDTO> findAll() {
         return categoriaRepository.findAll().stream()
+                .map(categoriaMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoriaResponseDTO> findAllActive() {
+        return categoriaRepository.findByActiveTrue().stream()
                 .map(categoriaMapper::toResponseDTO)
                 .toList();
     }
@@ -113,7 +118,7 @@ public class CategoriaService {
                 .orElseThrow(() -> new NotFoundException("Categoria con el ID " + id + " no encontrada"));
 
         if (verifyActive && !categoria.getActive()) {
-            throw new NotFoundException("Categoria con el ID " + " inactiva");
+            throw new NotFoundException("Categoria con el ID " + id + " inactiva");
         }
 
         return categoria;
