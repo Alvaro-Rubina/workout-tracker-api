@@ -19,23 +19,34 @@ public class MusculoController {
 
     private final MusculoService musculoService;
 
-    @PostMapping
+    @PostMapping("/admin")
     public ResponseEntity<MusculoResponseDTO> createMusculo(@Valid @RequestBody MusculoRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(musculoService.save(dto));
     }
 
-    @GetMapping("/{id}")
+
+    @GetMapping("/admin/{id}")
     public ResponseEntity<Object> getMusculoById(@PathVariable Long id,
                                                  @RequestParam(defaultValue = "false") Boolean relations) {
         Object response = relations
-                ? musculoService.findById(id)
-                : musculoService.findByIdSimple(id);
+                ? musculoService.findById(id, false)
+                : musculoService.findByIdSimple(id, false);
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getMusculoByIdVerifyActive(@PathVariable Long id,
+                                                 @RequestParam(defaultValue = "false") Boolean relations) {
+        Object response = relations
+                ? musculoService.findById(id, true)
+                : musculoService.findByIdSimple(id, true);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin")
     public ResponseEntity<List<?>> getAllMusculos(@RequestParam(defaultValue = "false") Boolean relations) {
         List<?> response = relations
                 ? musculoService.findAll()
@@ -44,12 +55,22 @@ public class MusculoController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/toggle-active")
+    @GetMapping
+    public ResponseEntity<List<?>> getAllActiveMusculos(@RequestParam(defaultValue = "false") Boolean relations) {
+
+        List<?> response = relations
+                ? musculoService.findAllActive()
+                : musculoService.findAllSimpleActive();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/admin/{id}/toggle-active")
     public ResponseEntity<MusculoSimpleDTO> toggleMusculoActiveStatus(@PathVariable Long id) {
         return ResponseEntity.ok(musculoService.toggleActive(id));
     }
 
-    @PatchMapping("/{id}/deactivate")
+    @PatchMapping("/admin/{id}/deactivate")
     public ResponseEntity<MusculoSimpleDTO> deactivateMusculo(@PathVariable Long id) {
         return ResponseEntity.ok(musculoService.softDelete(id));
     }

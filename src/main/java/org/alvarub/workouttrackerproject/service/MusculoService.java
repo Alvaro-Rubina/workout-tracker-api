@@ -7,7 +7,6 @@ import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoRequestD
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Musculo;
-import org.alvarub.workouttrackerproject.persistence.entity.ZonaMuscular;
 import org.alvarub.workouttrackerproject.persistence.repository.MusculoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,14 +31,14 @@ public class MusculoService {
     }
 
     @Transactional(readOnly = true)
-    public MusculoResponseDTO findById(Long id) {
-        Musculo musculo = getMusculoOrThrow(id, false);
+    public MusculoResponseDTO findById(Long id, boolean verifyActive) {
+        Musculo musculo = getMusculoOrThrow(id, verifyActive);
         return musculoMapper.toResponseDTO(musculo);
     }
 
     @Transactional(readOnly = true)
-    public MusculoSimpleDTO findByIdSimple(Long id) {
-        Musculo musculo = getMusculoOrThrow(id, false);
+    public MusculoSimpleDTO findByIdSimple(Long id, boolean verifyActive) {
+        Musculo musculo = getMusculoOrThrow(id, verifyActive);
         return musculoMapper.toSimpleDTO(musculo);
     }
 
@@ -53,6 +52,22 @@ public class MusculoService {
     @Transactional(readOnly = true)
     public List<MusculoSimpleDTO> findAllSimple() {
         return musculoRepository.findAll().stream()
+                .map(musculoMapper::toSimpleDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MusculoResponseDTO> findAllActive() {
+        return musculoRepository.findAll().stream()
+                .filter(Musculo::getActive)
+                .map(musculoMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MusculoSimpleDTO> findAllSimpleActive() {
+        return musculoRepository.findAll().stream()
+                .filter(Musculo::getActive)
                 .map(musculoMapper::toSimpleDTO)
                 .toList();
     }
