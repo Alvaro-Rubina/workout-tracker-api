@@ -19,23 +19,33 @@ public class ZonaMuscularController {
 
     private final ZonaMuscularService zonaMuscularService;
 
-    @PostMapping
+    @PostMapping("/admin")
     public ResponseEntity<ZonaMuscularResponseDTO> createZonaMuscular(@Valid @RequestBody ZonaMuscularRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(zonaMuscularService.save(dto));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin/{id}")
     public ResponseEntity<Object> getZonaMuscularById(@PathVariable Long id,
                                                       @RequestParam(defaultValue = "false") Boolean relations) {
         Object response = relations
-                ? zonaMuscularService.findById(id)
-                : zonaMuscularService.findByIdSimple(id);
+                ? zonaMuscularService.findById(id, false)
+                : zonaMuscularService.findByIdSimple(id, false);
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getZonaMuscularByIdVerifyActive(@PathVariable Long id,
+                                                      @RequestParam(defaultValue = "false") Boolean relations) {
+        Object response = relations
+                ? zonaMuscularService.findById(id, true)
+                : zonaMuscularService.findByIdSimple(id, true);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin")
     public ResponseEntity<List<?>> getAllZonasMusculares(@RequestParam(defaultValue = "false") Boolean relations) {
         List<?> response = relations
                 ? zonaMuscularService.findAll()
@@ -44,12 +54,21 @@ public class ZonaMuscularController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/toggle-active")
+    @GetMapping
+    public ResponseEntity<List<?>> getAllActiveZonasMusculares(@RequestParam(defaultValue = "false") Boolean relations) {
+        List<?> response = relations
+                ? zonaMuscularService.findAllActive()
+                : zonaMuscularService.findAllSimpleActive();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/admin/{id}/toggle-active")
     public ResponseEntity<ZonaMuscularSimpleDTO> toggleZonaMuscularActiveStatus(@PathVariable Long id) {
         return ResponseEntity.ok(zonaMuscularService.toggleActive(id));
     }
 
-    @PatchMapping("/{id}/deactivate")
+    @PatchMapping("/admin/{id}/deactivate")
     public ResponseEntity<ZonaMuscularSimpleDTO> deactivateZonaMuscular(@PathVariable Long id) {
         return ResponseEntity.ok(zonaMuscularService.softDelete(id));
     }
