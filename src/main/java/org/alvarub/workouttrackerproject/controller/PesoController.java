@@ -23,7 +23,7 @@ public class PesoController {
 
     @PostMapping
     public ResponseEntity<PesoResponseDTO> createBodyWeight(@AuthenticationPrincipal Jwt jwt,
-                                                            @Valid PesoRequestDTO dto) {
+                                                            @Valid @RequestBody PesoRequestDTO dto) {
         String auth0UserId = jwt.getSubject();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(pesoService.save(auth0UserId, dto));
