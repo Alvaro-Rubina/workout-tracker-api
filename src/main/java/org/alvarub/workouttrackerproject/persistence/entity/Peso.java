@@ -23,7 +23,7 @@ public class Peso extends Auditable {
     private Double bodyWeight;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false)
     private Usuario user;
 
 }
