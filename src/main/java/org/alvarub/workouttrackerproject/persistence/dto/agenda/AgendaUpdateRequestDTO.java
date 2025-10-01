@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AgendaUpdateRequestDTO {
 
-    // Todos los campos son opcionales para PATCH
     @FutureOrPresent(message = "El campo startDate debe ser una fecha futura o presente")
     private LocalDateTime startDate;
 
