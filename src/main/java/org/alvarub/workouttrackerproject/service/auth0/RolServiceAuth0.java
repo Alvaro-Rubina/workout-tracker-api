@@ -35,6 +35,15 @@ public class RolServiceAuth0 {
         return createdRole;
     }
 
+    public void updateRol(String auth0Id, String name, String description) throws Auth0Exception {
+        Role update = new Role();
+        update.setName(name);
+        update.setDescription(description);
+
+        managementAPI.roles().update(auth0Id, update).execute();
+        log.info("Rol '{}' actualizado exitosamente en Auth0.", auth0Id);
+    }
+
     public Role getRoleByName(String name) throws Auth0Exception {
         Request<RolesPage> request = managementAPI.roles().list(null);
         List<Role> roles = request.execute().getItems();

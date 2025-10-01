@@ -16,7 +16,7 @@ public class Rol extends Auditable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "auth0_role_id")
+    @Column(name = "auth0_role_id", length = 50)
     private String auth0RoleId; // ID del rol en Auth0
 
     @Column(name = "name", unique = true, nullable = false)
