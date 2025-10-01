@@ -34,12 +34,14 @@ public class ComentarioService {
         Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
         Rutina rutina = rutinaService.getRutinaOrThrow(dto.getRoutineId());
 
-        if (!rutina.getIsPublic() && !usuario.getCreatedRoutines().contains(rutina)) {
-            throw new ForbiddenOperationException("Usuario sin permiso para comentar en una rutina privada que no le pertenece");
+        if (!Boolean.TRUE.equals(rutina.getIsPublic())) {
+            if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
+                throw new ForbiddenOperationException("Usuario sin permiso para comentar en una rutina privada que no le pertenece");
+            }
         }
 
         comentario.setUser(usuario);
-        comentario.setRoutine(rutinaService.getRutinaOrThrow(dto.getRoutineId()));
+        comentario.setRoutine(rutina);
 
         if (dto.getReplyToId() != null) {
             Comentario replyTo = getComentarioOrThrow(dto.getReplyToId());
