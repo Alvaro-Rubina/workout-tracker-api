@@ -37,7 +37,7 @@ public class SecurityConfig {
     @Value("${web.cors.allowed-origins}")
     private String corsAllowedOrigins;
 
-    @Value("{sprig.websecurity.debug:false}")
+    @Value("${spring.websecurity.debug:false}")
     private boolean webSecurityDebug;
 
     @Bean
