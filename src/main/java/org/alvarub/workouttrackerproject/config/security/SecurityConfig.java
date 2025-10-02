@@ -20,6 +20,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
+import static org.alvarub.workouttrackerproject.utils.Constants.*;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -45,9 +46,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/*/public/**").permitAll()
-                        .requestMatchers("/**").hasRole("PROPIETARIO")
-                        .requestMatchers("/*/admin/**").hasRole("ADMIN")
+                        // Endpoints publicos
+                        .requestMatchers("/*/public/**", "/public/**").permitAll()
+                        // Endpoints para ADMIN y PROPIETARIO
+                        .requestMatchers("/*/admin/**", "/admin/**").hasAnyRole(
+                                        ADMIN_ROL_NAME,
+                                        OWNER_ROL_NAME
+                                )
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2resourceServer -> oauth2resourceServer
