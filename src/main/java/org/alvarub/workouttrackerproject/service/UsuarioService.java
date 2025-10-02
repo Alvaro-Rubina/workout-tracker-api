@@ -9,6 +9,7 @@ import org.alvarub.workouttrackerproject.exception.UserRegistrationException;
 import org.alvarub.workouttrackerproject.mapper.UsuarioMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Rol;
@@ -242,6 +243,25 @@ public class UsuarioService {
             response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
         }
         return response;
+    }
+
+    @Transactional
+    public UsuarioResponseDTO update(String auth0UserId, UsuarioUpdateRequestDTO dto) throws Auth0Exception {
+        Usuario usuario = getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+
+        if ((!usuario.getName().equals(dto.getName()) && (dto.getName() != null && !dto.getName().isBlank()))) {
+            usuario.setName(dto.getName());
+        }
+
+        if ((!usuario.getPicture().equals(dto.getPicture()) && (dto.getPicture() != null && !dto.getPicture().isBlank()))) {
+            usuario.setPicture(dto.getPicture());
+        }
+
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            usuarioServiceAuth0.changePassword(usuario.getAuth0Id(), dto.getPassword());
+        }
+
+        return usuarioMapper.toResponseDTO(usuario);
     }
 
     @Transactional

@@ -1,9 +1,11 @@
 package org.alvarub.workouttrackerproject.controller;
 
 import com.auth0.exception.Auth0Exception;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
 import org.alvarub.workouttrackerproject.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,6 +66,12 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.findAllStats());
     }
 
+    @PatchMapping
+    public ResponseEntity<UsuarioResponseDTO> updateUsuario(@AuthenticationPrincipal Jwt jwt,
+                                                            @Valid @RequestBody UsuarioUpdateRequestDTO dto) throws Auth0Exception {
+        String auth0userId = jwt.getSubject();
+        return ResponseEntity.ok(usuarioService.update(auth0userId, dto));
+    }
 
     // ENDPOINTS ADMIN
     @PostMapping("/admin/signup")
