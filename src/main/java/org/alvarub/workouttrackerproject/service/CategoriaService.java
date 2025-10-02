@@ -1,6 +1,5 @@
 package org.alvarub.workouttrackerproject.service;
 
-import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.CategoriaMapper;
@@ -25,18 +24,6 @@ public class CategoriaService {
     private final CategoriaMapper categoriaMapper;
     private final SesionRepository sesionRepository;
     private final RutinaRepository rutinaRepository;
-
-    // Método para crear la categoría por defecto si es que no existe
-    @PostConstruct
-    public void initDefaultCategoria() {
-        if (!categoriaRepository.existsByName(DEFAULT_CATEGORY_NAME)) {
-            Categoria categoria = Categoria.builder()
-                    .name(DEFAULT_CATEGORY_NAME)
-                    .active(true)
-                    .build();
-            categoriaRepository.save(categoria);
-        }
-    }
 
     @Transactional
     public CategoriaResponseDTO save(CategoriaRequestDTO dto) {
