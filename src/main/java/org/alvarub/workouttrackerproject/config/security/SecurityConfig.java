@@ -45,9 +45,9 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/api/*/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/*/public/**").permitAll()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/*/public/**").permitAll()
+                        .requestMatchers("/*/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2resourceServer -> oauth2resourceServer
