@@ -87,6 +87,24 @@ public class UsuarioServiceAuth0 {
     }
 
     /**
+     * Cambia la contraseña de un usuario en Auth0
+     * @param auth0UserId ID del usuario en Auth0 (sub)
+     * @param newPassword Nueva contraseña
+     */
+    public void changePassword(String auth0UserId, String newPassword) throws Auth0Exception {
+        try {
+            User userUpdate = new User();
+            userUpdate.setPassword(newPassword.toCharArray());
+            log.info("Cambiando contraseña del usuario Auth0 {}", auth0UserId);
+            managementAPI.users().update(auth0UserId, userUpdate).execute();
+            log.info("Contraseña cambiada exitosamente para el usuario Auth0 {}", auth0UserId);
+        } catch (Auth0Exception e) {
+            log.error("Error cambiando la contraseña del usuario Auth0 {}", auth0UserId, e);
+            throw e;
+        }
+    }
+
+    /**
      * Elimina un usuario de Auth0
      */
     public void deleteUser(String auth0UserId) throws Auth0Exception {
