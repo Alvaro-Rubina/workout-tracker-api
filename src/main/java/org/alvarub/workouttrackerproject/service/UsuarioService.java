@@ -146,14 +146,15 @@ public class UsuarioService {
                         throw new ExistingResourceException("El email ya está registrado con otro método de autenticación");
                     }
 
-                    Rol rolUsuario = rolService.getRolByNameOrThrow(USER_ROL_NAME, true);
+                    Rol rol = rolService.getRolByNameOrThrow(
+                            usuarioServiceAuth0.getUserRol(authoUserID).getName(), true);
 
                     // Creo nuevo usuario
                     Usuario newUser = Usuario.builder()
                             .auth0Id(authoUserID)
                             .email(auth0UserEmail)
                             .name(auth0UserName)
-                            .role(rolUsuario)
+                            .role(rol)
                             .active(true)
                             .build();
 
@@ -162,7 +163,7 @@ public class UsuarioService {
                     try {
                         // Asigno el rol al usuario ya existente en Auth0
                         log.info("Asignando rol en Auth0 al usuario {}", authoUserID);
-                        usuarioServiceAuth0.setRole(authoUserID, rolUsuario.getAuth0RoleId());
+                        usuarioServiceAuth0.setRole(authoUserID, rol.getAuth0RoleId());
 
                         // Guardo en db
                         log.info("Guardando usuario en base de datos {}", auth0UserEmail);
