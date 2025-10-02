@@ -33,8 +33,4 @@ public class RutinaRequestDTO {
 
     @NotEmpty(message = "El campo sessions es obligatorio y debe tener al menos 1 elemento")
     private List<SesionRequestDTO> sessions;
-
-    @NotNull(message = "El campo userId es obligatorio")
-    @Positive(message = "El campo userId debe ser mayor a 0")
-    private Long userId;
 }

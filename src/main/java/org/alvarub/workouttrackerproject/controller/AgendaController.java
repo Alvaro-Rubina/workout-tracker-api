@@ -28,31 +28,38 @@ public class AgendaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getAgendaById(@PathVariable Long id,
+    public ResponseEntity<Object> getAgendaById(@AuthenticationPrincipal Jwt jwt,
+                                                @PathVariable Long id,
                                                 @RequestParam(defaultValue = "false") Boolean includeUser) {
+        String auth0UserId = jwt.getSubject();
         Object response = includeUser
-                ? agendaService.findById(id)
-                : agendaService.findByIdSimple(id);
+                ? agendaService.findById(id, auth0UserId)
+                : agendaService.findByIdSimple(id, auth0UserId);
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<AgendaRutinaDTO>> getAllAgendasByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(agendaService.findAllByUserId(userId));
+    @GetMapping("/user/me")
+    public ResponseEntity<List<AgendaRutinaDTO>> getAllAgendasByUser(@AuthenticationPrincipal Jwt jwt) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(agendaService.findAllByUserId(auth0UserId));
     }
 
     @PatchMapping("/{id}/complete")
-    public ResponseEntity<AgendaResponseDTO> markAsCompleted(@PathVariable Long id,
+    public ResponseEntity<AgendaResponseDTO> markAsCompleted(@AuthenticationPrincipal Jwt jwt,
+                                                             @PathVariable Long id,
                                                              @Valid @RequestBody(required = false) AgendaCompleteRequestDTO dto) {
-        AgendaResponseDTO updatedAgenda = agendaService.markAsCompleted(id, dto);
+        String auth0UserId = jwt.getSubject();
+        AgendaResponseDTO updatedAgenda = agendaService.markAsCompleted(id, auth0UserId, dto);
         return ResponseEntity.ok(updatedAgenda);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<AgendaResponseDTO> updateAgenda(@PathVariable Long id,
+    public ResponseEntity<AgendaResponseDTO> updateAgenda(@AuthenticationPrincipal Jwt jwt,
+                                                          @PathVariable Long id,
                                                           @Valid @RequestBody AgendaUpdateRequestDTO dto) {
-        AgendaResponseDTO updated = agendaService.update(id, dto);
+        String auth0UserId = jwt.getSubject();
+        AgendaResponseDTO updated = agendaService.update(id, auth0UserId, dto);
         return ResponseEntity.ok(updated);
     }
 

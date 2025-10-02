@@ -18,33 +18,43 @@ public class EquipamientoController {
 
     private final EquipamientoService equipamientoService;
 
-    @PostMapping
+    @PostMapping("/admin")
     public ResponseEntity<EquipamientoResponseDTO> createEquipamiento(@Valid @RequestBody EquipamientoRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(equipamientoService.save(dto));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin/{id}")
     public ResponseEntity<EquipamientoResponseDTO> getEquipamientoById(@PathVariable Long id) {
-        return ResponseEntity.ok(equipamientoService.findById(id));
+        return ResponseEntity.ok(equipamientoService.findById(id, false));
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
+    public ResponseEntity<EquipamientoResponseDTO> getEquipamientoByIdVerifyActive(@PathVariable Long id) {
+        return ResponseEntity.ok(equipamientoService.findById(id, true));
+    }
+
+    @GetMapping("/admin")
     public ResponseEntity<List<EquipamientoResponseDTO>> getAllEquipamientos() {
         return ResponseEntity.ok(equipamientoService.findAll());
     }
 
-    @PatchMapping("/{id}/toggle-active")
+    @GetMapping
+    public ResponseEntity<List<EquipamientoResponseDTO>> getAllActiveEquipamientos() {
+        return ResponseEntity.ok(equipamientoService.findAllActive());
+    }
+
+    @PatchMapping("/admin/{id}/toggle-active")
     public ResponseEntity<EquipamientoResponseDTO> toggleEquipamientoActiveStatus(@PathVariable Long id) {
         return ResponseEntity.ok(equipamientoService.toggleActive(id));
     }
 
-    @PatchMapping("/{id}/deactivate")
+    @PatchMapping("/admin/{id}/deactivate")
     public ResponseEntity<EquipamientoResponseDTO> deactivateEquipamiento(@PathVariable Long id) {
         return ResponseEntity.ok(equipamientoService.softDelete(id));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/{id}")
     public ResponseEntity<Void> deleteEquipamiento(@PathVariable Long id) {
         equipamientoService.hardDelete(id);
         return ResponseEntity.noContent().build();

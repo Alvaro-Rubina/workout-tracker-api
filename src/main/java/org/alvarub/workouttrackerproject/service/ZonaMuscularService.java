@@ -30,14 +30,14 @@ public class ZonaMuscularService {
     }
 
     @Transactional(readOnly = true)
-    public ZonaMuscularResponseDTO findById(Long id) {
-        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, false);
+    public ZonaMuscularResponseDTO findById(Long id, boolean verifyActive) {
+        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, verifyActive);
         return zonaMuscularMapper.toResponseDTO(zonaMuscular);
     }
 
     @Transactional(readOnly = true)
-    public ZonaMuscularSimpleDTO findByIdSimple(Long id) {
-        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, false);
+    public ZonaMuscularSimpleDTO findByIdSimple(Long id, boolean verifyActive) {
+        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, verifyActive);
         return zonaMuscularMapper.toSimpleDTO(zonaMuscular);
     }
 
@@ -51,6 +51,22 @@ public class ZonaMuscularService {
     @Transactional(readOnly = true)
     public List<ZonaMuscularSimpleDTO> findAllSimple() {
         return zonaMuscularRepository.findAll().stream()
+                .map(zonaMuscularMapper::toSimpleDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ZonaMuscularResponseDTO> findAllActive() {
+        return zonaMuscularRepository.findAll().stream()
+                .filter(ZonaMuscular::getActive)
+                .map(zonaMuscularMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ZonaMuscularSimpleDTO> findAllSimpleActive() {
+        return zonaMuscularRepository.findAll().stream()
+                .filter(ZonaMuscular::getActive)
                 .map(zonaMuscularMapper::toSimpleDTO)
                 .toList();
     }

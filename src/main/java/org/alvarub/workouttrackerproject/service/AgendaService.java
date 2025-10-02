@@ -35,11 +35,10 @@ public class AgendaService {
         Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
         Rutina rutina = rutinaService.getRutinaOrThrow(dto.getRoutineId());
 
-        if (!usuario.getCreatedRoutines().contains(rutina)) {
-            throw new ForbiddenOperationException("Usuario sin permiso para agendar una rutina que no ha creado");
-
-        } else if (!rutina.getIsPublic()) {
-            throw new ForbiddenOperationException("Usuario sin permiso para agendar una rutina ajena que no es pública.");
+        if (!Boolean.TRUE.equals(rutina.getIsPublic())) {
+            if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
+                throw new ForbiddenOperationException("Usuario sin permiso para agendar una rutina privada que no le pertenece");
+            }
         }
 
         agenda.setUser(usuario);
@@ -48,28 +47,42 @@ public class AgendaService {
     }
 
     @Transactional(readOnly = true)
-    public AgendaResponseDTO findById(Long id) {
+    public AgendaResponseDTO findById(Long id, String auth0UserId) {
         Agenda agenda = getAgendaOrThrow(id);
+
+        if (!agenda.getUser().getAuth0Id().equals(auth0UserId)) {
+            throw new ForbiddenOperationException("Usuario sin permiso para obtener la agenda de otro usuario");
+        }
+
         return agendaMapper.toResponseDTO(agenda);
     }
 
     @Transactional(readOnly = true)
-    public AgendaRutinaDTO findByIdSimple(Long id) {
+    public AgendaRutinaDTO findByIdSimple(Long id, String auth0UserId) {
         Agenda agenda = getAgendaOrThrow(id);
+
+        if (!agenda.getUser().getAuth0Id().equals(auth0UserId)) {
+            throw new ForbiddenOperationException("Usuario sin permiso para obtener la agenda de otro usuario");
+        }
+
         return agendaMapper.toRutinaDTO(agenda);
     }
 
     @Transactional(readOnly = true)
-    public List<AgendaRutinaDTO> findAllByUserId(Long userId) {
-        return agendaRepository.findByUserId(userId)
+    public List<AgendaRutinaDTO> findAllByUserId(String auth0UserId) {
+        return agendaRepository.findByUser_Auth0Id(auth0UserId)
                 .stream()
                 .map(agendaMapper::toRutinaDTO)
                 .toList();
     }
 
     @Transactional
-    public AgendaResponseDTO markAsCompleted(Long id, AgendaCompleteRequestDTO dto) {
+    public AgendaResponseDTO markAsCompleted(Long id, String auth0UserId, AgendaCompleteRequestDTO dto) {
         Agenda agenda = getAgendaOrThrow(id);
+
+        if (!agenda.getUser().getAuth0Id().equals(auth0UserId)) {
+            throw new ForbiddenOperationException("Usuario sin permiso para modificar la agenda de otro usuario");
+        }
 
         // Si la agenda ya fué completada anteriormente simplemente la retorno
         if (agenda.getCompleted().equals(true)) {
@@ -87,8 +100,12 @@ public class AgendaService {
     }
 
     @Transactional
-    public AgendaResponseDTO update(Long id, AgendaUpdateRequestDTO dto) {
+    public AgendaResponseDTO update(Long id, String auth0UserId, AgendaUpdateRequestDTO dto) {
         Agenda agenda = getAgendaOrThrow(id);
+
+        if (!agenda.getUser().getAuth0Id().equals(auth0UserId)) {
+            throw new ForbiddenOperationException("Usuario sin permiso para modificar la agenda de otro usuario");
+        }
 
         if (dto.getStartDate() != null) {
             agenda.setStartDate(dto.getStartDate());

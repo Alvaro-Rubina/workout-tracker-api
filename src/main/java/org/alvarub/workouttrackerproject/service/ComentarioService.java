@@ -1,6 +1,7 @@
 package org.alvarub.workouttrackerproject.service;
 
 import lombok.RequiredArgsConstructor;
+import org.alvarub.workouttrackerproject.exception.BusinessException;
 import org.alvarub.workouttrackerproject.exception.ForbiddenOperationException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.ComentarioMapper;
@@ -9,6 +10,8 @@ import org.alvarub.workouttrackerproject.persistence.dto.comentario.ComentarioRe
 import org.alvarub.workouttrackerproject.persistence.dto.comentario.ComentarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.comentario.ComentarioSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Comentario;
+import org.alvarub.workouttrackerproject.persistence.entity.Rutina;
+import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
 import org.alvarub.workouttrackerproject.persistence.repository.ComentarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,18 +28,26 @@ public class ComentarioService {
     private final RutinaService rutinaService;
 
     @Transactional
-    public ComentarioResponseDTO save(ComentarioRequestDTO dto) {
+    public ComentarioResponseDTO save(ComentarioRequestDTO dto, String auth0UserId) {
         Comentario comentario = comentarioMapper.toEntity(dto);
 
-        comentario.setUser(usuarioService.getUsuarioOrThrow(dto.getUserId(), true));
-        comentario.setRoutine(rutinaService.getRutinaOrThrow(dto.getRoutineId()));
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+        Rutina rutina = rutinaService.getRutinaOrThrow(dto.getRoutineId());
 
-        // TODO: cambiar la excepcion por una más adecuada
+        if (!Boolean.TRUE.equals(rutina.getIsPublic())) {
+            if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
+                throw new ForbiddenOperationException("Usuario sin permiso para comentar en una rutina privada que no le pertenece");
+            }
+        }
+
+        comentario.setUser(usuario);
+        comentario.setRoutine(rutina);
+
         if (dto.getReplyToId() != null) {
             Comentario replyTo = getComentarioOrThrow(dto.getReplyToId());
 
             if (!replyTo.getRoutine().equals(comentario.getRoutine())) {
-                throw new ForbiddenOperationException("No es posible responder un comentario de una rutina distinta");
+                throw new BusinessException("No es posible responder a un comentario de una rutina distinta");
             }
             comentario.setReplyTo(replyTo);
         }
@@ -65,12 +76,29 @@ public class ComentarioService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ComentarioResponseDTO> findAllByUser(String auth0UserId) {
+        return comentarioRepository.findByUser_Auth0Id(auth0UserId).stream()
+                .map(comentarioMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ComentarioSimpleDTO> findAllSimpleByUser(String auth0UserId) {
+        return comentarioRepository.findByUser_Auth0Id(auth0UserId).stream()
+                .map(comentarioMapper::toSimpleDTO)
+                .toList();
+    }
+
     @Transactional
-    public ComentarioSimpleDTO updateComentario(Long id, ComentarioContentRequestDTO dto) {
+    public ComentarioSimpleDTO updateComentario(Long id, String auth0UserId, ComentarioContentRequestDTO dto) {
         Comentario comentario = getComentarioOrThrow(id);
 
+        if (!comentario.getUser().getAuth0Id().equals(auth0UserId)) {
+            throw new ForbiddenOperationException("Usuario sin permiso para modificar el comentario de otro usuario");
+        }
+
         comentario.setContent(dto.content());
-        comentarioRepository.save(comentario);
 
         return comentarioMapper.toSimpleDTO(comentario);
     }

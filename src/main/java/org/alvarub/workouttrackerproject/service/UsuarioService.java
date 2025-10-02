@@ -119,8 +119,8 @@ public class UsuarioService {
 
         UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 
-        if (!usuario.getHistorialPeso().isEmpty()) {
-            response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+        if (!usuario.getBodyWeightHistorial().isEmpty()) {
+            response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
         }
 
         return response;
@@ -133,8 +133,8 @@ public class UsuarioService {
                 .map(usuario -> {
                     UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 
-                    if (!usuario.getHistorialPeso().isEmpty()) {
-                        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+                    if (!usuario.getBodyWeightHistorial().isEmpty()) {
+                        response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
                     }
 
                     return response;
@@ -164,7 +164,6 @@ public class UsuarioService {
         Usuario usuario = getUsuarioOrThrow(id, false);
 
         UsuarioStatsDTO response = usuarioMapper.toStatsDTO(usuario);
-        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
 
         return response;
     }
@@ -175,8 +174,8 @@ public class UsuarioService {
                 .map(usuario -> {
                     UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 
-                    if (!usuario.getHistorialPeso().isEmpty()) {
-                        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
+                    if (!usuario.getBodyWeightHistorial().isEmpty()) {
+                        response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
                     }
 
                     return response;
@@ -187,15 +186,7 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public List<UsuarioStatsDTO> findAllStats() {
         return usuarioRepository.findAll().stream()
-                .map(usuario -> {
-                    UsuarioStatsDTO response = usuarioMapper.toStatsDTO(usuario);
-
-                    if (!usuario.getHistorialPeso().isEmpty()) {
-                        response.setBodyWeight(usuario.getHistorialPeso().getLast().getBodyWeight());
-                    }
-
-                    return response;
-                })
+                .map(usuarioMapper::toStatsDTO)
                 .toList();
     }
 
@@ -225,13 +216,18 @@ public class UsuarioService {
         log.info("Actualizando estado activo del usuario {} a {}", usuario.getEmail(), !usuario.getActive());
         usuarioServiceAuth0.toggleActive(usuario.getAuth0Id(), usuario.getActive());
 
-        usuarioRepository.save(usuario);
-        return usuarioMapper.toResponseDTO(usuario);
+        UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
+
+        if (!usuario.getBodyWeightHistorial().isEmpty()) {
+            response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
+        }
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
         Usuario usuario = getUsuarioOrThrow(id, true);
+        // TODO: Delete, quizas poner un schedule para que se elimine dentro de 30 dias
     }
 
     // Métodos auxiliares

@@ -1,6 +1,7 @@
 package org.alvarub.workouttrackerproject.service;
 
 import lombok.RequiredArgsConstructor;
+import org.alvarub.workouttrackerproject.exception.ForbiddenOperationException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.RutinaMapper;
 import org.alvarub.workouttrackerproject.mapper.SesionMapper;
@@ -34,10 +35,11 @@ public class RutinaService {
     private final SesionMapper sesionMapper;
 
     @Transactional
-    public RutinaResponseDTO save(RutinaRequestDTO dto) {
+    public RutinaResponseDTO save(RutinaRequestDTO dto, String auth0UserId) {
         Rutina rutina = rutinaMapper.toEntity(dto);
 
-        rutina.setUser(usuarioService.getUsuarioOrThrow(dto.getUserId(), true));
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+        rutina.setUser(usuario);
 
         rutina.setCategory(categoriaService.getCategoriaOrThrow(dto.getCategoryId(), true));
 
@@ -69,6 +71,33 @@ public class RutinaService {
     }
 
     @Transactional(readOnly = true)
+    public RutinaResponseDTO findByIdVisibleToUser(Long id, String auth0UserId) {
+        Rutina rutina = getRutinaOrThrow(id);
+
+        if (!Boolean.TRUE.equals(rutina.getIsPublic())) {
+            // Solo el creador puede verla si es privada
+            if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
+                throw new ForbiddenOperationException("Usuario sin permiso para obtener una rutina privada que no le pertenece");
+            }
+        }
+
+        return rutinaMapper.toResponseDTO(rutina);
+    }
+
+    @Transactional(readOnly = true)
+    public RutinaSimpleDTO findByIdSimpleVisibleToUser(Long id, String auth0UserId) {
+        Rutina rutina = getRutinaOrThrow(id);
+
+        if (!Boolean.TRUE.equals(rutina.getIsPublic())) {
+            if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
+                throw new ForbiddenOperationException("Usuario sin permiso para obtener una rutina privada que no le pertenece");
+            }
+        }
+
+        return rutinaMapper.toSimpleDTO(rutina);
+    }
+
+    @Transactional(readOnly = true)
     public List<RutinaResponseDTO> findAll() {
         return rutinaRepository.findAll().stream()
                 .map(rutinaMapper::toResponseDTO)
@@ -82,16 +111,41 @@ public class RutinaService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<RutinaResponseDTO> findAllPublic() {
+        return rutinaRepository.findAll().stream()
+                .filter(Rutina::getIsPublic)
+                .map(rutinaMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RutinaSimpleDTO> findAllPublicSimple() {
+        return rutinaRepository.findAll().stream()
+                .filter(Rutina::getIsPublic)
+                .map(rutinaMapper::toSimpleDTO)
+                .toList();
+    }
+
     @Transactional
-    public RutinaSimpleDTO toggleIsPublic(Long id) {
+    public RutinaSimpleDTO toggleIsPublic(Long id, String auth0UserId) {
         Rutina rutina = getRutinaOrThrow(id);
+
+        if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
+            throw new ForbiddenOperationException("Usuario sin permiso para modificar una rutina que no le pertenece");
+        }
+
         rutina.setIsPublic(!rutina.getIsPublic());
         return rutinaMapper.toSimpleDTO(rutina);
     }
 
     @Transactional
-    public void hardDelete(Long id) {
+    public void hardDelete(Long id, String auth0UserId) {
         Rutina rutina = getRutinaOrThrow(id);
+
+        if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
+            throw new ForbiddenOperationException("Usuario sin permiso para modificar una rutina que no le pertenece");
+        }
 
         // Remuevo la rutina de todas las relaciones con Usuario
         Usuario creador = usuarioRepository.findByCreatedRoutinesContains(rutina)
@@ -118,8 +172,12 @@ public class RutinaService {
     }
 
     @Transactional
-    public RutinaResponseDTO update(Long id, RutinaUpdateRequestDTO dto) {
+    public RutinaResponseDTO update(Long id, String auth0UserId, RutinaUpdateRequestDTO dto) {
         Rutina rutina = getRutinaOrThrow(id);
+
+        if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
+            throw new ForbiddenOperationException("Usuario sin permiso para modificar una rutina que no le pertenece");
+        }
 
         if (dto.getName() != null){
             rutina.setName(dto.getName());

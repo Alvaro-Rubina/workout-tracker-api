@@ -9,6 +9,8 @@ import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaUpdateRequ
 import org.alvarub.workouttrackerproject.service.RutinaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,12 +23,14 @@ public class RutinaController {
     private final RutinaService rutinaService;
 
     @PostMapping
-    public ResponseEntity<RutinaResponseDTO> createRutina(@Valid @RequestBody RutinaRequestDTO dto) {
+    public ResponseEntity<RutinaResponseDTO> createRutina(@AuthenticationPrincipal Jwt jwt,
+                                                          @Valid @RequestBody RutinaRequestDTO dto) {
+        String auth0UserId = jwt.getSubject();
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(rutinaService.save(dto));
+                .body(rutinaService.save(dto, auth0UserId));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin/{id}")
     public ResponseEntity<Object> getRutinaById(@PathVariable Long id,
                                                 @RequestParam(defaultValue = "false") Boolean relations) {
         Object response = relations
@@ -36,7 +40,19 @@ public class RutinaController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getRutinaByIdVisibleToUser(@AuthenticationPrincipal Jwt jwt,
+                                                             @PathVariable Long id,
+                                                             @RequestParam(defaultValue = "false") Boolean relations) {
+        String auth0UserId = jwt.getSubject();
+        Object response = relations
+                ? rutinaService.findByIdVisibleToUser(id, auth0UserId)
+                : rutinaService.findByIdSimpleVisibleToUser(id, auth0UserId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin")
     public ResponseEntity<List<?>> getAllRutinas(@RequestParam(defaultValue = "false") Boolean relations) {
         List<?> response = relations
                 ? rutinaService.findAll()
@@ -45,20 +61,35 @@ public class RutinaController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping()
+    public ResponseEntity<List<?>> getAllPublicRutinas(@RequestParam(defaultValue = "false") Boolean relations) {
+        List<?> response = relations
+                ? rutinaService.findAllPublic()
+                :  rutinaService.findAllPublicSimple();
+
+        return ResponseEntity.ok(response);
+    }
+
     @PatchMapping("/{id}/toggle-public")
-    public ResponseEntity<RutinaSimpleDTO> toggleRutinaIsPublicStatus(@PathVariable Long id) {
-        return ResponseEntity.ok(rutinaService.toggleIsPublic(id));
+    public ResponseEntity<RutinaSimpleDTO> toggleRutinaIsPublicStatus(@AuthenticationPrincipal Jwt jwt,
+                                                                      @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.toggleIsPublic(id, auth0UserId));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<RutinaResponseDTO> updateRutina(@PathVariable Long id,
+    public ResponseEntity<RutinaResponseDTO> updateRutina(@AuthenticationPrincipal Jwt jwt,
+                                                          @PathVariable Long id,
                                                           @RequestBody RutinaUpdateRequestDTO dto) {
-        return ResponseEntity.ok(rutinaService.update(id, dto));
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.update(id, auth0UserId, dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRutina(@PathVariable Long id) {
-        rutinaService.hardDelete(id);
+    public ResponseEntity<Void> deleteRutina(@AuthenticationPrincipal Jwt jwt,
+                                             @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        rutinaService.hardDelete(id, auth0UserId);
         return ResponseEntity.noContent().build();
     }
 }
