@@ -190,8 +190,11 @@ public class UsuarioService {
     }
 
     @Transactional(readOnly = true)
-    public List<UsuarioResponseDTO> findAll() {
+    public List<UsuarioResponseDTO> findAllByRolName(String rolName) {
+        Rol rol = rolService.getRolByNameOrThrow(rolName, true);
+
         return usuarioRepository.findAll().stream()
+                .filter(usuario -> usuario.getRole().equals(rol))
                 .map(usuario -> {
                     UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 

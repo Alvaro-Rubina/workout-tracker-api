@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.alvarub.workouttrackerproject.utils.Constants.ADMIN_ROL_NAME;
+import static org.alvarub.workouttrackerproject.utils.Constants.USER_ROL_NAME;
+
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -56,9 +59,14 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.findStatsById(id));
     }
 
-    @GetMapping("/admin")
+    @GetMapping("/admin/users")
     public ResponseEntity<List<UsuarioResponseDTO>> getAllUsuarios() {
-        return ResponseEntity.ok(usuarioService.findAll());
+        return ResponseEntity.ok(usuarioService.findAllByRolName(USER_ROL_NAME));
+    }
+
+    @GetMapping("/admin/admins")
+    public ResponseEntity<List<UsuarioResponseDTO>> getAllAdmins() {
+        return ResponseEntity.ok(usuarioService.findAllByRolName(ADMIN_ROL_NAME));
     }
 
     @GetMapping("/admin/stats")
