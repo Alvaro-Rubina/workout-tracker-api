@@ -44,8 +44,7 @@ public class PesoController {
 
     @PatchMapping()
     public ResponseEntity<PesoResponseDTO> updateLastBodyWeight(@AuthenticationPrincipal Jwt jwt,
-                                                                @PathVariable Long id,
-                                                                @Valid PesoRequestDTO dto, ServletResponse servletResponse) {
+                                                                @Valid @RequestBody PesoRequestDTO dto) {
         String auth0UserID = jwt.getSubject();
         return ResponseEntity.ok(pesoService.updateLast(auth0UserID, dto));
     }
