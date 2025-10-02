@@ -24,6 +24,8 @@ public class UsuarioResponseDTO {
 
     private Boolean active;
 
+    private String picture;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
