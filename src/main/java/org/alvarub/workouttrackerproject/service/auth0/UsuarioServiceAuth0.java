@@ -2,16 +2,19 @@ package org.alvarub.workouttrackerproject.service.auth0;
 
 import com.auth0.client.mgmt.ManagementAPI;
 import com.auth0.exception.Auth0Exception;
+import com.auth0.json.mgmt.Role;
 import com.auth0.json.mgmt.users.User;
 import com.auth0.net.Request;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alvarub.workouttrackerproject.persistence.dto.rol.RolResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -104,6 +107,26 @@ public class UsuarioServiceAuth0 {
         }
     }
 
+    public RolResponseDTO getUserRol(String auth0UserId) {
+        try {
+            log.info("Obteniendo roles del usuario Auth0 {}", auth0UserId);
+            // Obtiene los roles del usuario desde Auth0
+            List<Role> roles = managementAPI.users().listRoles(auth0UserId, null).execute().getItems();
+            if (roles != null && !roles.isEmpty()) {
+                Role rol = roles.getFirst();
+                return RolResponseDTO.builder()
+                        .name(rol.getName())
+                        .description(rol.getDescription())
+                        .build();
+            } else {
+                log.warn("El usuario Auth0 {} no tiene roles asignados", auth0UserId);
+                return null;
+            }
+        } catch (Auth0Exception e) {
+            log.error("Error obteniendo roles del usuario Auth0 {}", auth0UserId, e);
+            return null;
+        }
+    }
     /**
      * Elimina un usuario de Auth0
      */
