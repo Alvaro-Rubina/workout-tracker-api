@@ -19,7 +19,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -47,7 +46,7 @@ public class SecurityConfig {
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/*/public/**").permitAll()
-                        .requestMatchers("/**").hasRole("PROPIETARIO") // Acceso completo para PROPIETARIO
+                        .requestMatchers("/**").hasRole("PROPIETARIO")
                         .requestMatchers("/*/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -90,8 +89,8 @@ public class SecurityConfig {
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
-        converter.setAuthoritiesClaimName(audience + "/roles");
-        converter.setAuthorityPrefix("");
+        converter.setAuthoritiesClaimName(audience + "/roles"); // Donde Auth0 manda los roles
+        converter.setAuthorityPrefix("ROLE_");
 
         JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
         jwtConverter.setJwtGrantedAuthoritiesConverter(converter);
