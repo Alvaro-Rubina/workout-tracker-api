@@ -24,7 +24,9 @@ public class ZonaMuscularService {
     public ZonaMuscularResponseDTO save(ZonaMuscularRequestDTO dto) {
         ZonaMuscular zonaMuscular = zonaMuscularMapper.toEntity(dto);
 
-        zonaMuscular.getMuscles().forEach(muscle -> muscle.setMuscleGroup(zonaMuscular));
+        if (dto.getMuscles() != null && !dto.getMuscles().isEmpty()) {
+            zonaMuscular.getMuscles().forEach(muscle -> muscle.setMuscleGroup(zonaMuscular));
+        }
 
         return zonaMuscularMapper.toResponseDTO(zonaMuscularRepository.save(zonaMuscular));
     }
