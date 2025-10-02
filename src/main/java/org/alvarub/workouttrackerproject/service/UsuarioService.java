@@ -145,17 +145,37 @@ public class UsuarioService {
                         throw new ExistingResourceException("El email ya está registrado con otro método de autenticación");
                     }
 
+                    Rol rolUsuario = rolService.getRolByNameOrThrow(USER_ROL_NAME, true);
+
                     // Creo nuevo usuario
                     Usuario newUser = Usuario.builder()
                             .auth0Id(authoUserID)
                             .email(auth0UserEmail)
                             .name(auth0UserName)
-                            .role(rolService.getRolByNameOrThrow(USER_ROL_NAME, true))
+                            .role(rolUsuario)
                             .active(true)
                             .build();
 
                     log.info("Creando usuario desde token {}", auth0UserEmail);
-                    return usuarioMapper.toResponseDTO(usuarioRepository.save(newUser));
+
+                    try {
+                        // Asigno el rol al usuario ya existente en Auth0
+                        log.info("Asignando rol en Auth0 al usuario {}", authoUserID);
+                        usuarioServiceAuth0.setRole(authoUserID, rolUsuario.getAuth0RoleId());
+
+                        // Guardo en db
+                        log.info("Guardando usuario en base de datos {}", auth0UserEmail);
+                        Usuario saved = usuarioRepository.save(newUser);
+                        return usuarioMapper.toResponseDTO(saved);
+
+                    } catch (Auth0Exception e) {
+                        log.error("Error asignando rol en Auth0 al usuario {}", authoUserID, e);
+                        throw new UserRegistrationException("Error asignando rol en Auth0", e);
+
+                    } catch (DataAccessException e) {
+                        log.error("Error guardando usuario en BD {}", auth0UserEmail, e);
+                        throw new UserRegistrationException("Error guardando usuario en la base de datos", e);
+                    }
                 });
     }
 
