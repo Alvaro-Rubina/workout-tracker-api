@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/*/public/**").permitAll()
+                        .requestMatchers("/**").hasRole("PROPIETARIO") // Acceso completo para PROPIETARIO
                         .requestMatchers("/*/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -90,7 +91,7 @@ public class SecurityConfig {
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
         converter.setAuthoritiesClaimName(audience + "/roles");
-        converter.setAuthorityPrefix("");
+        converter.setAuthorityPrefix("ROLE_");
 
         JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
         jwtConverter.setJwtGrantedAuthoritiesConverter(converter);
