@@ -239,6 +239,7 @@ public class UsuarioService {
 
         log.info("Actualizando estado activo del usuario {} a {}", usuario.getEmail(), !usuario.getActive());
         usuarioServiceAuth0.toggleActive(usuario.getAuth0Id(), usuario.getActive());
+        usuario.setActive(!usuario.getActive());
 
         UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 
