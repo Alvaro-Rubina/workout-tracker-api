@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoSimpleDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.service.MusculoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,6 +69,12 @@ public class MusculoController {
     @PatchMapping("/admin/{id}/toggle-active")
     public ResponseEntity<MusculoSimpleDTO> toggleMusculoActiveStatus(@PathVariable Long id) {
         return ResponseEntity.ok(musculoService.toggleActive(id));
+    }
+
+    @PatchMapping("/admin/{id}")
+    public ResponseEntity<MusculoResponseDTO> updateMusculo(@PathVariable Long id,
+                                                            @Valid @RequestBody MusculoUpdateRequestDTO dto) {
+        return ResponseEntity.ok(musculoService.update(id, dto));
     }
 
     @PatchMapping("/admin/{id}/deactivate")

@@ -6,6 +6,7 @@ import org.alvarub.workouttrackerproject.mapper.MusculoMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoSimpleDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Musculo;
 import org.alvarub.workouttrackerproject.persistence.repository.MusculoRepository;
 import org.springframework.stereotype.Service;
@@ -77,6 +78,25 @@ public class MusculoService {
         Musculo musculo = getMusculoOrThrow(id, false);
         musculo.setActive(!musculo.getActive());
         return musculoMapper.toSimpleDTO(musculoRepository.save(musculo));
+    }
+
+    @Transactional
+    public MusculoResponseDTO update(Long id, MusculoUpdateRequestDTO dto) {
+        Musculo musculo = getMusculoOrThrow(id, false);
+
+        if ((!musculo.getName().equalsIgnoreCase(dto.getName())) && (dto.getName() != null && !dto.getName().isBlank())) {
+            musculo.setName(dto.getName());
+        }
+
+        if ((!musculo.getActive().equals(dto.getActive())) && (dto.getActive() != null)) {
+            musculo.setActive(dto.getActive());
+        }
+
+        if (dto.getMuscleGroupId() != null) {
+            musculo.setMuscleGroup(zonaMuscularService.getZonaMuscularOrThrow(dto.getMuscleGroupId(), true));
+        }
+
+        return musculoMapper.toResponseDTO(musculo);
     }
 
     @Transactional

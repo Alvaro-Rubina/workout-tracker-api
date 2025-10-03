@@ -1,9 +1,11 @@
 package org.alvarub.workouttrackerproject.controller;
 
 import com.auth0.exception.Auth0Exception;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
 import org.alvarub.workouttrackerproject.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.alvarub.workouttrackerproject.utils.Constants.ADMIN_ROL_NAME;
+import static org.alvarub.workouttrackerproject.utils.Constants.USER_ROL_NAME;
 
 @RestController
 @RequestMapping("/users")
@@ -54,9 +59,14 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.findStatsById(id));
     }
 
-    @GetMapping("/admin")
+    @GetMapping("/admin/users")
     public ResponseEntity<List<UsuarioResponseDTO>> getAllUsuarios() {
-        return ResponseEntity.ok(usuarioService.findAll());
+        return ResponseEntity.ok(usuarioService.findAllByRolName(USER_ROL_NAME));
+    }
+
+    @GetMapping("/admin/admins")
+    public ResponseEntity<List<UsuarioResponseDTO>> getAllAdmins() {
+        return ResponseEntity.ok(usuarioService.findAllByRolName(ADMIN_ROL_NAME));
     }
 
     @GetMapping("/admin/stats")
@@ -64,6 +74,12 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.findAllStats());
     }
 
+    @PatchMapping
+    public ResponseEntity<UsuarioResponseDTO> updateUsuario(@AuthenticationPrincipal Jwt jwt,
+                                                            @Valid @RequestBody UsuarioUpdateRequestDTO dto) throws Auth0Exception {
+        String auth0userId = jwt.getSubject();
+        return ResponseEntity.ok(usuarioService.update(auth0userId, dto));
+    }
 
     // ENDPOINTS ADMIN
     @PostMapping("/admin/signup")

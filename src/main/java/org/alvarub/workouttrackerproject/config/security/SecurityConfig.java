@@ -19,8 +19,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.Collections;
 
+import static org.alvarub.workouttrackerproject.utils.Constants.*;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -45,9 +45,14 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/api/*/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/*/public/**").permitAll()
+                .authorizeHttpRequests(auth -> auth
+                        // Endpoints publicos
+                        .requestMatchers("/*/public/**", "/public/**").permitAll()
+                        // Endpoints para ADMIN y PROPIETARIO
+                        .requestMatchers("/*/admin/**", "/admin/**").hasAnyRole(
+                                        ADMIN_ROL_NAME,
+                                        OWNER_ROL_NAME
+                                )
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2resourceServer -> oauth2resourceServer
@@ -89,8 +94,8 @@ public class SecurityConfig {
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
-        converter.setAuthoritiesClaimName(audience + "/roles");
-        converter.setAuthorityPrefix("");
+        converter.setAuthoritiesClaimName(audience + "/roles"); // Donde Auth0 manda los roles
+        converter.setAuthorityPrefix("ROLE_");
 
         JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
         jwtConverter.setJwtGrantedAuthoritiesConverter(converter);
