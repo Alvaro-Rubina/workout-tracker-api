@@ -100,6 +100,7 @@ public class ZonaMuscularService {
         return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
     }
 
+    @Transactional
     public ZonaMuscularResponseDTO update(Long id, ZonaMuscularUpdateRequestDTO dto) {
         ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, false);
 
