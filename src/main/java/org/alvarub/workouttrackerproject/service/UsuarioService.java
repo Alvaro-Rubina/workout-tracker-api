@@ -9,6 +9,7 @@ import org.alvarub.workouttrackerproject.exception.UserRegistrationException;
 import org.alvarub.workouttrackerproject.mapper.UsuarioMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Rol;
@@ -145,17 +146,38 @@ public class UsuarioService {
                         throw new ExistingResourceException("El email ya está registrado con otro método de autenticación");
                     }
 
+                    Rol rol = rolService.getRolByNameOrThrow(
+                            usuarioServiceAuth0.getUserRol(authoUserID).getName(), true);
+
                     // Creo nuevo usuario
                     Usuario newUser = Usuario.builder()
                             .auth0Id(authoUserID)
                             .email(auth0UserEmail)
                             .name(auth0UserName)
-                            .role(rolService.getRolByNameOrThrow(USER_ROL_NAME, true))
+                            .role(rol)
                             .active(true)
                             .build();
 
                     log.info("Creando usuario desde token {}", auth0UserEmail);
-                    return usuarioMapper.toResponseDTO(usuarioRepository.save(newUser));
+
+                    try {
+                        // Asigno el rol al usuario ya existente en Auth0
+                        log.info("Asignando rol en Auth0 al usuario {}", authoUserID);
+                        usuarioServiceAuth0.setRole(authoUserID, rol.getAuth0RoleId());
+
+                        // Guardo en db
+                        log.info("Guardando usuario en base de datos {}", auth0UserEmail);
+                        Usuario saved = usuarioRepository.save(newUser);
+                        return usuarioMapper.toResponseDTO(saved);
+
+                    } catch (Auth0Exception e) {
+                        log.error("Error asignando rol en Auth0 al usuario {}", authoUserID, e);
+                        throw new UserRegistrationException("Error asignando rol en Auth0", e);
+
+                    } catch (DataAccessException e) {
+                        log.error("Error guardando usuario en BD {}", auth0UserEmail, e);
+                        throw new UserRegistrationException("Error guardando usuario en la base de datos", e);
+                    }
                 });
     }
 
@@ -169,8 +191,11 @@ public class UsuarioService {
     }
 
     @Transactional(readOnly = true)
-    public List<UsuarioResponseDTO> findAll() {
+    public List<UsuarioResponseDTO> findAllByRolName(String rolName) {
+        Rol rol = rolService.getRolByNameOrThrow(rolName, true);
+
         return usuarioRepository.findAll().stream()
+                .filter(usuario -> usuario.getRole().equals(rol))
                 .map(usuario -> {
                     UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 
@@ -222,6 +247,25 @@ public class UsuarioService {
             response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
         }
         return response;
+    }
+
+    @Transactional
+    public UsuarioResponseDTO update(String auth0UserId, UsuarioUpdateRequestDTO dto) throws Auth0Exception {
+        Usuario usuario = getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+
+        if ((!usuario.getName().equals(dto.getName()) && (dto.getName() != null && !dto.getName().isBlank()))) {
+            usuario.setName(dto.getName());
+        }
+
+        if ((!usuario.getPicture().equals(dto.getPicture()) && (dto.getPicture() != null && !dto.getPicture().isBlank()))) {
+            usuario.setPicture(dto.getPicture());
+        }
+
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            usuarioServiceAuth0.changePassword(usuario.getAuth0Id(), dto.getPassword());
+        }
+
+        return usuarioMapper.toResponseDTO(usuario);
     }
 
     @Transactional

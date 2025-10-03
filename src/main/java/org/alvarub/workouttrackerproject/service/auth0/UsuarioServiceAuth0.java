@@ -2,16 +2,19 @@ package org.alvarub.workouttrackerproject.service.auth0;
 
 import com.auth0.client.mgmt.ManagementAPI;
 import com.auth0.exception.Auth0Exception;
+import com.auth0.json.mgmt.Role;
 import com.auth0.json.mgmt.users.User;
 import com.auth0.net.Request;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alvarub.workouttrackerproject.persistence.dto.rol.RolResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.auth0.SignupResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -86,6 +89,44 @@ public class UsuarioServiceAuth0 {
         }
     }
 
+    /**
+     * Cambia la contraseña de un usuario en Auth0
+     * @param auth0UserId ID del usuario en Auth0 (sub)
+     * @param newPassword Nueva contraseña
+     */
+    public void changePassword(String auth0UserId, String newPassword) throws Auth0Exception {
+        try {
+            User userUpdate = new User();
+            userUpdate.setPassword(newPassword.toCharArray());
+            log.info("Cambiando contraseña del usuario Auth0 {}", auth0UserId);
+            managementAPI.users().update(auth0UserId, userUpdate).execute();
+            log.info("Contraseña cambiada exitosamente para el usuario Auth0 {}", auth0UserId);
+        } catch (Auth0Exception e) {
+            log.error("Error cambiando la contraseña del usuario Auth0 {}", auth0UserId, e);
+            throw e;
+        }
+    }
+
+    public RolResponseDTO getUserRol(String auth0UserId) {
+        try {
+            log.info("Obteniendo roles del usuario Auth0 {}", auth0UserId);
+            // Obtiene los roles del usuario desde Auth0
+            List<Role> roles = managementAPI.users().listRoles(auth0UserId, null).execute().getItems();
+            if (roles != null && !roles.isEmpty()) {
+                Role rol = roles.getFirst();
+                return RolResponseDTO.builder()
+                        .name(rol.getName())
+                        .description(rol.getDescription())
+                        .build();
+            } else {
+                log.warn("El usuario Auth0 {} no tiene roles asignados", auth0UserId);
+                return null;
+            }
+        } catch (Auth0Exception e) {
+            log.error("Error obteniendo roles del usuario Auth0 {}", auth0UserId, e);
+            return null;
+        }
+    }
     /**
      * Elimina un usuario de Auth0
      */

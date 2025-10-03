@@ -2,7 +2,6 @@ package org.alvarub.workouttrackerproject.service;
 
 import com.auth0.exception.Auth0Exception;
 import com.auth0.json.mgmt.Role;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alvarub.workouttrackerproject.exception.ForbiddenOperationException;
@@ -33,19 +32,6 @@ public class RolService {
     private final RolServiceAuth0 rolServiceAuth0;
     private final UsuarioRepository usuarioRepository;
 
-    // Método para guardar los roles predefinidos
-    @PostConstruct
-    @Transactional
-    public void initDefaultRoles() {
-        log.info("Verificando que los roles por defecto existan en Auth0 y en base de datos...");
-        ROLES.forEach((rol, description) -> {
-            try {
-                createRoleIfNotExists(rol, description);
-            } catch (Auth0Exception e) {
-                log.error("Error creando rol por defecto en Auth0: {}", rol, e);
-            }
-        });
-    }
 
     @Transactional
     public RolResponseDTO save(RolRequestDTO dto) throws Auth0Exception {

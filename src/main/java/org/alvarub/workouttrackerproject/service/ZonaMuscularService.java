@@ -6,6 +6,7 @@ import org.alvarub.workouttrackerproject.mapper.ZonaMuscularMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularSimpleDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.ZonaMuscular;
 import org.alvarub.workouttrackerproject.persistence.repository.ZonaMuscularRepository;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,9 @@ public class ZonaMuscularService {
     public ZonaMuscularResponseDTO save(ZonaMuscularRequestDTO dto) {
         ZonaMuscular zonaMuscular = zonaMuscularMapper.toEntity(dto);
 
-        zonaMuscular.getMuscles().forEach(muscle -> muscle.setMuscleGroup(zonaMuscular));
+        if (dto.getMuscles() != null && !dto.getMuscles().isEmpty()) {
+            zonaMuscular.getMuscles().forEach(muscle -> muscle.setMuscleGroup(zonaMuscular));
+        }
 
         return zonaMuscularMapper.toResponseDTO(zonaMuscularRepository.save(zonaMuscular));
     }
@@ -95,6 +98,21 @@ public class ZonaMuscularService {
                 .forEach(m -> m.setActive(false));
 
         return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
+    }
+
+    @Transactional
+    public ZonaMuscularResponseDTO update(Long id, ZonaMuscularUpdateRequestDTO dto) {
+        ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, false);
+
+        if ((!zonaMuscular.getName().equals(dto.getName()) && (dto.getName() != null && !dto.getName().isBlank()))) {
+            zonaMuscular.setName(dto.getName());
+        }
+
+        if ((!zonaMuscular.getActive().equals(dto.getActive())) && (dto.getActive() != null)) {
+            zonaMuscular.setActive(dto.getActive());
+        }
+
+        return zonaMuscularMapper.toResponseDTO(zonaMuscular);
     }
 
     // Métodos auxiliares

@@ -3,6 +3,7 @@ package org.alvarub.workouttrackerproject.persistence.dto.ejercicio;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.io.Serializable;
@@ -25,7 +26,7 @@ public class EjercicioRequestDTO implements Serializable {
 
     private String tips;
 
-    @NotNull(message = "El campo instructions es obligatorio")
+    @NotEmpty(message = "El campo instructions es obligatorio y debe tener al menos 1 elemento")
     private Map<Integer, String> instructions;
 
     @NotEmpty(message = "El campo sampleVideos es obligatorio y debe tener al menos 1 elemento")

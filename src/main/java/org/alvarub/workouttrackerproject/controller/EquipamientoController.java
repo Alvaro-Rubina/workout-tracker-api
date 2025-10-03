@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoResponseDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.service.EquipamientoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,12 @@ public class EquipamientoController {
     @PatchMapping("/admin/{id}/toggle-active")
     public ResponseEntity<EquipamientoResponseDTO> toggleEquipamientoActiveStatus(@PathVariable Long id) {
         return ResponseEntity.ok(equipamientoService.toggleActive(id));
+    }
+
+    @PatchMapping("/admin/{id}")
+    public ResponseEntity<EquipamientoResponseDTO> updateEquipamiento(@PathVariable Long id,
+                                                                      @Valid @RequestBody EquipamientoUpdateRequestDTO dto) {
+        return ResponseEntity.ok(equipamientoService.update(id, dto));
     }
 
     @PatchMapping("/admin/{id}/deactivate")
