@@ -5,6 +5,7 @@ import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.EquipamientoMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoResponseDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Equipamiento;
 import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.EquipamientoRepository;
@@ -64,6 +65,21 @@ public class EquipamientoService {
 
         equipamiento.setActive(false);
         return equipamientoMapper.toResponseDTO(equipamientoRepository.save(equipamiento));
+    }
+
+    @Transactional
+    public EquipamientoResponseDTO update(Long id, EquipamientoUpdateRequestDTO dto) {
+        Equipamiento equipamiento = getEquipamientoOrThrow(id, false);
+
+        if ((!equipamiento.getName().equalsIgnoreCase(dto.getName())) && (dto.getName() != null && !dto.getName().isBlank())) {
+            equipamiento.setName(dto.getName());
+        }
+
+        if ((!equipamiento.getActive().equals(dto.getActive())) && (dto.getActive() != null)) {
+            equipamiento.setActive(dto.getActive());
+        }
+
+        return equipamientoMapper.toResponseDTO(equipamiento);
     }
 
     @Transactional
