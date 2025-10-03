@@ -20,6 +20,7 @@ public class ZonaMuscularService {
 
     private final ZonaMuscularRepository zonaMuscularRepository;
     private final ZonaMuscularMapper zonaMuscularMapper;
+    private final MusculoService musculoService;
 
     @Transactional
     public ZonaMuscularResponseDTO save(ZonaMuscularRequestDTO dto) {
@@ -80,7 +81,12 @@ public class ZonaMuscularService {
         zonaMuscular.setActive(!zonaMuscular.getActive());
 
         zonaMuscular.getMuscles()
-                .forEach(m -> m.setActive(zonaMuscular.getActive()));
+                .forEach(m -> {
+                    m.setActive(zonaMuscular.getActive());
+                    if (!m.getActive()) {
+                        musculoService.deactivateRelatedEjercicios(m);
+                    }
+                });
 
         return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
     }
@@ -95,7 +101,10 @@ public class ZonaMuscularService {
 
         zonaMuscular.setActive(false);
         zonaMuscular.getMuscles()
-                .forEach(m -> m.setActive(false));
+                .forEach(m -> {
+                    m.setActive(false);
+                    musculoService.deactivateRelatedEjercicios(m);
+                });
 
         return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
     }
