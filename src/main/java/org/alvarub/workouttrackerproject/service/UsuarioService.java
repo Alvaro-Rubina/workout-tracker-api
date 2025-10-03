@@ -86,6 +86,7 @@ public class UsuarioService {
         Usuario usuario = Usuario.builder()
                 .auth0Id(auth0User.getUserId())
                 .email(auth0User.getEmail())
+                .picture("https://static.vecteezy.com/system/resources/previews/013/360/247/non_2x/default-avatar-photo-icon-social-media-profile-sign-symbol-vector.jpg")
                 .name(auth0User.getName() != null ? auth0User.getName() : dto.getEmail())
                 .role(rol)
                 .build();
