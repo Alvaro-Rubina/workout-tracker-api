@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface RutinaRepository extends JpaRepository<Rutina, Long> {
     List<Rutina> findAllByCategory(Categoria categoria);
+    List<Rutina> findByUser_Auth0Id(String auth0Id);
+
 }

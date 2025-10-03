@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.LinkedHashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -123,6 +122,20 @@ public class RutinaService {
     public List<RutinaSimpleDTO> findAllPublicSimple() {
         return rutinaRepository.findAll().stream()
                 .filter(Rutina::getIsPublic)
+                .map(rutinaMapper::toSimpleDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RutinaResponseDTO> findAllByUser(String auth0UserId) {
+        return rutinaRepository.findByUser_Auth0Id(auth0UserId).stream()
+                .map(rutinaMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RutinaSimpleDTO> findAllSimpleByUser(String auth0UserId) {
+        return rutinaRepository.findByUser_Auth0Id(auth0UserId).stream()
                 .map(rutinaMapper::toSimpleDTO)
                 .toList();
     }
