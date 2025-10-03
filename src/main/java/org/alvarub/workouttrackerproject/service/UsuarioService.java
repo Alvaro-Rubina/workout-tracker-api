@@ -237,9 +237,10 @@ public class UsuarioService {
             });
         }
 
-        log.info("Actualizando estado activo del usuario {} a {}", usuario.getEmail(), !usuario.getActive());
-        usuarioServiceAuth0.toggleActive(usuario.getAuth0Id(), usuario.getActive());
-        usuario.setActive(!usuario.getActive());
+        boolean nuevoEstado = !usuario.getActive();
+        log.info("Actualizando estado activo del usuario {} a {}", usuario.getEmail(), nuevoEstado);
+        usuarioServiceAuth0.toggleActive(usuario.getAuth0Id(), nuevoEstado);
+        usuario.setActive(nuevoEstado);
 
         UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
 
@@ -248,6 +249,7 @@ public class UsuarioService {
         }
         return response;
     }
+
 
     @Transactional
     public UsuarioResponseDTO update(String auth0UserId, UsuarioUpdateRequestDTO dto) throws Auth0Exception {
