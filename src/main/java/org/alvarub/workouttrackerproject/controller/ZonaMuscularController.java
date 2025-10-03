@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularSimpleDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.service.ZonaMuscularService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,6 +67,12 @@ public class ZonaMuscularController {
     @PatchMapping("/admin/{id}/toggle-active")
     public ResponseEntity<ZonaMuscularSimpleDTO> toggleZonaMuscularActiveStatus(@PathVariable Long id) {
         return ResponseEntity.ok(zonaMuscularService.toggleActive(id));
+    }
+
+    @PatchMapping("/admin/{id}")
+    public ResponseEntity<ZonaMuscularResponseDTO> updateZonaMuscular(@PathVariable Long id,
+                                                                      @Valid @RequestBody ZonaMuscularUpdateRequestDTO dto) {
+        return ResponseEntity.ok(zonaMuscularService.update(id, dto));
     }
 
     @PatchMapping("/admin/{id}/deactivate")
