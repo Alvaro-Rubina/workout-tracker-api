@@ -1,6 +1,7 @@
 package org.alvarub.workouttrackerproject.service;
 
 import lombok.RequiredArgsConstructor;
+import org.alvarub.workouttrackerproject.exception.BusinessException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.MusculoMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoRequestDTO;
@@ -79,11 +80,16 @@ public class MusculoService {
     public MusculoSimpleDTO toggleActive(Long id) {
         Musculo musculo = getMusculoOrThrow(id, false);
 
-        musculo.setActive(!musculo.getActive());
-        if (!musculo.getActive()) {
+        boolean active = !musculo.getActive();
+        if (active) {
+            if (!musculo.getMuscleGroup().getActive()) {
+                throw new BusinessException("No es posible activar un músculo cuya zona muscular está inactiva");
+            }
+        } else {
             deactivateRelatedEjercicios(musculo);
         }
 
+        musculo.setActive(active);
         return musculoMapper.toSimpleDTO(musculoRepository.save(musculo));
     }
 
