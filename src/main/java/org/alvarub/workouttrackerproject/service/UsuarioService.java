@@ -43,6 +43,7 @@ public class UsuarioService {
                 .name(auth0UserEmail)
                 .auth0Id(auth0UserId)
                 .email(auth0UserEmail)
+                .picture("https://static.vecteezy.com/system/resources/previews/013/360/247/non_2x/default-avatar-photo-icon-social-media-profile-sign-symbol-vector.jpg")
                 .name(auth0UserName)
                 .role(rol)
                 .build();
@@ -185,9 +186,7 @@ public class UsuarioService {
     public UsuarioStatsDTO findStatsById(Long id) {
         Usuario usuario = getUsuarioOrThrow(id, false);
 
-        UsuarioStatsDTO response = usuarioMapper.toStatsDTO(usuario);
-
-        return response;
+        return usuarioMapper.toStatsDTO(usuario);
     }
 
     @Transactional(readOnly = true)
@@ -253,7 +252,7 @@ public class UsuarioService {
     public UsuarioResponseDTO update(String auth0UserId, UsuarioUpdateRequestDTO dto) throws Auth0Exception {
         Usuario usuario = getUsuarioByAuth0IdOrThrow(auth0UserId, true);
 
-        if ((!usuario.getName().equals(dto.getName()) && (dto.getName() != null && !dto.getName().isBlank()))) {
+        if ((dto.getName() != null && !dto.getName().isBlank()) && (!usuario.getName().equals(dto.getName()))) {
             usuario.setName(dto.getName());
         }
 

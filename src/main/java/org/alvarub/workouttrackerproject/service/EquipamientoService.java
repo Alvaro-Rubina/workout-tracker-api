@@ -6,7 +6,6 @@ import org.alvarub.workouttrackerproject.mapper.EquipamientoMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoUpdateRequestDTO;
-import org.alvarub.workouttrackerproject.persistence.entity.Ejercicio;
 import org.alvarub.workouttrackerproject.persistence.entity.Equipamiento;
 import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.EquipamientoRepository;
@@ -65,11 +64,11 @@ public class EquipamientoService {
     public EquipamientoResponseDTO update(Long id, EquipamientoUpdateRequestDTO dto) {
         Equipamiento equipamiento = getEquipamientoOrThrow(id, false);
 
-        if ((!equipamiento.getName().equalsIgnoreCase(dto.getName())) && (dto.getName() != null && !dto.getName().isBlank())) {
+        if ((dto.getName() != null && !dto.getName().isBlank()) && (!equipamiento.getName().equalsIgnoreCase(dto.getName()))) {
             equipamiento.setName(dto.getName());
         }
 
-        if ((!equipamiento.getActive().equals(dto.getActive())) && (dto.getActive() != null)) {
+        if ((dto.getActive() != null) && (!equipamiento.getActive().equals(dto.getActive()))) {
             equipamiento.setActive(dto.getActive());
             if (!equipamiento.getActive()) {
                 deactivateRelatedEjercicios(equipamiento);

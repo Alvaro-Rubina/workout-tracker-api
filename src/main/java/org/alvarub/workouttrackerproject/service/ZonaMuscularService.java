@@ -104,11 +104,11 @@ public class ZonaMuscularService {
     public ZonaMuscularResponseDTO update(Long id, ZonaMuscularUpdateRequestDTO dto) {
         ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, false);
 
-        if ((!zonaMuscular.getName().equals(dto.getName()) && (dto.getName() != null && !dto.getName().isBlank()))) {
+        if ((dto.getName() != null && !dto.getName().isBlank()) && (!zonaMuscular.getName().equals(dto.getName()))) {
             zonaMuscular.setName(dto.getName());
         }
 
-        if ((!zonaMuscular.getActive().equals(dto.getActive())) && (dto.getActive() != null)) {
+        if ((dto.getActive() != null) && (!zonaMuscular.getActive().equals(dto.getActive()))) {
             zonaMuscular.setActive(dto.getActive());
         }
 

@@ -7,7 +7,6 @@ import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoRequestD
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoUpdateRequestDTO;
-import org.alvarub.workouttrackerproject.persistence.entity.Equipamiento;
 import org.alvarub.workouttrackerproject.persistence.entity.Musculo;
 import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.MusculoRepository;
@@ -92,11 +91,11 @@ public class MusculoService {
     public MusculoResponseDTO update(Long id, MusculoUpdateRequestDTO dto) {
         Musculo musculo = getMusculoOrThrow(id, false);
 
-        if ((!musculo.getName().equalsIgnoreCase(dto.getName())) && (dto.getName() != null && !dto.getName().isBlank())) {
+        if ((dto.getName() != null && !dto.getName().isBlank()) && (!musculo.getName().equalsIgnoreCase(dto.getName()))) {
             musculo.setName(dto.getName());
         }
 
-        if ((!musculo.getActive().equals(dto.getActive())) && (dto.getActive() != null)) {
+        if ((dto.getActive() != null) && (!musculo.getActive().equals(dto.getActive()))) {
             musculo.setActive(dto.getActive());
             if (!musculo.getActive()) {
                 deactivateRelatedEjercicios(musculo);
