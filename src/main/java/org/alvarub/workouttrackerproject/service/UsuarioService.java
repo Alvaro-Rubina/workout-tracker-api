@@ -119,14 +119,7 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public UsuarioResponseDTO findById(Long id) {
         Usuario usuario = getUsuarioOrThrow(id, false);
-
-        UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
-
-        if (!usuario.getBodyWeightHistorial().isEmpty()) {
-            response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
-        }
-
-        return response;
+        return usuarioMapper.toResponseDTO(usuario);
     }
 
     @Transactional
@@ -196,15 +189,7 @@ public class UsuarioService {
 
         return usuarioRepository.findAll().stream()
                 .filter(usuario -> usuario.getRole().equals(rol))
-                .map(usuario -> {
-                    UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
-
-                    if (!usuario.getBodyWeightHistorial().isEmpty()) {
-                        response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
-                    }
-
-                    return response;
-                })
+                .map(usuarioMapper::toResponseDTO)
                 .toList();
     }
 
@@ -243,12 +228,7 @@ public class UsuarioService {
         usuarioServiceAuth0.toggleActive(usuario.getAuth0Id(), nuevoEstado);
         usuario.setActive(nuevoEstado);
 
-        UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
-
-        if (!usuario.getBodyWeightHistorial().isEmpty()) {
-            response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
-        }
-        return response;
+        return usuarioMapper.toResponseDTO(usuario);
     }
 
 
