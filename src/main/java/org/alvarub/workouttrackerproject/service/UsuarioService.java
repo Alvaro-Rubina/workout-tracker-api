@@ -257,7 +257,7 @@ public class UsuarioService {
             usuario.setName(dto.getName());
         }
 
-        if ((!usuario.getPicture().equals(dto.getPicture()) && (dto.getPicture() != null && !dto.getPicture().isBlank()))) {
+        if ((dto.getPicture() != null && !dto.getPicture().isBlank()) && (!usuario.getPicture().equals(dto.getPicture()))) {
             usuario.setPicture(dto.getPicture());
         }
 
