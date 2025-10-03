@@ -7,7 +7,9 @@ import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoRequestD
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoUpdateRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.entity.Equipamiento;
 import org.alvarub.workouttrackerproject.persistence.entity.Musculo;
+import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.MusculoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,7 @@ public class MusculoService {
     private final MusculoRepository musculoRepository;
     private final MusculoMapper musculoMapper;
     private final ZonaMuscularService zonaMuscularService;
+    private final EjercicioRepository ejercicioRepository;
 
     @Transactional
     public MusculoResponseDTO save(MusculoRequestDTO dto) {
@@ -76,7 +79,12 @@ public class MusculoService {
     @Transactional
     public MusculoSimpleDTO toggleActive(Long id) {
         Musculo musculo = getMusculoOrThrow(id, false);
+
         musculo.setActive(!musculo.getActive());
+        if (!musculo.getActive()) {
+            deactivateRelatedEjercicios(musculo);
+        }
+
         return musculoMapper.toSimpleDTO(musculoRepository.save(musculo));
     }
 
@@ -90,6 +98,9 @@ public class MusculoService {
 
         if ((!musculo.getActive().equals(dto.getActive())) && (dto.getActive() != null)) {
             musculo.setActive(dto.getActive());
+            if (!musculo.getActive()) {
+                deactivateRelatedEjercicios(musculo);
+            }
         }
 
         if (dto.getMuscleGroupId() != null) {
@@ -103,9 +114,7 @@ public class MusculoService {
     public MusculoSimpleDTO softDelete(Long id) {
         Musculo musculo = getMusculoOrThrow(id, false);
 
-        if (!musculo.getActive()) {
-            return musculoMapper.toSimpleDTO(musculo);
-        }
+        deactivateRelatedEjercicios(musculo);
 
         musculo.setActive(false);
         return musculoMapper.toSimpleDTO(musculoRepository.save(musculo));
@@ -121,6 +130,18 @@ public class MusculoService {
         }
 
         return musculo;
+    }
+
+    @Transactional
+    public void deactivateRelatedEjercicios(Musculo musculo) {
+        ejercicioRepository.findAllByTargetMusclesContains(musculo).stream()
+                .filter(e -> e.getTargetMuscles().size() == 1 && e.getTargetMuscles().contains(musculo))
+                .forEach(ejercicio -> {
+                    if (ejercicio.getActive()) {
+                        ejercicio.setActive(false);
+                        ejercicioRepository.save(ejercicio);
+                    }
+                });
     }
 
 }

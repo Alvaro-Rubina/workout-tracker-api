@@ -6,6 +6,7 @@ import org.alvarub.workouttrackerproject.mapper.EquipamientoMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.EquipamientoUpdateRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.entity.Ejercicio;
 import org.alvarub.workouttrackerproject.persistence.entity.Equipamiento;
 import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.EquipamientoRepository;
@@ -51,19 +52,12 @@ public class EquipamientoService {
     @Transactional
     public EquipamientoResponseDTO toggleActive(Long id) {
         Equipamiento equipamiento = getEquipamientoOrThrow(id, false);
+
         equipamiento.setActive(!equipamiento.getActive());
-        return equipamientoMapper.toResponseDTO(equipamientoRepository.save(equipamiento));
-    }
-
-    @Transactional
-    public EquipamientoResponseDTO softDelete(Long id) {
-        Equipamiento equipamiento = getEquipamientoOrThrow(id, false);
-
         if (!equipamiento.getActive()) {
-            return equipamientoMapper.toResponseDTO(equipamiento);
+            deactivateRelatedEjercicios(equipamiento);
         }
 
-        equipamiento.setActive(false);
         return equipamientoMapper.toResponseDTO(equipamientoRepository.save(equipamiento));
     }
 
@@ -77,9 +71,22 @@ public class EquipamientoService {
 
         if ((!equipamiento.getActive().equals(dto.getActive())) && (dto.getActive() != null)) {
             equipamiento.setActive(dto.getActive());
+            if (!equipamiento.getActive()) {
+                deactivateRelatedEjercicios(equipamiento);
+            }
         }
 
         return equipamientoMapper.toResponseDTO(equipamiento);
+    }
+
+    @Transactional
+    public EquipamientoResponseDTO softDelete(Long id) {
+        Equipamiento equipamiento = getEquipamientoOrThrow(id, false);
+
+        deactivateRelatedEjercicios(equipamiento);
+
+        equipamiento.setActive(false);
+        return equipamientoMapper.toResponseDTO(equipamientoRepository.save(equipamiento));
     }
 
     @Transactional
@@ -88,6 +95,7 @@ public class EquipamientoService {
 
         ejercicioRepository.findAllByEquipmentContains(equipamiento).forEach(ejercicio -> {
             ejercicio.getEquipment().remove(equipamiento);
+            ejercicioRepository.save(ejercicio);
         });
 
         equipamientoRepository.delete(equipamiento);
@@ -103,5 +111,17 @@ public class EquipamientoService {
         }
 
         return equipamiento;
+    }
+
+    @Transactional
+    public void deactivateRelatedEjercicios(Equipamiento equipamiento) {
+        ejercicioRepository.findAllByEquipmentContains(equipamiento).stream()
+                .filter(e -> e.getEquipment().size() == 1 && e.getEquipment().contains(equipamiento))
+                .forEach(ejercicio -> {
+                    if (ejercicio.getActive()) {
+                        ejercicio.setActive(false);
+                        ejercicioRepository.save(ejercicio);
+                    }
+                });
     }
 }
