@@ -7,7 +7,9 @@ import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscul
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.zonamuscular.ZonaMuscularUpdateRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.entity.Musculo;
 import org.alvarub.workouttrackerproject.persistence.entity.ZonaMuscular;
+import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.ZonaMuscularRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +22,7 @@ public class ZonaMuscularService {
 
     private final ZonaMuscularRepository zonaMuscularRepository;
     private final ZonaMuscularMapper zonaMuscularMapper;
-    private final MusculoService musculoService;
+    private final EjercicioRepository ejercicioRepository; // Sustituye a MusculoService
 
     @Transactional
     public ZonaMuscularResponseDTO save(ZonaMuscularRequestDTO dto) {
@@ -78,15 +80,14 @@ public class ZonaMuscularService {
     @Transactional
     public ZonaMuscularSimpleDTO toggleActive(Long id) {
         ZonaMuscular zonaMuscular = getZonaMuscularOrThrow(id, false);
-        zonaMuscular.setActive(!zonaMuscular.getActive());
 
-        zonaMuscular.getMuscles()
-                .forEach(m -> {
-                    m.setActive(zonaMuscular.getActive());
-                    if (!m.getActive()) {
-                        musculoService.deactivateRelatedEjercicios(m);
-                    }
-                });
+        zonaMuscular.setActive(!zonaMuscular.getActive());
+        zonaMuscular.getMuscles().forEach(m -> {
+            m.setActive(zonaMuscular.getActive());
+            if (!m.getActive()) {
+                deactivateRelatedEjercicios(m);
+            }
+        });
 
         return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
     }
@@ -100,11 +101,10 @@ public class ZonaMuscularService {
         }
 
         zonaMuscular.setActive(false);
-        zonaMuscular.getMuscles()
-                .forEach(m -> {
-                    m.setActive(false);
-                    musculoService.deactivateRelatedEjercicios(m);
-                });
+        zonaMuscular.getMuscles().forEach(m -> {
+            m.setActive(false);
+            deactivateRelatedEjercicios(m);
+        });
 
         return zonaMuscularMapper.toSimpleDTO(zonaMuscularRepository.save(zonaMuscular));
     }
@@ -136,4 +136,15 @@ public class ZonaMuscularService {
         return zonaMuscular;
     }
 
+    @Transactional
+    void deactivateRelatedEjercicios(Musculo musculo) {
+        ejercicioRepository.findAllByTargetMusclesContains(musculo).stream()
+                .filter(e -> e.getTargetMuscles().size() == 1 && e.getTargetMuscles().contains(musculo))
+                .forEach(ejercicio -> {
+                    if (ejercicio.getActive()) {
+                        ejercicio.setActive(false);
+                        ejercicioRepository.save(ejercicio);
+                    }
+                });
+    }
 }
