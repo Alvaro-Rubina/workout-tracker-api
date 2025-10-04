@@ -104,6 +104,22 @@ public class ComentarioService {
     }
 
     @Transactional
+    public ComentarioSimpleDTO toggleLikeOnComment(Long id, String auth0UserId) {
+        Comentario comentario = getComentarioOrThrow(id);
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+
+        if (usuario.getLikedComments().contains(comentario)) {
+            usuario.getLikedComments().remove(comentario);
+            comentario.setLikes(comentario.getLikes() - 1);
+        } else {
+            usuario.getLikedComments().add(comentario);
+            comentario.setLikes(comentario.getLikes() + 1);
+        }
+
+        return comentarioMapper.toSimpleDTO(comentario);
+    }
+
+    @Transactional
     public void hardDelete(Long id) {
         Comentario comentario = getComentarioOrThrow(id);
 
