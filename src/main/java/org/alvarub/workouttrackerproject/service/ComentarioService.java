@@ -120,7 +120,7 @@ public class ComentarioService {
     }
 
     @Transactional
-    public void hardDelete(Long id) {
+    public void delete(Long id) {
         Comentario comentario = getComentarioOrThrow(id);
 
         comentario.getReplies().forEach(replie -> {

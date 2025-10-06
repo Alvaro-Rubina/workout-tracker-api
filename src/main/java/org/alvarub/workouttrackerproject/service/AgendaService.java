@@ -130,6 +130,16 @@ public class AgendaService {
         return agendaMapper.toResponseDTO(agendaRepository.save(agenda));
     }
 
+    public void delete(Long id, String auth0UserId) {
+        Agenda agenda = getAgendaOrThrow(id);
+
+        if (!agenda.getUser().getAuth0Id().equals(auth0UserId)) {
+            throw new ForbiddenOperationException("Usuario sin permiso para eliminar la agenda de otro usuario");
+        }
+
+        agendaRepository.delete(agenda);
+    }
+
     // Métodos auxiliares
     public Agenda getAgendaOrThrow(Long id) {
         return agendaRepository.findById(id)

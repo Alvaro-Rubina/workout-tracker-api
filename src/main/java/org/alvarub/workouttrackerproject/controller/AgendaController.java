@@ -63,4 +63,12 @@ public class AgendaController {
         return ResponseEntity.ok(updated);
     }
 
+    // TODO: METODO PARA ELIMINAR UNA AGENDA
+    public ResponseEntity<Void> deleteAgenda(@AuthenticationPrincipal Jwt jwt,
+                                             @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        agendaService.delete(id, auth0UserId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

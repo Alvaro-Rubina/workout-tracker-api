@@ -74,7 +74,7 @@ public class ComentarioController {
 
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<Void> deleteComentario(@PathVariable Long id) {
-        comentarioService.hardDelete(id);
+        comentarioService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
