@@ -67,7 +67,8 @@ public class Usuario extends Auditable {
     private Set<Rutina> savedRoutines = new HashSet<>();
 
     @Column(name = "completed_routines")
-    private Long completedRoutines;
+    @Builder.Default
+    private Long completedRoutines = 0L;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Peso> bodyWeightHistorial = new ArrayList<>();
