@@ -11,7 +11,6 @@ import org.alvarub.workouttrackerproject.persistence.dto.rol.RolRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rol.RolResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rol.RolUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Rol;
-import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
 import org.alvarub.workouttrackerproject.persistence.repository.RolRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.UsuarioRepository;
 import org.alvarub.workouttrackerproject.service.auth0.RolServiceAuth0;

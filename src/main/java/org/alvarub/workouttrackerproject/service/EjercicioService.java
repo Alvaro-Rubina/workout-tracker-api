@@ -1,6 +1,7 @@
 package org.alvarub.workouttrackerproject.service;
 
 import lombok.RequiredArgsConstructor;
+import org.alvarub.workouttrackerproject.exception.BusinessException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.EjercicioMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioRequestDTO;
@@ -8,11 +9,13 @@ import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioResp
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.ejercicio.EjercicioUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Ejercicio;
+import org.alvarub.workouttrackerproject.persistence.entity.Musculo;
 import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
@@ -85,6 +88,10 @@ public class EjercicioService {
     @Transactional
     public EjercicioSimpleDTO toggleActive(Long id) {
         Ejercicio ejercicio = getEjercicioOrThrow(id, false);
+
+        if (!ejercicio.getActive() && ejercicio.getTargetMuscles().stream().noneMatch(Musculo::getActive)) {
+            throw new BusinessException("Debe haber por lo menos 1 músculo objetivo activo para activar el músculo");
+        }
 
         ejercicio.setActive(!ejercicio.getActive());
 

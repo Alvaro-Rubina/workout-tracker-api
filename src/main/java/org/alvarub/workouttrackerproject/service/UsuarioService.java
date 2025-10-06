@@ -43,6 +43,7 @@ public class UsuarioService {
                 .name(auth0UserEmail)
                 .auth0Id(auth0UserId)
                 .email(auth0UserEmail)
+                .picture("https://static.vecteezy.com/system/resources/previews/013/360/247/non_2x/default-avatar-photo-icon-social-media-profile-sign-symbol-vector.jpg")
                 .name(auth0UserName)
                 .role(rol)
                 .build();
@@ -85,6 +86,7 @@ public class UsuarioService {
         Usuario usuario = Usuario.builder()
                 .auth0Id(auth0User.getUserId())
                 .email(auth0User.getEmail())
+                .picture("https://static.vecteezy.com/system/resources/previews/013/360/247/non_2x/default-avatar-photo-icon-social-media-profile-sign-symbol-vector.jpg")
                 .name(auth0User.getName() != null ? auth0User.getName() : dto.getEmail())
                 .role(rol)
                 .build();
@@ -117,14 +119,7 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public UsuarioResponseDTO findById(Long id) {
         Usuario usuario = getUsuarioOrThrow(id, false);
-
-        UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
-
-        if (!usuario.getBodyWeightHistorial().isEmpty()) {
-            response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
-        }
-
-        return response;
+        return usuarioMapper.toResponseDTO(usuario);
     }
 
     @Transactional
@@ -185,9 +180,7 @@ public class UsuarioService {
     public UsuarioStatsDTO findStatsById(Long id) {
         Usuario usuario = getUsuarioOrThrow(id, false);
 
-        UsuarioStatsDTO response = usuarioMapper.toStatsDTO(usuario);
-
-        return response;
+        return usuarioMapper.toStatsDTO(usuario);
     }
 
     @Transactional(readOnly = true)
@@ -196,15 +189,7 @@ public class UsuarioService {
 
         return usuarioRepository.findAll().stream()
                 .filter(usuario -> usuario.getRole().equals(rol))
-                .map(usuario -> {
-                    UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
-
-                    if (!usuario.getBodyWeightHistorial().isEmpty()) {
-                        response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
-                    }
-
-                    return response;
-                })
+                .map(usuarioMapper::toResponseDTO)
                 .toList();
     }
 
@@ -238,26 +223,24 @@ public class UsuarioService {
             });
         }
 
-        log.info("Actualizando estado activo del usuario {} a {}", usuario.getEmail(), !usuario.getActive());
-        usuarioServiceAuth0.toggleActive(usuario.getAuth0Id(), usuario.getActive());
+        boolean nuevoEstado = !usuario.getActive();
+        log.info("Actualizando estado activo del usuario {} a {}", usuario.getEmail(), nuevoEstado);
+        usuarioServiceAuth0.toggleActive(usuario.getAuth0Id(), nuevoEstado);
+        usuario.setActive(nuevoEstado);
 
-        UsuarioResponseDTO response = usuarioMapper.toResponseDTO(usuario);
-
-        if (!usuario.getBodyWeightHistorial().isEmpty()) {
-            response.setBodyWeight(usuario.getBodyWeightHistorial().getLast().getBodyWeight());
-        }
-        return response;
+        return usuarioMapper.toResponseDTO(usuario);
     }
+
 
     @Transactional
     public UsuarioResponseDTO update(String auth0UserId, UsuarioUpdateRequestDTO dto) throws Auth0Exception {
         Usuario usuario = getUsuarioByAuth0IdOrThrow(auth0UserId, true);
 
-        if ((!usuario.getName().equals(dto.getName()) && (dto.getName() != null && !dto.getName().isBlank()))) {
+        if ((dto.getName() != null && !dto.getName().isBlank()) && (!usuario.getName().equals(dto.getName()))) {
             usuario.setName(dto.getName());
         }
 
-        if ((!usuario.getPicture().equals(dto.getPicture()) && (dto.getPicture() != null && !dto.getPicture().isBlank()))) {
+        if ((dto.getPicture() != null && !dto.getPicture().isBlank()) && (!usuario.getPicture().equals(dto.getPicture()))) {
             usuario.setPicture(dto.getPicture());
         }
 

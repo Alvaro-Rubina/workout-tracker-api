@@ -62,6 +62,17 @@ public class RutinaController {
     }
 
     @GetMapping()
+    public ResponseEntity<List<?>> getAllUserRutinas(@AuthenticationPrincipal Jwt jwt,
+                                                     @RequestParam(defaultValue = "false") Boolean relations) {
+        String auth0UserId = jwt.getSubject();
+        List<?> response = relations
+                ? rutinaService.findAllByUser(auth0UserId)
+                :  rutinaService.findAllSimpleByUser(auth0UserId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/public")
     public ResponseEntity<List<?>> getAllPublicRutinas(@RequestParam(defaultValue = "false") Boolean relations) {
         List<?> response = relations
                 ? rutinaService.findAllPublic()

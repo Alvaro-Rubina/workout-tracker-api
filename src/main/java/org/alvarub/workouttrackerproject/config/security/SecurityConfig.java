@@ -48,6 +48,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints publicos
                         .requestMatchers("/*/public/**", "/public/**").permitAll()
+                        // PROPIETARIO: Solo usuarios con dicho rol pueden registrar administradores
+                        .requestMatchers("/*/admin/signup", "/admin/signup").hasRole(OWNER_ROL_NAME)
                         // Endpoints para ADMIN y PROPIETARIO
                         .requestMatchers("/*/admin/**", "/admin/**").hasAnyRole(
                                         ADMIN_ROL_NAME,
