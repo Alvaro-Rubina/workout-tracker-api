@@ -64,9 +64,25 @@ public class ComentarioController {
         return ResponseEntity.ok(comentarioService.updateComentario(id, auth0UserId, dto));
     }
 
+    @PatchMapping("/{id}/like")
+    public ResponseEntity<ComentarioSimpleDTO> toggleLikeOnComentario(@AuthenticationPrincipal Jwt jwt,
+                                                                      @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(comentarioService.toggleLike(id, auth0UserId));
+
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOwnComentario(@AuthenticationPrincipal Jwt jwt,
+                                                    @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        comentarioService.deleteByUser(id, auth0UserId);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<Void> deleteComentario(@PathVariable Long id) {
-        comentarioService.hardDelete(id);
+        comentarioService.delete(id);
         return ResponseEntity.noContent().build();
     }
 

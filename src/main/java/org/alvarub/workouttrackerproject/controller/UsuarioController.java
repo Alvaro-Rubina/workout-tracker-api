@@ -81,7 +81,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.update(auth0userId, dto));
     }
 
-    // ENDPOINTS ADMIN
+    @PreAuthorize("hasRole('PROPIETARIO')")
     @PostMapping("/admin/signup")
     public ResponseEntity<UsuarioResponseDTO> registerAdmin(@RequestBody SignupRequestDTO request) throws Auth0Exception {
         return ResponseEntity.status(HttpStatus.CREATED)

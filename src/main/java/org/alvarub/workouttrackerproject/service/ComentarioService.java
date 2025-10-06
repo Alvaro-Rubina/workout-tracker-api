@@ -104,7 +104,38 @@ public class ComentarioService {
     }
 
     @Transactional
-    public void hardDelete(Long id) {
+    public ComentarioSimpleDTO toggleLike(Long id, String auth0UserId) {
+        Comentario comentario = getComentarioOrThrow(id);
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+
+        if (usuario.getLikedComments().contains(comentario)) {
+            usuario.getLikedComments().remove(comentario);
+            comentario.setLikes(comentario.getLikes() - 1);
+        } else {
+            usuario.getLikedComments().add(comentario);
+            comentario.setLikes(comentario.getLikes() + 1);
+        }
+
+        return comentarioMapper.toSimpleDTO(comentario);
+    }
+
+    @Transactional
+    public void deleteByUser(Long id, String auth0UserId) {
+        Comentario comentario = getComentarioOrThrow(id);
+
+        if (!comentario.getUser().getAuth0Id().equals(auth0UserId)) {
+            throw new ForbiddenOperationException("Usuario sin permiso para eliminar el comentario de otro usuario");
+        }
+
+        comentario.getReplies().forEach(replie -> {
+            replie.setReplyTo(null);
+        });
+
+        comentarioRepository.delete(comentario);
+    }
+
+    @Transactional
+    public void delete(Long id) {
         Comentario comentario = getComentarioOrThrow(id);
 
         comentario.getReplies().forEach(replie -> {
