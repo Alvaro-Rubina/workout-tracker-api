@@ -16,9 +16,11 @@ import org.alvarub.workouttrackerproject.persistence.entity.Rol;
 import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
 import org.alvarub.workouttrackerproject.persistence.repository.UsuarioRepository;
 import org.alvarub.workouttrackerproject.service.auth0.UsuarioServiceAuth0;
+import org.alvarub.workouttrackerproject.service.storage.CloudinaryService;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,6 +36,7 @@ public class UsuarioService {
     private final UsuarioServiceAuth0 usuarioServiceAuth0;
     private final UsuarioMapper usuarioMapper;
     private final RolService rolService;
+    private final CloudinaryService cloudinaryService;
 
     @Transactional
     public UsuarioResponseDTO registerUser(String auth0UserId, String auth0UserEmail, String auth0UserName) throws Auth0Exception {
@@ -43,7 +46,7 @@ public class UsuarioService {
                 .name(auth0UserEmail)
                 .auth0Id(auth0UserId)
                 .email(auth0UserEmail)
-                .picture("https://static.vecteezy.com/system/resources/previews/013/360/247/non_2x/default-avatar-photo-icon-social-media-profile-sign-symbol-vector.jpg")
+                .pictureUrl("https://static.vecteezy.com/system/resources/previews/013/360/247/non_2x/default-avatar-photo-icon-social-media-profile-sign-symbol-vector.jpg")
                 .name(auth0UserName)
                 .role(rol)
                 .build();
@@ -86,7 +89,7 @@ public class UsuarioService {
         Usuario usuario = Usuario.builder()
                 .auth0Id(auth0User.getUserId())
                 .email(auth0User.getEmail())
-                .picture("https://static.vecteezy.com/system/resources/previews/013/360/247/non_2x/default-avatar-photo-icon-social-media-profile-sign-symbol-vector.jpg")
+                .pictureUrl("https://static.vecteezy.com/system/resources/previews/013/360/247/non_2x/default-avatar-photo-icon-social-media-profile-sign-symbol-vector.jpg")
                 .name(auth0User.getName() != null ? auth0User.getName() : dto.getEmail())
                 .role(rol)
                 .build();
@@ -233,19 +236,30 @@ public class UsuarioService {
 
 
     @Transactional
-    public UsuarioResponseDTO update(String auth0UserId, UsuarioUpdateRequestDTO dto) throws Auth0Exception {
+    public UsuarioResponseDTO update(String auth0UserId, UsuarioUpdateRequestDTO dto, MultipartFile image) throws Auth0Exception {
         Usuario usuario = getUsuarioByAuth0IdOrThrow(auth0UserId, true);
 
         if ((dto.getName() != null && !dto.getName().isBlank()) && (!usuario.getName().equals(dto.getName()))) {
             usuario.setName(dto.getName());
         }
 
-        if ((dto.getPicture() != null && !dto.getPicture().isBlank()) && (!usuario.getPicture().equals(dto.getPicture()))) {
-            usuario.setPicture(dto.getPicture());
+        if ((dto.getPicture() != null && !dto.getPicture().isBlank()) && (!usuario.getPictureUrl().equals(dto.getPicture()))) {
+            usuario.setPictureUrl(dto.getPicture());
         }
 
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             usuarioServiceAuth0.changePassword(usuario.getAuth0Id(), dto.getPassword());
+        }
+
+        if (image != null) {
+            if (!image.isEmpty()) {
+                cloudinaryService.delete(usuario.getPicturePublicId());
+                var res = cloudinaryService.upload(image, "muscles");
+                if (res != null) {
+                    usuario.setPictureUrl(res.url());
+                    usuario.setPicturePublicId(res.publicId());
+                }
+            }
         }
 
         return usuarioMapper.toResponseDTO(usuario);

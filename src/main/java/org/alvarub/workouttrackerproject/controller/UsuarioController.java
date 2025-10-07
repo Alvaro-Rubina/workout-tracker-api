@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -74,11 +75,12 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.findAllStats());
     }
 
-    @PatchMapping
+    @PatchMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<UsuarioResponseDTO> updateUsuario(@AuthenticationPrincipal Jwt jwt,
-                                                            @Valid @RequestBody UsuarioUpdateRequestDTO dto) throws Auth0Exception {
+                                                            @Valid @RequestBody UsuarioUpdateRequestDTO dto,
+                                                            @RequestPart(value = "image", required = false) MultipartFile image) throws Auth0Exception {
         String auth0userId = jwt.getSubject();
-        return ResponseEntity.ok(usuarioService.update(auth0userId, dto));
+        return ResponseEntity.ok(usuarioService.update(auth0userId, dto, image));
     }
 
     @PreAuthorize("hasRole('PROPIETARIO')")

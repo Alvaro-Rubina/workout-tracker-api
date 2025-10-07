@@ -9,6 +9,7 @@ import org.alvarub.workouttrackerproject.service.EquipamientoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,10 +20,11 @@ public class EquipamientoController {
 
     private final EquipamientoService equipamientoService;
 
-    @PostMapping("/admin")
-    public ResponseEntity<EquipamientoResponseDTO> createEquipamiento(@Valid @RequestBody EquipamientoRequestDTO dto) {
+    @PostMapping(value = "/admin", consumes = {"multipart/form-data"})
+    public ResponseEntity<EquipamientoResponseDTO> createEquipamiento(@Valid @RequestBody EquipamientoRequestDTO dto,
+                                                                      @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(equipamientoService.save(dto));
+                .body(equipamientoService.save(dto, image));
     }
 
     @GetMapping("/admin/{id}")
@@ -50,10 +52,11 @@ public class EquipamientoController {
         return ResponseEntity.ok(equipamientoService.toggleActive(id));
     }
 
-    @PatchMapping("/admin/{id}")
+    @PatchMapping(value = "/admin/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<EquipamientoResponseDTO> updateEquipamiento(@PathVariable Long id,
-                                                                      @Valid @RequestBody EquipamientoUpdateRequestDTO dto) {
-        return ResponseEntity.ok(equipamientoService.update(id, dto));
+                                                                      @Valid @RequestBody EquipamientoUpdateRequestDTO dto,
+                                                                      @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(equipamientoService.update(id, dto, image));
     }
 
     @PatchMapping("/admin/{id}/deactivate")

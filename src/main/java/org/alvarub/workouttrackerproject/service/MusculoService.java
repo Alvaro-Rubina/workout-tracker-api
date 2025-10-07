@@ -123,7 +123,6 @@ public class MusculoService {
         }
 
         if (image != null) {
-            // si envían image vacía => ignoramos; si mandan nueva => reemplazamos
             if (!image.isEmpty()) {
                 // borra la anterior si existe
                 cloudinaryService.delete(musculo.getImagePublicId());
