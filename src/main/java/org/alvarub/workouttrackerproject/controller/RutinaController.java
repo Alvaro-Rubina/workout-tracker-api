@@ -131,4 +131,16 @@ public class RutinaController {
         String auth0UserId = jwt.getSubject();
         return ResponseEntity.ok(rutinaService.removeFromSavedRoutines(id, auth0UserId));
     }
+
+    @GetMapping("/liked")
+    public ResponseEntity<List<RutinaResponseDTO>> getUserLikedRutinas(@AuthenticationPrincipal Jwt jwt) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.findAllLiked(auth0UserId));
+    }
+
+    @GetMapping("/saved")
+    public ResponseEntity<List<RutinaResponseDTO>> getUserSavedRutinas(@AuthenticationPrincipal Jwt jwt) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.findAllSaved(auth0UserId));
+    }
 }

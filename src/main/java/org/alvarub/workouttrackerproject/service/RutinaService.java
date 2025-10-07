@@ -142,6 +142,24 @@ public class RutinaService {
     }
 
     @Transactional
+    public List<RutinaResponseDTO> findAllLiked(String auth0UserId) {
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+
+        return usuario.getLikedRoutines().stream()
+                .map(rutinaMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional
+    public List<RutinaResponseDTO> findAllSaved(String auth0UserId) {
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+
+        return usuario.getSavedRoutines().stream()
+                .map(rutinaMapper::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional
     public RutinaSimpleDTO toggleIsPublic(Long id, String auth0UserId) {
         Rutina rutina = getRutinaOrThrow(id);
 
@@ -233,26 +251,6 @@ public class RutinaService {
             });
         }
 
-        return rutinaMapper.toResponseDTO(rutina);
-    }
-
-    @Transactional
-    public RutinaResponseDTO addSessionToRoutine(Long id, SesionRequestDTO sesionRequestDTO) {
-        Rutina rutina = getRutinaOrThrow(id);
-
-        Sesion sesion = sesionMapper.toEntity(sesionRequestDTO);
-
-        sesion.setCategory(categoriaService.getCategoriaOrThrow(sesionRequestDTO.getCategoryId(), true));
-
-        // A cada SesionEjercicio de la sesion le seteo la sesión y el ejercicio (validando este último)
-        sesion.getSessionExercises().forEach(sesionEjercicio -> {
-            sesionEjercicio.setSession(sesion);
-
-            Long ejercicioId = sesionEjercicio.getExercise().getId();
-            sesionEjercicio.setExercise(ejercicioService.getEjercicioOrThrow(ejercicioId, true));
-        });
-
-        rutina.getSessions().add(sesion);
         return rutinaMapper.toResponseDTO(rutina);
     }
 
