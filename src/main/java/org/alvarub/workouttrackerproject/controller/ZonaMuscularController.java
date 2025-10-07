@@ -10,6 +10,7 @@ import org.alvarub.workouttrackerproject.service.ZonaMuscularService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,10 +21,11 @@ public class ZonaMuscularController {
 
     private final ZonaMuscularService zonaMuscularService;
 
-    @PostMapping("/admin")
-    public ResponseEntity<ZonaMuscularResponseDTO> createZonaMuscular(@Valid @RequestBody ZonaMuscularRequestDTO dto) {
+    @PostMapping(value = "/admin", consumes = {"multipart/form-data"})
+    public ResponseEntity<ZonaMuscularResponseDTO> createZonaMuscular(@Valid @RequestPart("data") ZonaMuscularRequestDTO dto,
+                                                                      @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(zonaMuscularService.save(dto));
+                .body(zonaMuscularService.save(dto, image));
     }
 
     @GetMapping("/admin/{id}")
@@ -69,10 +71,16 @@ public class ZonaMuscularController {
         return ResponseEntity.ok(zonaMuscularService.toggleActive(id));
     }
 
-    @PatchMapping("/admin/{id}")
+    @PatchMapping(value = "/admin/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<ZonaMuscularResponseDTO> updateZonaMuscular(@PathVariable Long id,
-                                                                      @Valid @RequestBody ZonaMuscularUpdateRequestDTO dto) {
-        return ResponseEntity.ok(zonaMuscularService.update(id, dto));
+                                                                      @Valid @RequestPart("data") ZonaMuscularUpdateRequestDTO dto,
+                                                                      @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(zonaMuscularService.update(id, dto, image));
+    }
+
+    @DeleteMapping("/admin/{id}/image")
+    public ResponseEntity<ZonaMuscularResponseDTO> deleteZonaMuscularImage(@PathVariable Long id) {
+        return ResponseEntity.ok(zonaMuscularService.removeImage(id));
     }
 
     @PatchMapping("/admin/{id}/deactivate")
