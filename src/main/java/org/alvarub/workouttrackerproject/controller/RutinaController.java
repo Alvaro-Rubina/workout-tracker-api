@@ -7,6 +7,7 @@ import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDT
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.service.RutinaService;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -102,5 +103,33 @@ public class RutinaController {
         String auth0UserId = jwt.getSubject();
         rutinaService.hardDelete(id, auth0UserId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<RutinaSimpleDTO> addRutinaToLikedRoutines(@AuthenticationPrincipal Jwt jwt,
+                                                                    @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.addToLikedRoutines(id, auth0UserId));
+    }
+
+    @PostMapping("/{id}/unlike")
+    public ResponseEntity<RutinaSimpleDTO> removeRutinaFromLikedRoutines(@AuthenticationPrincipal Jwt jwt,
+                                                                        @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.removeFromLikedRoutines(id, auth0UserId));
+    }
+
+    @PostMapping("/{id}/save")
+    public ResponseEntity<RutinaSimpleDTO> addRutinaToSavedRoutines(@AuthenticationPrincipal Jwt jwt,
+                                                                    @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.addToLikedRoutines(id, auth0UserId));
+    }
+
+    @PostMapping("/{id}/unsave")
+    public ResponseEntity<RutinaSimpleDTO> removeRutinaFromSavedRoutines(@AuthenticationPrincipal Jwt jwt,
+                                                                        @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.removeFromLikedRoutines(id, auth0UserId));
     }
 }

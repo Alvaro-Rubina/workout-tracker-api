@@ -1,6 +1,7 @@
 package org.alvarub.workouttrackerproject.service;
 
 import lombok.RequiredArgsConstructor;
+import org.alvarub.workouttrackerproject.exception.BusinessException;
 import org.alvarub.workouttrackerproject.exception.ForbiddenOperationException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.RutinaMapper;
@@ -253,6 +254,64 @@ public class RutinaService {
 
         rutina.getSessions().add(sesion);
         return rutinaMapper.toResponseDTO(rutina);
+    }
+
+    @Transactional
+    public RutinaSimpleDTO addToLikedRoutines(Long rutinaId, String auth0UserId) {
+        Rutina rutina = getRutinaOrThrow(rutinaId);
+
+        if (!Boolean.TRUE.equals(rutina.getIsPublic())) {
+            if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
+                throw new ForbiddenOperationException("Usuario sin permiso para obtener una rutina privada que no le pertenece");
+            }
+        }
+
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+        usuario.getLikedRoutines().add(rutina);
+
+        return rutinaMapper.toSimpleDTO(rutina);
+    }
+
+    @Transactional
+    public RutinaSimpleDTO removeFromLikedRoutines(Long rutinaId, String auth0UserId) {
+        Rutina rutina = getRutinaOrThrow(rutinaId);
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+
+        if (!usuario.getLikedRoutines().contains(rutina)) {
+            throw new BusinessException("El usuario no tiene a la rutina solicitada en su lista likedRoutines");
+        }
+        usuario.getLikedRoutines().remove(rutina);
+
+        return rutinaMapper.toSimpleDTO(rutina);
+    }
+
+    @Transactional
+    public RutinaSimpleDTO addToSavedRoutines(Long rutinaId, String auth0UserId) {
+        Rutina rutina = getRutinaOrThrow(rutinaId);
+
+        if (!Boolean.TRUE.equals(rutina.getIsPublic())) {
+            if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
+                throw new ForbiddenOperationException("Usuario sin permiso para obtener una rutina privada que no le pertenece");
+            }
+        }
+
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+        usuario.getSavedRoutines().add(rutina);
+
+        return rutinaMapper.toSimpleDTO(rutina);
+    }
+
+    @Transactional
+    public RutinaSimpleDTO removeFromSavedRoutines(Long rutinaId, String auth0UserId) {
+        Rutina rutina = getRutinaOrThrow(rutinaId);
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+
+        if (!usuario.getLikedRoutines().contains(rutina)) {
+            throw new BusinessException("El usuario no tiene a la rutina solicitada en su lista likedRoutines");
+        }
+        usuario.getSavedRoutines().remove(rutina);
+
+        return rutinaMapper.toSimpleDTO(rutina);
     }
 
     // Métodos auxiliares
