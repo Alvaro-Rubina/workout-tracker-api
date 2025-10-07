@@ -7,6 +7,7 @@ import org.alvarub.workouttrackerproject.exception.ExistingResourceException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.exception.UserRegistrationException;
 import org.alvarub.workouttrackerproject.mapper.UsuarioMapper;
+import org.alvarub.workouttrackerproject.persistence.dto.rol.RolResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioStatsDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.usuario.UsuarioUpdateRequestDTO;
@@ -24,8 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-import static org.alvarub.workouttrackerproject.utils.Constants.ADMIN_ROL_NAME;
-import static org.alvarub.workouttrackerproject.utils.Constants.USER_ROL_NAME;
+import static org.alvarub.workouttrackerproject.utils.Constants.*;
 
 @Slf4j
 @Service
@@ -46,7 +46,7 @@ public class UsuarioService {
                 .name(auth0UserEmail)
                 .auth0Id(auth0UserId)
                 .email(auth0UserEmail)
-                .pictureUrl("https://static.vecteezy.com/system/resources/previews/013/360/247/non_2x/default-avatar-photo-icon-social-media-profile-sign-symbol-vector.jpg")
+                .pictureUrl(DEFAULT_PFP)
                 .name(auth0UserName)
                 .role(rol)
                 .build();
@@ -89,7 +89,7 @@ public class UsuarioService {
         Usuario usuario = Usuario.builder()
                 .auth0Id(auth0User.getUserId())
                 .email(auth0User.getEmail())
-                .pictureUrl("https://static.vecteezy.com/system/resources/previews/013/360/247/non_2x/default-avatar-photo-icon-social-media-profile-sign-symbol-vector.jpg")
+                .pictureUrl(DEFAULT_PFP)
                 .name(auth0User.getName() != null ? auth0User.getName() : dto.getEmail())
                 .role(rol)
                 .build();
@@ -144,14 +144,19 @@ public class UsuarioService {
                         throw new ExistingResourceException("El email ya está registrado con otro método de autenticación");
                     }
 
-                    Rol rol = rolService.getRolByNameOrThrow(
-                            usuarioServiceAuth0.getUserRol(authoUserID).getName(), true);
+                    RolResponseDTO userRolDTO = usuarioServiceAuth0.getUserRol(authoUserID);
+                    String rolName = (userRolDTO != null) ? userRolDTO.getName() : USER_ROL_NAME;
+
+                    Rol rol = rolService.getRolByNameOrThrow(rolName, true);
+
+                    String pictureUrl = usuarioServiceAuth0.getUserPictureUrl(authoUserID);
 
                     // Creo nuevo usuario
                     Usuario newUser = Usuario.builder()
                             .auth0Id(authoUserID)
                             .email(auth0UserEmail)
                             .name(auth0UserName)
+                            .pictureUrl((pictureUrl == null ? DEFAULT_PFP : pictureUrl))
                             .role(rol)
                             .active(true)
                             .build();
@@ -254,7 +259,7 @@ public class UsuarioService {
         if (image != null) {
             if (!image.isEmpty()) {
                 cloudinaryService.delete(usuario.getPicturePublicId());
-                var res = cloudinaryService.upload(image, "muscles");
+                var res = cloudinaryService.upload(image, "users");
                 if (res != null) {
                     usuario.setPictureUrl(res.url());
                     usuario.setPicturePublicId(res.publicId());

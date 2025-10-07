@@ -30,7 +30,7 @@ public class EquipamientoService {
         Equipamiento equipamiento = equipamientoMapper.toEntity(requestDTO);
 
         if (image != null && !image.isEmpty()) {
-            var res = cloudinaryService.upload(image, "muscles");
+            var res = cloudinaryService.upload(image, "equipments");
             if (res != null) {
                 equipamiento.setImageUrl(res.url());
                 equipamiento.setImagePublicId(res.publicId());
@@ -91,7 +91,7 @@ public class EquipamientoService {
             if (!image.isEmpty()) {
                 // borra la anterior si existe
                 cloudinaryService.delete(equipamiento.getImagePublicId());
-                var res = cloudinaryService.upload(image, "muscles");
+                var res = cloudinaryService.upload(image, "equipments");
                 if (res != null) {
                     equipamiento.setImageUrl(res.url());
                     equipamiento.setImagePublicId(res.publicId());
