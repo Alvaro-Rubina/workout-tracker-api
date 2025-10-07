@@ -268,6 +268,7 @@ public class RutinaService {
 
         Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
         usuario.getLikedRoutines().add(rutina);
+        rutina.setLikesCount(rutina.getLikesCount() + 1);
 
         return rutinaMapper.toSimpleDTO(rutina);
     }
