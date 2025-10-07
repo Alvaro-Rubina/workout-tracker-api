@@ -17,6 +17,8 @@ public class ZonaMuscularSimpleDTO {
 
     private String name;
 
+    private String imageUrl;
+
     private Boolean active;
 
     private LocalDateTime createdAt;
