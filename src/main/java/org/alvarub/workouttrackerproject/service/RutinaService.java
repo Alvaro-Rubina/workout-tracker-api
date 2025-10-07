@@ -306,8 +306,8 @@ public class RutinaService {
         Rutina rutina = getRutinaOrThrow(rutinaId);
         Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
 
-        if (!usuario.getLikedRoutines().contains(rutina)) {
-            throw new BusinessException("El usuario no tiene a la rutina solicitada en su lista likedRoutines");
+        if (!usuario.getSavedRoutines().contains(rutina)) {
+            throw new BusinessException("El usuario no tiene a la rutina solicitada en su lista savedRoutines");
         }
         usuario.getSavedRoutines().remove(rutina);
 
