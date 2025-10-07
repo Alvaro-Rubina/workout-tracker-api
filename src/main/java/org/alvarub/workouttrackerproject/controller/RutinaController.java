@@ -105,31 +105,17 @@ public class RutinaController {
     }
 
     @PostMapping("/{id}/like")
-    public ResponseEntity<RutinaSimpleDTO> addRutinaToLikedRoutines(@AuthenticationPrincipal Jwt jwt,
-                                                                    @PathVariable Long id) {
+    public ResponseEntity<RutinaSimpleDTO> toggleLikeOnRutina(@AuthenticationPrincipal Jwt jwt,
+                                                              @PathVariable Long id) {
         String auth0UserId = jwt.getSubject();
-        return ResponseEntity.ok(rutinaService.addToLikedRoutines(id, auth0UserId));
-    }
-
-    @PostMapping("/{id}/unlike")
-    public ResponseEntity<RutinaSimpleDTO> removeRutinaFromLikedRoutines(@AuthenticationPrincipal Jwt jwt,
-                                                                        @PathVariable Long id) {
-        String auth0UserId = jwt.getSubject();
-        return ResponseEntity.ok(rutinaService.removeFromLikedRoutines(id, auth0UserId));
+        return ResponseEntity.ok(rutinaService.toggleLikeOnRoutine(id, auth0UserId));
     }
 
     @PostMapping("/{id}/save")
-    public ResponseEntity<RutinaSimpleDTO> addRutinaToSavedRoutines(@AuthenticationPrincipal Jwt jwt,
+    public ResponseEntity<RutinaSimpleDTO> toggleSaveOnRutina(@AuthenticationPrincipal Jwt jwt,
                                                                     @PathVariable Long id) {
         String auth0UserId = jwt.getSubject();
-        return ResponseEntity.ok(rutinaService.addToSavedRoutines(id, auth0UserId));
-    }
-
-    @PostMapping("/{id}/unsave")
-    public ResponseEntity<RutinaSimpleDTO> removeRutinaFromSavedRoutines(@AuthenticationPrincipal Jwt jwt,
-                                                                        @PathVariable Long id) {
-        String auth0UserId = jwt.getSubject();
-        return ResponseEntity.ok(rutinaService.removeFromSavedRoutines(id, auth0UserId));
+        return ResponseEntity.ok(rutinaService.toggleSaveOnRoutine(id, auth0UserId));
     }
 
     @GetMapping("/liked")
