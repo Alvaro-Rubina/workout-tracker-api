@@ -255,7 +255,7 @@ public class RutinaService {
     }
 
     @Transactional
-    public RutinaSimpleDTO addToLikedRoutines(Long rutinaId, String auth0UserId) {
+    public RutinaSimpleDTO toggleLikeOnRoutine(Long rutinaId, String auth0UserId) {
         Rutina rutina = getRutinaOrThrow(rutinaId);
 
         if (!Boolean.TRUE.equals(rutina.getIsPublic())) {
@@ -265,27 +265,19 @@ public class RutinaService {
         }
 
         Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
-        usuario.getLikedRoutines().add(rutina);
-        rutina.setLikesCount(rutina.getLikesCount() + 1);
-
-        return rutinaMapper.toSimpleDTO(rutina);
-    }
-
-    @Transactional
-    public RutinaSimpleDTO removeFromLikedRoutines(Long rutinaId, String auth0UserId) {
-        Rutina rutina = getRutinaOrThrow(rutinaId);
-        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
-
-        if (!usuario.getLikedRoutines().contains(rutina)) {
-            throw new BusinessException("El usuario no tiene a la rutina solicitada en su lista likedRoutines");
+        if (usuario.getLikedRoutines().contains(rutina)) {
+            usuario.getLikedRoutines().remove(rutina);
+            rutina.setLikesCount(rutina.getLikesCount() - 1);
+        } else {
+            usuario.getLikedRoutines().add(rutina);
+            rutina.setLikesCount(rutina.getLikesCount() + 1);
         }
-        usuario.getLikedRoutines().remove(rutina);
 
         return rutinaMapper.toSimpleDTO(rutina);
     }
 
     @Transactional
-    public RutinaSimpleDTO addToSavedRoutines(Long rutinaId, String auth0UserId) {
+    public RutinaSimpleDTO toggleSaveOnRoutine(Long rutinaId, String auth0UserId) {
         Rutina rutina = getRutinaOrThrow(rutinaId);
 
         if (!Boolean.TRUE.equals(rutina.getIsPublic())) {
@@ -295,20 +287,11 @@ public class RutinaService {
         }
 
         Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
-        usuario.getSavedRoutines().add(rutina);
-
-        return rutinaMapper.toSimpleDTO(rutina);
-    }
-
-    @Transactional
-    public RutinaSimpleDTO removeFromSavedRoutines(Long rutinaId, String auth0UserId) {
-        Rutina rutina = getRutinaOrThrow(rutinaId);
-        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
-
-        if (!usuario.getSavedRoutines().contains(rutina)) {
-            throw new BusinessException("El usuario no tiene a la rutina solicitada en su lista savedRoutines");
+        if (usuario.getSavedRoutines().contains(rutina)) {
+            usuario.getSavedRoutines().remove(rutina);
+        } else {
+            usuario.getSavedRoutines().add(rutina);
         }
-        usuario.getSavedRoutines().remove(rutina);
 
         return rutinaMapper.toSimpleDTO(rutina);
     }
