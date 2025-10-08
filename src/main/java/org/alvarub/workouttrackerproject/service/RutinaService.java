@@ -141,7 +141,7 @@ public class RutinaService {
                 .toList();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<RutinaResponseDTO> findAllLiked(String auth0UserId) {
         Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
 
@@ -150,7 +150,7 @@ public class RutinaService {
                 .toList();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<RutinaResponseDTO> findAllSaved(String auth0UserId) {
         Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
 
