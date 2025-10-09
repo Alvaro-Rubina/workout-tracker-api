@@ -11,8 +11,10 @@ import org.alvarub.workouttrackerproject.persistence.dto.musculo.MusculoUpdateRe
 import org.alvarub.workouttrackerproject.persistence.entity.Musculo;
 import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.MusculoRepository;
+import org.alvarub.workouttrackerproject.service.storage.CloudinaryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,12 +26,20 @@ public class MusculoService {
     private final MusculoMapper musculoMapper;
     private final ZonaMuscularService zonaMuscularService;
     private final EjercicioRepository ejercicioRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Transactional
-    public MusculoResponseDTO save(MusculoRequestDTO dto) {
+    public MusculoResponseDTO save(MusculoRequestDTO dto, MultipartFile image) {
         Musculo musculo = musculoMapper.toEntity(dto);
-
         musculo.setMuscleGroup(zonaMuscularService.getZonaMuscularOrThrow(dto.getMuscleGroupId(), true));
+
+        if (image != null && !image.isEmpty()) {
+            var res = cloudinaryService.upload(image, "muscles");
+            if (res != null) {
+                musculo.setImageUrl(res.url());
+                musculo.setImagePublicId(res.publicId());
+            }
+        }
 
         return musculoMapper.toResponseDTO(musculoRepository.save(musculo));
     }
@@ -94,7 +104,7 @@ public class MusculoService {
     }
 
     @Transactional
-    public MusculoResponseDTO update(Long id, MusculoUpdateRequestDTO dto) {
+    public MusculoResponseDTO update(Long id, MusculoUpdateRequestDTO dto, MultipartFile image) {
         Musculo musculo = getMusculoOrThrow(id, false);
 
         if ((dto.getName() != null && !dto.getName().isBlank()) && (!musculo.getName().equalsIgnoreCase(dto.getName()))) {
@@ -112,7 +122,28 @@ public class MusculoService {
             musculo.setMuscleGroup(zonaMuscularService.getZonaMuscularOrThrow(dto.getMuscleGroupId(), true));
         }
 
+        if (image != null) {
+            if (!image.isEmpty()) {
+                // borra la anterior si existe
+                cloudinaryService.delete(musculo.getImagePublicId());
+                var res = cloudinaryService.upload(image, "muscles");
+                if (res != null) {
+                    musculo.setImageUrl(res.url());
+                    musculo.setImagePublicId(res.publicId());
+                }
+            }
+        }
+
         return musculoMapper.toResponseDTO(musculo);
+    }
+
+    @Transactional
+    public MusculoResponseDTO removeImage(Long id) {
+        Musculo musculo = getMusculoOrThrow(id, false);
+        cloudinaryService.delete(musculo.getImagePublicId());
+        musculo.setImagePublicId(null);
+        musculo.setImageUrl(null);
+        return musculoMapper.toResponseDTO(musculoRepository.save(musculo));
     }
 
     @Transactional

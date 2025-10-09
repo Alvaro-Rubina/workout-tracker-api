@@ -10,6 +10,7 @@ import org.alvarub.workouttrackerproject.service.MusculoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,10 +21,11 @@ public class MusculoController {
 
     private final MusculoService musculoService;
 
-    @PostMapping("/admin")
-    public ResponseEntity<MusculoResponseDTO> createMusculo(@Valid @RequestBody MusculoRequestDTO dto) {
+    @PostMapping(value = "/admin", consumes = {"multipart/form-data"})
+    public ResponseEntity<MusculoResponseDTO> createMusculo(@Valid @RequestPart("data") MusculoRequestDTO dto,
+                                                            @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(musculoService.save(dto));
+                .body(musculoService.save(dto, image));
     }
 
 
@@ -71,10 +73,16 @@ public class MusculoController {
         return ResponseEntity.ok(musculoService.toggleActive(id));
     }
 
-    @PatchMapping("/admin/{id}")
+    @PatchMapping(value = "/admin/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<MusculoResponseDTO> updateMusculo(@PathVariable Long id,
-                                                            @Valid @RequestBody MusculoUpdateRequestDTO dto) {
-        return ResponseEntity.ok(musculoService.update(id, dto));
+                                                            @Valid @RequestPart("data") MusculoUpdateRequestDTO dto,
+                                                            @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(musculoService.update(id, dto, image));
+    }
+
+    @DeleteMapping("/admin/{id}/image")
+    public ResponseEntity<MusculoResponseDTO> deleteMuscleImage(@PathVariable Long id) {
+        return ResponseEntity.ok(musculoService.removeImage(id));
     }
 
     @PatchMapping("/admin/{id}/deactivate")

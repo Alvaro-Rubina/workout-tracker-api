@@ -36,8 +36,11 @@ public class Usuario extends Auditable {
     @Builder.Default
     private Boolean active = true;
 
-    @Column(name = "picture") // Avatar de Auth0
-    private String picture;
+    @Column(name = "profile_picture")
+    private String pictureUrl;
+
+    @Column(name = "profile_picture_public_id")
+    private String picturePublicId;
 
     @Column(name = "last_access")
     @Builder.Default
@@ -67,7 +70,8 @@ public class Usuario extends Auditable {
     private Set<Rutina> savedRoutines = new HashSet<>();
 
     @Column(name = "completed_routines")
-    private Long completedRoutines;
+    @Builder.Default
+    private Long completedRoutines = 0L;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Peso> bodyWeightHistorial = new ArrayList<>();

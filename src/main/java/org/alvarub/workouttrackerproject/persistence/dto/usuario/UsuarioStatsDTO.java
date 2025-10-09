@@ -19,7 +19,7 @@ public class UsuarioStatsDTO implements Serializable {
 
     private String email;
 
-    private String picture;
+    private String pictureUrl;
 
     private Long completedWorkouts;
 
