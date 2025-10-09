@@ -1,4 +1,4 @@
-package org.alvarub.workouttrackerproject.config;
+package org.alvarub.workouttrackerproject.config.dataloader;
 
 import com.auth0.exception.Auth0Exception;
 import com.auth0.json.mgmt.Role;

@@ -103,4 +103,30 @@ public class RutinaController {
         rutinaService.hardDelete(id, auth0UserId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<RutinaSimpleDTO> toggleLikeOnRutina(@AuthenticationPrincipal Jwt jwt,
+                                                              @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.toggleLikeOnRoutine(id, auth0UserId));
+    }
+
+    @PostMapping("/{id}/save")
+    public ResponseEntity<RutinaSimpleDTO> toggleSaveOnRutina(@AuthenticationPrincipal Jwt jwt,
+                                                                    @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.toggleSaveOnRoutine(id, auth0UserId));
+    }
+
+    @GetMapping("/liked")
+    public ResponseEntity<List<RutinaResponseDTO>> getUserLikedRutinas(@AuthenticationPrincipal Jwt jwt) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.findAllLiked(auth0UserId));
+    }
+
+    @GetMapping("/saved")
+    public ResponseEntity<List<RutinaResponseDTO>> getUserSavedRutinas(@AuthenticationPrincipal Jwt jwt) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.findAllSaved(auth0UserId));
+    }
 }

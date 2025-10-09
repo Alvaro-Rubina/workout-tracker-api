@@ -9,6 +9,7 @@ import org.alvarub.workouttrackerproject.persistence.dto.comentario.ComentarioCo
 import org.alvarub.workouttrackerproject.persistence.dto.comentario.ComentarioRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.comentario.ComentarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.comentario.ComentarioSimpleDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Comentario;
 import org.alvarub.workouttrackerproject.persistence.entity.Rutina;
 import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
@@ -87,6 +88,15 @@ public class ComentarioService {
     public List<ComentarioSimpleDTO> findAllSimpleByUser(String auth0UserId) {
         return comentarioRepository.findByUser_Auth0Id(auth0UserId).stream()
                 .map(comentarioMapper::toSimpleDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ComentarioResponseDTO> findAllLiked(String auth0UserId) {
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+
+        return usuario.getLikedComments().stream()
+                .map(comentarioMapper::toResponseDTO)
                 .toList();
     }
 

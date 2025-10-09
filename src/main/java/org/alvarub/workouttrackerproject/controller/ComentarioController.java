@@ -6,6 +6,7 @@ import org.alvarub.workouttrackerproject.persistence.dto.comentario.ComentarioCo
 import org.alvarub.workouttrackerproject.persistence.dto.comentario.ComentarioRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.comentario.ComentarioResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.comentario.ComentarioSimpleDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
 import org.alvarub.workouttrackerproject.service.ComentarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,8 +53,14 @@ public class ComentarioController {
     }
 
     @GetMapping("/routine/{routineId}")
-    public ResponseEntity<List<ComentarioResponseDTO>> getComentariosByRoutineId(@PathVariable Long routineId) {
+    public ResponseEntity<List<ComentarioResponseDTO>> getAllComentariosByRoutineId(@PathVariable Long routineId) {
         return ResponseEntity.ok(comentarioService.findAllByRoutineId(routineId));
+    }
+
+    @GetMapping("/liked")
+    public ResponseEntity<List<ComentarioResponseDTO>> getUserLikedComentarios(@AuthenticationPrincipal Jwt jwt) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(comentarioService.findAllLiked(auth0UserId));
     }
 
     @PatchMapping("/{id}")

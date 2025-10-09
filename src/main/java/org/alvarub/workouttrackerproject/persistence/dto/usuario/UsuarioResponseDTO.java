@@ -24,6 +24,8 @@ public class UsuarioResponseDTO {
 
     private Double bodyWeight;
 
+    private String pictureUrl;
+
     private Boolean active;
 
     private String picture;
