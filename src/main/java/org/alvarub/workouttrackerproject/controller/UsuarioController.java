@@ -77,7 +77,7 @@ public class UsuarioController {
 
     @PatchMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<UsuarioResponseDTO> updateUsuario(@AuthenticationPrincipal Jwt jwt,
-                                                            @Valid @RequestBody UsuarioUpdateRequestDTO dto,
+                                                            @Valid @RequestPart("data") UsuarioUpdateRequestDTO dto,
                                                             @RequestPart(value = "image", required = false) MultipartFile image) throws Auth0Exception {
         String auth0userId = jwt.getSubject();
         return ResponseEntity.ok(usuarioService.update(auth0userId, dto, image));

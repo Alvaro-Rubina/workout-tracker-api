@@ -21,7 +21,7 @@ public class EquipamientoController {
     private final EquipamientoService equipamientoService;
 
     @PostMapping(value = "/admin", consumes = {"multipart/form-data"})
-    public ResponseEntity<EquipamientoResponseDTO> createEquipamiento(@Valid @RequestBody EquipamientoRequestDTO dto,
+    public ResponseEntity<EquipamientoResponseDTO> createEquipamiento(@Valid @RequestPart("data") EquipamientoRequestDTO dto,
                                                                       @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(equipamientoService.save(dto, image));
@@ -54,7 +54,7 @@ public class EquipamientoController {
 
     @PatchMapping(value = "/admin/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<EquipamientoResponseDTO> updateEquipamiento(@PathVariable Long id,
-                                                                      @Valid @RequestBody EquipamientoUpdateRequestDTO dto,
+                                                                      @Valid @RequestPart("data") EquipamientoUpdateRequestDTO dto,
                                                                       @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.ok(equipamientoService.update(id, dto, image));
     }
