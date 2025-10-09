@@ -19,6 +19,12 @@ public class Equipamiento extends Auditable {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(name = "image_public_id")
+    private String imagePublicId;
+
     @Column(name = "active", nullable = false)
     @Builder.Default
     private Boolean active = true;

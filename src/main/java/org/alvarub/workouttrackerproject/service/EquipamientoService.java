@@ -9,8 +9,10 @@ import org.alvarub.workouttrackerproject.persistence.dto.equipamiento.Equipamien
 import org.alvarub.workouttrackerproject.persistence.entity.Equipamiento;
 import org.alvarub.workouttrackerproject.persistence.repository.EjercicioRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.EquipamientoRepository;
+import org.alvarub.workouttrackerproject.service.storage.CloudinaryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,10 +23,20 @@ public class EquipamientoService {
     private final EquipamientoRepository equipamientoRepository;
     private final EquipamientoMapper equipamientoMapper;
     private final EjercicioRepository ejercicioRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Transactional
-    public EquipamientoResponseDTO save (EquipamientoRequestDTO requestDTO) {
+    public EquipamientoResponseDTO save (EquipamientoRequestDTO requestDTO, MultipartFile image) {
         Equipamiento equipamiento = equipamientoMapper.toEntity(requestDTO);
+
+        if (image != null && !image.isEmpty()) {
+            var res = cloudinaryService.upload(image, "equipments");
+            if (res != null) {
+                equipamiento.setImageUrl(res.url());
+                equipamiento.setImagePublicId(res.publicId());
+            }
+        }
+
         return equipamientoMapper.toResponseDTO(equipamientoRepository.save(equipamiento));
     }
 
@@ -61,7 +73,7 @@ public class EquipamientoService {
     }
 
     @Transactional
-    public EquipamientoResponseDTO update(Long id, EquipamientoUpdateRequestDTO dto) {
+    public EquipamientoResponseDTO update(Long id, EquipamientoUpdateRequestDTO dto, MultipartFile image) {
         Equipamiento equipamiento = getEquipamientoOrThrow(id, false);
 
         if ((dto.getName() != null && !dto.getName().isBlank()) && (!equipamiento.getName().equalsIgnoreCase(dto.getName()))) {
@@ -72,6 +84,18 @@ public class EquipamientoService {
             equipamiento.setActive(dto.getActive());
             if (!equipamiento.getActive()) {
                 deactivateRelatedEjercicios(equipamiento);
+            }
+        }
+
+        if (image != null) {
+            if (!image.isEmpty()) {
+                // borra la anterior si existe
+                cloudinaryService.delete(equipamiento.getImagePublicId());
+                var res = cloudinaryService.upload(image, "equipments");
+                if (res != null) {
+                    equipamiento.setImageUrl(res.url());
+                    equipamiento.setImagePublicId(res.publicId());
+                }
             }
         }
 

@@ -127,6 +127,17 @@ public class UsuarioServiceAuth0 {
             return null;
         }
     }
+
+    public String getUserPictureUrl(String auth0UserId) {
+        try {
+            log.info("Obteniendo foto de perfil del usuario Auth0 {}", auth0UserId);
+            User user = managementAPI.users().get(auth0UserId, null).execute();
+            return user.getPicture();
+        } catch (Auth0Exception e) {
+            log.error("Error obteniendo foto de perfil del usuario Auth0 {}", auth0UserId, e);
+            return null;
+        }
+    }
     /**
      * Elimina un usuario de Auth0
      */
