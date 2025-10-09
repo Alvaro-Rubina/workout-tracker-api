@@ -43,7 +43,7 @@ public class UsuarioService {
         Rol rol = rolService.getRolByNameOrThrow(USER_ROL_NAME, true);
 
         Usuario usuario = Usuario.builder()
-                .name(auth0UserEmail)
+                .name(auth0UserName != null ? auth0UserName : auth0UserEmail)
                 .auth0Id(auth0UserId)
                 .email(auth0UserEmail)
                 .pictureUrl(DEFAULT_PFP)
