@@ -43,7 +43,7 @@ public class UsuarioService {
         Rol rol = rolService.getRolByNameOrThrow(USER_ROL_NAME, true);
 
         Usuario usuario = Usuario.builder()
-                .name(auth0UserName != null ? auth0UserName : auth0UserEmail)
+                .name(auth0UserName != null ? auth0UserName : auth0UserEmail.split("@")[0])
                 .auth0Id(auth0UserId)
                 .email(auth0UserEmail)
                 .pictureUrl(DEFAULT_PFP)
@@ -88,9 +88,9 @@ public class UsuarioService {
 
         Usuario usuario = Usuario.builder()
                 .auth0Id(auth0User.getUserId())
+                .name(auth0User.getName() != null ? auth0User.getName() : dto.getEmail().split("@")[0])
                 .email(auth0User.getEmail())
                 .pictureUrl(DEFAULT_PFP)
-                .name(auth0User.getName() != null ? auth0User.getName() : dto.getEmail())
                 .role(rol)
                 .build();
 
