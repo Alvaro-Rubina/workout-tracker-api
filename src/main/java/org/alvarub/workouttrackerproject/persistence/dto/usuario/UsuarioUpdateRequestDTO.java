@@ -14,6 +14,4 @@ public class UsuarioUpdateRequestDTO {
     private String name;
 
     private String password;
-
-    private String picture;
 }

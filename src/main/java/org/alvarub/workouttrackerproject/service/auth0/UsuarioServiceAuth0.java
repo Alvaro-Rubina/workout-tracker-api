@@ -26,9 +26,6 @@ public class UsuarioServiceAuth0 {
 
     private final ManagementAPI managementAPI;
 
-    /**
-     * Crea un usuario en Auth0 usando Management API
-     */
     public SignupResponseDTO signup(SignupRequestDTO request) throws Auth0Exception {
         User user = new User(connection);
         user.setEmail(request.getEmail());
@@ -53,12 +50,7 @@ public class UsuarioServiceAuth0 {
         }
     }
 
-    /**
-     * Activa o desactiva un usuario en Auth0
-     * @param auth0UserId ID del usuario en Auth0 (sub)
-     * @param active true para activar, false para desactivar
-     */
-    public void toggleActive(String auth0UserId, boolean active) throws Auth0Exception {
+    public void toggleUserActiveStatus(String auth0UserId, boolean active) throws Auth0Exception {
         try {
             User userUpdate = new User();
             userUpdate.setBlocked(!active); // blocked = true -> desactivado
@@ -74,10 +66,7 @@ public class UsuarioServiceAuth0 {
         }
     }
 
-    /**
-     * Asigna un rol a un usuario en Auth0
-     */
-    public void setRole(String auth0UserId, String auth0RoleId) throws Auth0Exception {
+    public void setUserRole(String auth0UserId, String auth0RoleId) throws Auth0Exception {
         try {
             log.info("Asignando rol {} al usuario Auth0 {}", auth0RoleId, auth0UserId);
             managementAPI.users().addRoles(auth0UserId, Collections.singletonList(auth0RoleId)).execute();
@@ -89,25 +78,45 @@ public class UsuarioServiceAuth0 {
         }
     }
 
-    /**
-     * Cambia la contraseña de un usuario en Auth0
-     * @param auth0UserId ID del usuario en Auth0 (sub)
-     * @param newPassword Nueva contraseña
-     */
-    public void changePassword(String auth0UserId, String newPassword) throws Auth0Exception {
+    public void setName(String auth0UserId, String name) throws Auth0Exception {
         try {
             User userUpdate = new User();
-            userUpdate.setPassword(newPassword.toCharArray());
-            log.info("Cambiando contraseña del usuario Auth0 {}", auth0UserId);
+            userUpdate.setName(name);
+            log.info("Estableciendo nombre del usuario Auth0 {}", auth0UserId);
             managementAPI.users().update(auth0UserId, userUpdate).execute();
-            log.info("Contraseña cambiada exitosamente para el usuario Auth0 {}", auth0UserId);
         } catch (Auth0Exception e) {
-            log.error("Error cambiando la contraseña del usuario Auth0 {}", auth0UserId, e);
+            log.error("Error estableciendo el nombre del usuario Auth0 {}", auth0UserId);
             throw e;
         }
     }
 
-    public RolResponseDTO getUserRol(String auth0UserId) {
+    public void setUserPassword(String auth0UserId, String password) throws Auth0Exception {
+        try {
+            User userUpdate = new User();
+            userUpdate.setPassword(password.toCharArray());
+            log.info("Estableciendo contraseña del usuario Auth0 {}", auth0UserId);
+            managementAPI.users().update(auth0UserId, userUpdate).execute();
+            log.info("Contraseña establecida exitosamente para el usuario Auth0 {}", auth0UserId);
+        } catch (Auth0Exception e) {
+            log.error("Error estableciendo la contraseña del usuario Auth0 {}", auth0UserId, e);
+            throw e;
+        }
+    }
+
+    public void setUserPicture(String auth0UserId, String pictureUrl) throws Auth0Exception {
+        try {
+            User userUpdate = new User();
+            userUpdate.setPicture(pictureUrl);
+            log.info("Estableciendo foto de perfil al usuario Auth0 {}", auth0UserId);
+            managementAPI.users().update(auth0UserId, userUpdate).execute();
+        } catch (Auth0Exception e) {
+            log.error("Error estableciendo la foto de perfil del usuario Auth0 {}", auth0UserId, e);
+            throw e;
+        }
+
+    }
+
+    public RolResponseDTO getUserRole(String auth0UserId) {
         try {
             log.info("Obteniendo roles del usuario Auth0 {}", auth0UserId);
             // Obtiene los roles del usuario desde Auth0
@@ -138,9 +147,7 @@ public class UsuarioServiceAuth0 {
             return null;
         }
     }
-    /**
-     * Elimina un usuario de Auth0
-     */
+
     public void deleteUser(String auth0UserId) throws Auth0Exception {
         try {
             log.info("Eliminando usuario Auth0 {}", auth0UserId);
