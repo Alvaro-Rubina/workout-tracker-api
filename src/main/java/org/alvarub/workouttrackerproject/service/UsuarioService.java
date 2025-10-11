@@ -43,7 +43,7 @@ public class UsuarioService {
         Rol rol = rolService.getRolByNameOrThrow(USER_ROL_NAME, true);
 
         Usuario usuario = Usuario.builder()
-                .name(auth0UserEmail)
+                .name(auth0UserName != null ? auth0UserName : auth0UserEmail.split("@")[0])
                 .auth0Id(auth0UserId)
                 .email(auth0UserEmail)
                 .pictureUrl(DEFAULT_PFP)
@@ -56,7 +56,7 @@ public class UsuarioService {
         try {
             // Seteo el rol en Auth0 antes de guardar en BD
             log.info("Asignando rol en Auth0 al administrador {}", usuario.getAuth0Id());
-            usuarioServiceAuth0.setRole(auth0UserId, rol.getAuth0RoleId());
+            usuarioServiceAuth0.setUserRole(auth0UserId, rol.getAuth0RoleId());
 
             log.info("Guardando administrador en base de datos {}", usuario.getEmail());
             usuarioRepository.save(usuario);
@@ -88,9 +88,9 @@ public class UsuarioService {
 
         Usuario usuario = Usuario.builder()
                 .auth0Id(auth0User.getUserId())
+                .name(auth0User.getName() != null ? auth0User.getName() : dto.getEmail().split("@")[0])
                 .email(auth0User.getEmail())
                 .pictureUrl(DEFAULT_PFP)
-                .name(auth0User.getName() != null ? auth0User.getName() : dto.getEmail())
                 .role(rol)
                 .build();
 
@@ -99,7 +99,7 @@ public class UsuarioService {
         try {
             // Asignar rol en Auth0
             log.info("Asignando rol en Auth0 al usuario {}", usuario.getAuth0Id());
-            usuarioServiceAuth0.setRole(auth0User.getUserId(), rol.getAuth0RoleId());
+            usuarioServiceAuth0.setUserRole(auth0User.getUserId(), rol.getAuth0RoleId());
 
             // Guardar en BD
             usuarioRepository.save(usuario);
@@ -144,7 +144,7 @@ public class UsuarioService {
                         throw new ExistingResourceException("El email ya está registrado con otro método de autenticación");
                     }
 
-                    RolResponseDTO userRolDTO = usuarioServiceAuth0.getUserRol(authoUserID);
+                    RolResponseDTO userRolDTO = usuarioServiceAuth0.getUserRole(authoUserID);
                     String rolName = (userRolDTO != null) ? userRolDTO.getName() : USER_ROL_NAME;
 
                     Rol rol = rolService.getRolByNameOrThrow(rolName, true);
@@ -166,7 +166,7 @@ public class UsuarioService {
                     try {
                         // Asigno el rol al usuario ya existente en Auth0
                         log.info("Asignando rol en Auth0 al usuario {}", authoUserID);
-                        usuarioServiceAuth0.setRole(authoUserID, rol.getAuth0RoleId());
+                        usuarioServiceAuth0.setUserRole(authoUserID, rol.getAuth0RoleId());
 
                         // Guardo en db
                         log.info("Guardando usuario en base de datos {}", auth0UserEmail);
@@ -233,7 +233,7 @@ public class UsuarioService {
 
         boolean nuevoEstado = !usuario.getActive();
         log.info("Actualizando estado activo del usuario {} a {}", usuario.getEmail(), nuevoEstado);
-        usuarioServiceAuth0.toggleActive(usuario.getAuth0Id(), nuevoEstado);
+        usuarioServiceAuth0.toggleUserActiveStatus(usuario.getAuth0Id(), nuevoEstado);
         usuario.setActive(nuevoEstado);
 
         return usuarioMapper.toResponseDTO(usuario);
@@ -246,14 +246,11 @@ public class UsuarioService {
 
         if ((dto.getName() != null && !dto.getName().isBlank()) && (!usuario.getName().equals(dto.getName()))) {
             usuario.setName(dto.getName());
-        }
-
-        if ((dto.getPicture() != null && !dto.getPicture().isBlank()) && (!usuario.getPictureUrl().equals(dto.getPicture()))) {
-            usuario.setPictureUrl(dto.getPicture());
+            usuarioServiceAuth0.setName(usuario.getAuth0Id(), dto.getName());
         }
 
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
-            usuarioServiceAuth0.changePassword(usuario.getAuth0Id(), dto.getPassword());
+            usuarioServiceAuth0.setUserPassword(usuario.getAuth0Id(), dto.getPassword());
         }
 
         if (image != null) {
@@ -263,6 +260,7 @@ public class UsuarioService {
                 if (res != null) {
                     usuario.setPictureUrl(res.url());
                     usuario.setPicturePublicId(res.publicId());
+                    usuarioServiceAuth0.setUserPicture(usuario.getAuth0Id(), res.url());
                 }
             }
         }
