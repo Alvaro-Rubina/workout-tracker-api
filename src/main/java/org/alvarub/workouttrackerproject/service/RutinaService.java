@@ -1,7 +1,6 @@
 package org.alvarub.workouttrackerproject.service;
 
 import lombok.RequiredArgsConstructor;
-import org.alvarub.workouttrackerproject.exception.BusinessException;
 import org.alvarub.workouttrackerproject.exception.ForbiddenOperationException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.RutinaMapper;
@@ -10,8 +9,6 @@ import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaRequestDTO
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaUpdateRequestDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.sesion.SesionRequestDTO;
-import org.alvarub.workouttrackerproject.persistence.dto.sesionejercicio.SesionEjercicioRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.*;
 import org.alvarub.workouttrackerproject.persistence.repository.AgendaRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.RutinaRepository;
@@ -20,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -306,6 +302,7 @@ public class RutinaService {
         return rutinaMapper.toSimpleDTO(rutina);
     }
 
+    @Transactional
     public RutinaSimpleDTO toggleCompleteOnRoutine(Long rutinaId, String auth0UserId) {
         Rutina rutina = getRutinaOrThrow(rutinaId);
 
@@ -318,8 +315,10 @@ public class RutinaService {
         Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
         if (usuario.getCompletedRoutines().contains(rutina)) {
             usuario.getCompletedRoutines().remove(rutina);
+            usuario.setCompletedWorkouts(usuario.getCompletedWorkouts() - 1);
         } else {
             usuario.getCompletedRoutines().add(rutina);
+            usuario.setCompletedWorkouts(usuario.getCompletedWorkouts() + 1);
         }
 
         return rutinaMapper.toSimpleDTO(rutina);
