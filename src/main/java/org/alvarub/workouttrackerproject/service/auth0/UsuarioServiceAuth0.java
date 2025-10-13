@@ -3,6 +3,7 @@ package org.alvarub.workouttrackerproject.service.auth0;
 import com.auth0.client.mgmt.ManagementAPI;
 import com.auth0.exception.Auth0Exception;
 import com.auth0.json.mgmt.Role;
+import com.auth0.json.mgmt.users.Identity;
 import com.auth0.json.mgmt.users.User;
 import com.auth0.net.Request;
 import lombok.RequiredArgsConstructor;
@@ -80,6 +81,8 @@ public class UsuarioServiceAuth0 {
 
     public void setName(String auth0UserId, String name) throws Auth0Exception {
         try {
+            isSocialConnection(auth0UserId);
+
             User userUpdate = new User();
             userUpdate.setName(name);
             log.info("Estableciendo nombre del usuario Auth0 {}", auth0UserId);
@@ -92,6 +95,8 @@ public class UsuarioServiceAuth0 {
 
     public void setUserPassword(String auth0UserId, String password) throws Auth0Exception {
         try {
+            isSocialConnection(auth0UserId);
+
             User userUpdate = new User();
             userUpdate.setPassword(password.toCharArray());
             log.info("Estableciendo contraseña del usuario Auth0 {}", auth0UserId);
@@ -105,6 +110,8 @@ public class UsuarioServiceAuth0 {
 
     public void setUserPicture(String auth0UserId, String pictureUrl) throws Auth0Exception {
         try {
+            isSocialConnection(auth0UserId);
+
             User userUpdate = new User();
             userUpdate.setPicture(pictureUrl);
             log.info("Estableciendo foto de perfil al usuario Auth0 {}", auth0UserId);
@@ -158,5 +165,19 @@ public class UsuarioServiceAuth0 {
             log.error("Error eliminando usuario Auth0 {}", auth0UserId, e);
             throw e;
         }
+    }
+
+    // Métodos auxiliares
+    private boolean isSocialConnection(String auth0UserId) throws Auth0Exception {
+        User user = managementAPI.users().get(auth0UserId, null).execute();
+        if (user.getIdentities() != null && !user.getIdentities().isEmpty()) {
+            Identity primaryIdentity = user.getIdentities().getFirst();
+            String connection = primaryIdentity.getConnection();
+            if (!connection.equals(this.connection)) {
+                log.warn("No es posible actualizar en Auth0 credenciales de un usuario con conección social ({})", connection);
+            }
+            return true;
+        }
+        return false;
     }
 }
