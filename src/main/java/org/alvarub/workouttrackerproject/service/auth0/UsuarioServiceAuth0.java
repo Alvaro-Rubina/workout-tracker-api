@@ -81,7 +81,9 @@ public class UsuarioServiceAuth0 {
 
     public void setName(String auth0UserId, String name) throws Auth0Exception {
         try {
-            isSocialConnection(auth0UserId);
+            if (isSocialConnection(auth0UserId)) {
+                return;
+            }
 
             User userUpdate = new User();
             userUpdate.setName(name);
@@ -95,7 +97,9 @@ public class UsuarioServiceAuth0 {
 
     public void setUserPassword(String auth0UserId, String password) throws Auth0Exception {
         try {
-            isSocialConnection(auth0UserId);
+            if (isSocialConnection(auth0UserId)) {
+                return;
+            }
 
             User userUpdate = new User();
             userUpdate.setPassword(password.toCharArray());
@@ -110,7 +114,9 @@ public class UsuarioServiceAuth0 {
 
     public void setUserPicture(String auth0UserId, String pictureUrl) throws Auth0Exception {
         try {
-            isSocialConnection(auth0UserId);
+            if (isSocialConnection(auth0UserId)) {
+                return;
+            }
 
             User userUpdate = new User();
             userUpdate.setPicture(pictureUrl);
