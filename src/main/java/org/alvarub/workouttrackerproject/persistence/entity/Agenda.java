@@ -13,11 +13,6 @@ import java.util.Objects;
 @Setter
 @SuperBuilder
 @Entity
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"user_id", "routine_id"})
-        }
-)
 public class Agenda extends Auditable {
 
     @Id
@@ -41,19 +36,5 @@ public class Agenda extends Auditable {
     @ManyToOne
     @JoinColumn(name = "routine_id", nullable = false)
     private Rutina routine;
-
-    // equals y hashCode basados en usuario y rutina
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Agenda agenda)) return false;
-        return Objects.equals(user, agenda.user) &&
-                Objects.equals(routine, agenda.routine);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(user, routine);
-    }
 
 }
