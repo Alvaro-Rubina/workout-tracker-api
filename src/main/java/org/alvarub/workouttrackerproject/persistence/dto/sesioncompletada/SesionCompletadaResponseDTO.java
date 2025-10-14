@@ -17,11 +17,12 @@ public class SesionCompletadaResponseDTO {
 
     private Long id;
 
-    private UsuarioStatsDTO usuario;
+    private UsuarioStatsDTO user;
 
-    private RutinaSimpleDTO rutina;
+    private RutinaSimpleDTO session;
 
-    private LocalDate fechaSesion;
+    private LocalDate sessionDate;
 
-    private LocalDate fechaRegistro;
+    private LocalDate registrationDate;
+
 }

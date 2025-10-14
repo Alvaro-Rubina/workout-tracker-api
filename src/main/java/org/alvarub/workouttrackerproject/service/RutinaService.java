@@ -332,15 +332,15 @@ public class RutinaService {
             // Registrar cada sesión como completada
             for (Sesion sesion : sesiones) {
                 SesionCompletada sesionCompletada = new SesionCompletada();
-                sesionCompletada.setUsuario(usuario);
-                sesionCompletada.setSesion(sesion);
+                sesionCompletada.setUser(usuario);
+                sesionCompletada.setSession(sesion);
 
                 // Fecha correspondiente al día real de la sesión en esta semana
                 LocalDate fechaSesion = inicioSemana.with(TemporalAdjusters.nextOrSame(sesion.getDayOfWeek()));
-                sesionCompletada.setFechaSesion(fechaSesion);
+                sesionCompletada.setSessionDate(fechaSesion);
 
                 // Fecha en que el usuario registró la completitud
-                sesionCompletada.setFechaRegistro(hoy);
+                sesionCompletada.setRegistrationDate(hoy);
 
                 sesionCompletadaRepository.save(sesionCompletada);
 
