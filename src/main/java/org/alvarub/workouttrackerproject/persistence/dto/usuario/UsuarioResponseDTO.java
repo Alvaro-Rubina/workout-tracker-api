@@ -38,6 +38,8 @@ public class UsuarioResponseDTO {
 
     private Long createdRoutines;
 
+    private Long completedRoutines;
+
     private Long likedRoutines;
 
     private Long savedRoutines;

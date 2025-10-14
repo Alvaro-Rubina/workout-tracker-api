@@ -23,6 +23,8 @@ public class UsuarioStatsDTO implements Serializable {
 
     private Long createdRoutines;
 
+    private Long completedRoutines;
+
     private Long likedRoutines;
 
     private Long savedRoutines;
