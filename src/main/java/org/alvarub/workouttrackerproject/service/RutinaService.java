@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.exception.ForbiddenOperationException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.RutinaMapper;
-import org.alvarub.workouttrackerproject.mapper.SesionCompletaMapper;
+import org.alvarub.workouttrackerproject.mapper.SesionCompletadaMapper;
 import org.alvarub.workouttrackerproject.mapper.SesionMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
@@ -40,7 +40,7 @@ public class RutinaService {
     private final AgendaRepository agendaRepository;
     private final SesionMapper sesionMapper;
     private final SesionCompletadaRepository sesionCompletadaRepository;
-    private final SesionCompletaMapper sesionCompletaMapper;
+    private final SesionCompletadaMapper sesionCompletaMapper;
 
     @Transactional
     public RutinaResponseDTO save(RutinaRequestDTO dto, String auth0UserId) {

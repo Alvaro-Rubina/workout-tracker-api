@@ -5,7 +5,7 @@ import org.alvarub.workouttrackerproject.persistence.entity.SesionCompletada;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring", uses = {UsuarioMapper.class, RutinaMapper.class})
-public interface SesionCompletaMapper {
+public interface SesionCompletadaMapper {
 
     SesionCompletadaResponseDTO toResponseDTO(SesionCompletada dto);
 }
