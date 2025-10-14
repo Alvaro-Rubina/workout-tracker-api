@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.exception.ForbiddenOperationException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.RutinaMapper;
+import org.alvarub.workouttrackerproject.mapper.SesionCompletaMapper;
 import org.alvarub.workouttrackerproject.mapper.SesionMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaUpdateRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.sesioncompletada.SesionCompletadaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.*;
 import org.alvarub.workouttrackerproject.persistence.repository.AgendaRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.RutinaRepository;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,6 +40,7 @@ public class RutinaService {
     private final AgendaRepository agendaRepository;
     private final SesionMapper sesionMapper;
     private final SesionCompletadaRepository sesionCompletadaRepository;
+    private final SesionCompletaMapper sesionCompletaMapper;
 
     @Transactional
     public RutinaResponseDTO save(RutinaRequestDTO dto, String auth0UserId) {
@@ -301,7 +305,7 @@ public class RutinaService {
     }
 
     @Transactional
-    public void completeRoutine(Long rutinaId, String auth0UserId) {
+    public List<SesionCompletadaResponseDTO> completeRoutine(Long rutinaId, String auth0UserId) {
         Rutina rutina = getRutinaOrThrow(rutinaId);
         Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
 
@@ -319,6 +323,8 @@ public class RutinaService {
                 .allMatch(dia -> inicioSemana.with(TemporalAdjusters.nextOrSame(dia)).isBefore(hoy) ||
                         inicioSemana.with(TemporalAdjusters.nextOrSame(dia)).isEqual(hoy));
 
+        List<SesionCompletadaResponseDTO> sesionesCompletas = new ArrayList<>();
+
         if (todasLasSesionesPasaron) {
             // Incrementar contador de rutinas completadas
             usuario.setCompletedRoutines(usuario.getCompletedRoutines() + 1);
@@ -328,11 +334,23 @@ public class RutinaService {
                 SesionCompletada sesionCompletada = new SesionCompletada();
                 sesionCompletada.setUsuario(usuario);
                 sesionCompletada.setSesion(sesion);
-                sesionCompletada.setFechaCompletado(hoy);
+
+                // Fecha correspondiente al día real de la sesión en esta semana
+                LocalDate fechaSesion = inicioSemana.with(TemporalAdjusters.nextOrSame(sesion.getDayOfWeek()));
+                sesionCompletada.setFechaSesion(fechaSesion);
+
+                // Fecha en que el usuario registró la completitud
+                sesionCompletada.setFechaRegistro(hoy);
+
                 sesionCompletadaRepository.save(sesionCompletada);
+
+                sesionesCompletas.add(sesionCompletaMapper.toResponseDTO(sesionCompletada));
             }
         }
+
+        return sesionesCompletas;
     }
+
 
     // Métodos auxiliares
     public Rutina getRutinaOrThrow(Long id) {

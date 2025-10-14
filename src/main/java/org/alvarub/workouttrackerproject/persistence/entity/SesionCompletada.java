@@ -21,10 +21,17 @@ public class SesionCompletada {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
     @ManyToOne
+    @JoinColumn(name = "sesion_id", nullable = false)
     private Sesion sesion;
 
-    private LocalDate fechaCompletado;
+    @Column(nullable = false)
+    private LocalDate fechaSesion;
+
+    @Column(nullable = false)
+    private LocalDate fechaRegistro;
+
 }

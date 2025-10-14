@@ -6,6 +6,7 @@ import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaRequestDTO
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaSimpleDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaUpdateRequestDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.sesioncompletada.SesionCompletadaResponseDTO;
 import org.alvarub.workouttrackerproject.service.RutinaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -116,6 +117,13 @@ public class RutinaController {
                                                               @PathVariable Long id) {
         String auth0UserId = jwt.getSubject();
         return ResponseEntity.ok(rutinaService.toggleSaveOnRoutine(id, auth0UserId));
+    }
+
+    @PostMapping("/{id}/complete")
+    public ResponseEntity<List<SesionCompletadaResponseDTO>> completeRoutine(@AuthenticationPrincipal Jwt jwt,
+                                                                             @PathVariable Long id) {
+        String auth0UserId = jwt.getSubject();
+        return ResponseEntity.ok(rutinaService.completeRoutine(id, auth0UserId));
     }
 
     @GetMapping("/liked")
