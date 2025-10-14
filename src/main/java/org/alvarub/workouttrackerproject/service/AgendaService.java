@@ -5,7 +5,6 @@ import org.alvarub.workouttrackerproject.exception.ExistingResourceException;
 import org.alvarub.workouttrackerproject.exception.ForbiddenOperationException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.AgendaMapper;
-import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaCompleteRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaResponseDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaRutinaDTO;
@@ -17,7 +16,6 @@ import org.alvarub.workouttrackerproject.persistence.repository.AgendaRepository
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -78,29 +76,6 @@ public class AgendaService {
                 .stream()
                 .map(agendaMapper::toRutinaDTO)
                 .toList();
-    }
-
-    @Transactional
-    public AgendaResponseDTO markAsCompleted(Long id, String auth0UserId, AgendaCompleteRequestDTO dto) {
-        Agenda agenda = getAgendaOrThrow(id);
-
-        if (!agenda.getUser().getAuth0Id().equals(auth0UserId)) {
-            throw new ForbiddenOperationException("Usuario sin permiso para modificar la agenda de otro usuario");
-        }
-
-        // Si la agenda ya fué completada anteriormente simplemente la retorno
-        if (agenda.getCompleted().equals(true)) {
-            return agendaMapper.toResponseDTO(agenda);
-        }
-
-        agenda.setCompleted(true);
-        agenda.setCompletedAt(LocalDateTime.now());
-
-        if (dto != null && dto.comment() != null && !dto.comment().isBlank()) {
-            agenda.setComment(dto.comment());
-        }
-
-        return agendaMapper.toResponseDTO(agendaRepository.save(agenda));
     }
 
     @Transactional

@@ -45,15 +45,6 @@ public class AgendaController {
         return ResponseEntity.ok(agendaService.findAllByUserId(auth0UserId));
     }
 
-    @PatchMapping("/{id}/complete")
-    public ResponseEntity<AgendaResponseDTO> markAsCompleted(@AuthenticationPrincipal Jwt jwt,
-                                                             @PathVariable Long id,
-                                                             @Valid @RequestBody(required = false) AgendaCompleteRequestDTO dto) {
-        String auth0UserId = jwt.getSubject();
-        AgendaResponseDTO updatedAgenda = agendaService.markAsCompleted(id, auth0UserId, dto);
-        return ResponseEntity.ok(updatedAgenda);
-    }
-
     @PatchMapping("/{id}")
     public ResponseEntity<AgendaResponseDTO> updateAgenda(@AuthenticationPrincipal Jwt jwt,
                                                           @PathVariable Long id,
