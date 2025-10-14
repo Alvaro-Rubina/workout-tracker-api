@@ -21,15 +21,11 @@ public class UsuarioStatsDTO implements Serializable {
 
     private String pictureUrl;
 
-    private Long completedWorkouts;
-
     private Long createdRoutines;
 
     private Long likedRoutines;
 
     private Long savedRoutines;
-
-    private Long completedRoutines;
 
     private Long favoriteExercises;
 

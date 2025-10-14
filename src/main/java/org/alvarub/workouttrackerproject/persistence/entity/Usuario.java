@@ -25,10 +25,6 @@ public class Usuario extends Auditable {
     @Column(name = "email", unique = true ,nullable = false)
     private String email;
 
-    @Column(name = "completed_workouts")
-    @Builder.Default
-    private Long completedWorkouts = 0L;
-
     @Column(name = "auth0_id", unique = true, nullable = false)
     private String auth0Id;
 
@@ -68,13 +64,6 @@ public class Usuario extends Auditable {
             inverseJoinColumns = @JoinColumn(name = "routine_id"))
     @Builder.Default
     private Set<Rutina> savedRoutines = new HashSet<>();
-
-    @ManyToMany
-    @JoinTable(name = "user_completed_routines",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "routine_id"))
-    @Builder.Default
-    private Set<Rutina> completedRoutines = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Peso> bodyWeightHistorial = new ArrayList<>();

@@ -15,7 +15,6 @@ public interface RutinaMapper {
     @Mapping(target = "user.createdRoutines", ignore = true)
     @Mapping(target = "user.savedRoutines", ignore = true)
     @Mapping(target = "user.likedRoutines", ignore = true)
-    @Mapping(target = "user.completedRoutines", ignore = true)
     @Mapping(target = "user.favoriteExercises", ignore = true)
     RutinaResponseDTO toResponseDTO(Rutina entity);
 

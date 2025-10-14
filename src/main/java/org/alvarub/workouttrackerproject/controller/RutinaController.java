@@ -118,13 +118,6 @@ public class RutinaController {
         return ResponseEntity.ok(rutinaService.toggleSaveOnRoutine(id, auth0UserId));
     }
 
-    @PostMapping("/{id}/complete")
-    public ResponseEntity<RutinaSimpleDTO> toggleCompletedOnRoutine(@AuthenticationPrincipal Jwt jwt,
-                                                                    @PathVariable Long id) {
-        String auth0UserId = jwt.getSubject();
-        return ResponseEntity.ok(rutinaService.toggleCompleteOnRoutine(id, auth0UserId));
-    }
-
     @GetMapping("/liked")
     public ResponseEntity<List<RutinaResponseDTO>> getUserLikedRutinas(@AuthenticationPrincipal Jwt jwt) {
         String auth0UserId = jwt.getSubject();
@@ -137,9 +130,4 @@ public class RutinaController {
         return ResponseEntity.ok(rutinaService.findAllSaved(auth0UserId));
     }
 
-    @GetMapping("/completed")
-    public ResponseEntity<List<RutinaResponseDTO>> getUserCompletedRutinas(@AuthenticationPrincipal Jwt jwt) {
-        String auth0UserId = jwt.getSubject();
-        return ResponseEntity.ok(rutinaService.findAllCompleted(auth0UserId));
-    }
 }

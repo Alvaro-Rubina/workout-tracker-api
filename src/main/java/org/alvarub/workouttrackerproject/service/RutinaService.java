@@ -156,15 +156,6 @@ public class RutinaService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
-    public List<RutinaResponseDTO> findAllCompleted(String auth0UserId) {
-        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
-
-        return usuario.getCompletedRoutines().stream()
-                .map(rutinaMapper::toResponseDTO)
-                .toList();
-    }
-
     @Transactional
     public RutinaSimpleDTO toggleIsPublic(Long id, String auth0UserId) {
         Rutina rutina = getRutinaOrThrow(id);
@@ -297,28 +288,6 @@ public class RutinaService {
             usuario.getSavedRoutines().remove(rutina);
         } else {
             usuario.getSavedRoutines().add(rutina);
-        }
-
-        return rutinaMapper.toSimpleDTO(rutina);
-    }
-
-    @Transactional
-    public RutinaSimpleDTO toggleCompleteOnRoutine(Long rutinaId, String auth0UserId) {
-        Rutina rutina = getRutinaOrThrow(rutinaId);
-
-        if (!Boolean.TRUE.equals(rutina.getIsPublic())) {
-            if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
-                throw new ForbiddenOperationException("Usuario sin permiso para obtener una rutina privada que no le pertenece");
-            }
-        }
-
-        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
-        if (usuario.getCompletedRoutines().contains(rutina)) {
-            usuario.getCompletedRoutines().remove(rutina);
-            usuario.setCompletedWorkouts(usuario.getCompletedWorkouts() - 1);
-        } else {
-            usuario.getCompletedRoutines().add(rutina);
-            usuario.setCompletedWorkouts(usuario.getCompletedWorkouts() + 1);
         }
 
         return rutinaMapper.toSimpleDTO(rutina);
