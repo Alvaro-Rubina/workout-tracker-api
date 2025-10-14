@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.alvarub.workouttrackerproject.persistence.dto.categoria.CategoriaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.categoria.CategoriaResponseDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.categoria.CategoriaUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.service.CategoriaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,12 @@ public class CategoriaController {
     @PatchMapping("/admin/{id}/toggle-active")
     public ResponseEntity<CategoriaResponseDTO> toggleCategoriaActiveStatus(@PathVariable Long id) {
         return ResponseEntity.ok(categoriaService.toggleActive(id));
+    }
+
+    @PatchMapping("/admin/{id}")
+    public ResponseEntity<CategoriaResponseDTO> updateCategoria(@PathVariable Long id,
+                                                                @Valid @RequestBody CategoriaUpdateRequestDTO dto) {
+        return ResponseEntity.ok(categoriaService.update(id, dto));
     }
 
     @PatchMapping("/admin/{id}/deactivate")

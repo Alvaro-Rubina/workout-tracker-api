@@ -5,6 +5,7 @@ import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.CategoriaMapper;
 import org.alvarub.workouttrackerproject.persistence.dto.categoria.CategoriaRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.categoria.CategoriaResponseDTO;
+import org.alvarub.workouttrackerproject.persistence.dto.categoria.CategoriaUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Categoria;
 import org.alvarub.workouttrackerproject.persistence.repository.CategoriaRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.RutinaRepository;
@@ -64,6 +65,32 @@ public class CategoriaService {
     }
 
     @Transactional
+    public CategoriaResponseDTO update(Long id, CategoriaUpdateRequestDTO dto) {
+        Categoria categoria = getCategoriaOrThrow(id, false);
+
+        if ((dto.getName() != null && !dto.getName().isBlank()) && (!categoria.getName().equalsIgnoreCase(dto.getName()))) {
+            categoria.setName(dto.getName());
+        }
+
+        Categoria categoriaDefault = getDefaultCategoriaOrThrow();
+
+        if ((dto.getActive() != null) && (!categoria.getActive().equals(dto.getActive()))) {
+            categoria.setActive(dto.getActive());
+            if (!categoria.getActive()) {
+                sesionRepository.findAllByCategory(categoria).forEach(sesion -> {
+                    sesion.setCategory(categoriaDefault);
+                });
+
+                rutinaRepository.findAllByCategory(categoria).forEach(rutina -> {
+                    rutina.setCategory(categoriaDefault);
+                });
+            }
+        }
+
+        return categoriaMapper.toResponseDTO(categoria);
+    }
+
+    @Transactional
     public CategoriaResponseDTO softDelete(Long id) {
         Categoria categoria = getCategoriaOrThrow(id, false);
 
@@ -89,8 +116,8 @@ public class CategoriaService {
 
         Categoria categoriaDefault = getDefaultCategoriaOrThrow();
 
-        sesionRepository.findAllByCategory(categoriaAEliminar).forEach(categoria -> {
-            categoria.setCategory(categoriaDefault);
+        sesionRepository.findAllByCategory(categoriaAEliminar).forEach(sesion -> {
+            sesion.setCategory(categoriaDefault);
         });
 
         rutinaRepository.findAllByCategory(categoriaAEliminar).forEach(rutina -> {
