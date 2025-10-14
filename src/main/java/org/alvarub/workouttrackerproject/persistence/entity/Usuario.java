@@ -46,6 +46,10 @@ public class Usuario extends Auditable {
     @JoinColumn(name = "role_id")
     private Rol role;
 
+    @Column(name = "completed_routines")
+    @Builder.Default
+    private Long completedRoutines = 0L;
+
     // RUTINAS CREADAS - FAVORITAS - GUARDADAS
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     @Builder.Default

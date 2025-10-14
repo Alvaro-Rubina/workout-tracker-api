@@ -12,11 +12,17 @@ import org.alvarub.workouttrackerproject.persistence.dto.rutina.RutinaUpdateRequ
 import org.alvarub.workouttrackerproject.persistence.entity.*;
 import org.alvarub.workouttrackerproject.persistence.repository.AgendaRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.RutinaRepository;
+import org.alvarub.workouttrackerproject.persistence.repository.SesionCompletadaRepository;
 import org.alvarub.workouttrackerproject.persistence.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +36,7 @@ public class RutinaService {
     private final UsuarioRepository usuarioRepository;
     private final AgendaRepository agendaRepository;
     private final SesionMapper sesionMapper;
+    private final SesionCompletadaRepository sesionCompletadaRepository;
 
     @Transactional
     public RutinaResponseDTO save(RutinaRequestDTO dto, String auth0UserId) {
@@ -291,6 +298,40 @@ public class RutinaService {
         }
 
         return rutinaMapper.toSimpleDTO(rutina);
+    }
+
+    @Transactional
+    public void completeRoutine(Long rutinaId, String auth0UserId) {
+        Rutina rutina = getRutinaOrThrow(rutinaId);
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+
+        // Obtener todas las sesiones de la rutina
+        List<Sesion> sesiones = rutina.getSessions();
+        Set<DayOfWeek> diasDeSesiones = sesiones.stream()
+                .map(Sesion::getDayOfWeek)
+                .collect(Collectors.toSet());
+
+        // Verificar si todos los días de la semana ya han pasado
+        LocalDate hoy = LocalDate.now();
+        LocalDate inicioSemana = hoy.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        boolean todasLasSesionesPasaron = diasDeSesiones.stream()
+                .allMatch(dia -> inicioSemana.with(TemporalAdjusters.nextOrSame(dia)).isBefore(hoy) ||
+                        inicioSemana.with(TemporalAdjusters.nextOrSame(dia)).isEqual(hoy));
+
+        if (todasLasSesionesPasaron) {
+            // Incrementar contador de rutinas completadas
+            usuario.setCompletedRoutines(usuario.getCompletedRoutines() + 1);
+
+            // Registrar cada sesión como completada
+            for (Sesion sesion : sesiones) {
+                SesionCompletada sesionCompletada = new SesionCompletada();
+                sesionCompletada.setUsuario(usuario);
+                sesionCompletada.setSesion(sesion);
+                sesionCompletada.setFechaCompletado(hoy);
+                sesionCompletadaRepository.save(sesionCompletada);
+            }
+        }
     }
 
     // Métodos auxiliares
