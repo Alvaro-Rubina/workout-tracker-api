@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,6 +13,11 @@ import java.time.LocalDateTime;
 @Setter
 @SuperBuilder
 @Entity
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "routine_id"})
+        }
+)
 public class Agenda extends Auditable {
 
     @Id
@@ -25,13 +31,6 @@ public class Agenda extends Auditable {
     @Column(name = "reminder_minutes")
     private Integer reminderMinutes;
 
-    @Column(name = "completed")
-    @Builder.Default
-    private Boolean completed = false;
-
-    @Column(name = "completed_at")
-    private LocalDateTime completedAt;
-
     @Column(name = "comment", length = 500)
     private String comment;
 
@@ -42,5 +41,19 @@ public class Agenda extends Auditable {
     @ManyToOne
     @JoinColumn(name = "routine_id", nullable = false)
     private Rutina routine;
+
+    // equals y hashCode basados en usuario y rutina
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Agenda agenda)) return false;
+        return Objects.equals(user, agenda.user) &&
+                Objects.equals(routine, agenda.routine);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(user, routine);
+    }
 
 }

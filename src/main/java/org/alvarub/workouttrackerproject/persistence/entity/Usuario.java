@@ -75,9 +75,9 @@ public class Usuario extends Auditable {
     @Builder.Default
     private Set<Ejercicio> favoriteExercises = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,  orphanRemoval = true)
     @Builder.Default
-    private List<Agenda> schedules = new ArrayList<>();
+    private Set<Agenda> schedules = new HashSet<>();
 
     /*NOTE: Dejo comentada la relacion en esta parte porque no me parece necesario que la relacion esté aca tambien.
     *  Después veo si descomento*/
