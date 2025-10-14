@@ -1,6 +1,7 @@
 package org.alvarub.workouttrackerproject.service;
 
 import lombok.RequiredArgsConstructor;
+import org.alvarub.workouttrackerproject.exception.ExistingResourceException;
 import org.alvarub.workouttrackerproject.exception.ForbiddenOperationException;
 import org.alvarub.workouttrackerproject.exception.NotFoundException;
 import org.alvarub.workouttrackerproject.mapper.AgendaMapper;
@@ -32,13 +33,16 @@ public class AgendaService {
     public AgendaResponseDTO save(AgendaRequestDTO dto, String auth0UserId) {
         Agenda agenda = agendaMapper.toEntity(dto);
 
-        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
         Rutina rutina = rutinaService.getRutinaOrThrow(dto.getRoutineId());
-
         if (!Boolean.TRUE.equals(rutina.getIsPublic())) {
             if (!auth0UserId.equals(rutina.getUser().getAuth0Id())) {
                 throw new ForbiddenOperationException("Usuario sin permiso para agendar una rutina privada que no le pertenece");
             }
+        }
+        Usuario usuario = usuarioService.getUsuarioByAuth0IdOrThrow(auth0UserId, true);
+
+        if (agendaRepository.existsByUser_IdAndRoutine_Id(usuario.getId(), rutina.getId())) {
+            throw new ExistingResourceException("El usuario proporcionado ya tiene agendada la rutina indicada");
         }
 
         agenda.setUser(usuario);
