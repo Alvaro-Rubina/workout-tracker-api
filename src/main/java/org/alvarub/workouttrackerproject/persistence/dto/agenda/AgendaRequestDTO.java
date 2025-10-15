@@ -1,6 +1,5 @@
 package org.alvarub.workouttrackerproject.persistence.dto.agenda;
 
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -9,17 +8,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgendaRequestDTO {
 
-    @NotNull(message = "El campo startDate es obligatorio")
-    @FutureOrPresent(message = "El campo startDate debe ser una fecha futura o presente")
-    private LocalDateTime startDate;
 
     // Campos reminderMinutes y comment son opcional
     private Integer reminderMinutes;

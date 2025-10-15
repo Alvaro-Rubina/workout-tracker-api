@@ -11,11 +11,17 @@ import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaRutinaDTO;
 import org.alvarub.workouttrackerproject.persistence.dto.agenda.AgendaUpdateRequestDTO;
 import org.alvarub.workouttrackerproject.persistence.entity.Agenda;
 import org.alvarub.workouttrackerproject.persistence.entity.Rutina;
+import org.alvarub.workouttrackerproject.persistence.entity.Sesion;
 import org.alvarub.workouttrackerproject.persistence.entity.Usuario;
 import org.alvarub.workouttrackerproject.persistence.repository.AgendaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -42,6 +48,10 @@ public class AgendaService {
         if (agendaRepository.existsByUser_IdAndRoutine_Id(usuario.getId(), rutina.getId())) {
             throw new ExistingResourceException("El usuario proporcionado ya tiene agendada la rutina indicada");
         }
+
+        // Calcular el startDate basándose en los días de las sesiones de la rutina
+        LocalDateTime calculatedStartDate = calculateStartDate(rutina);
+        agenda.setStartDate(calculatedStartDate);
 
         agenda.setUser(usuario);
         agenda.setRoutine(rutina);
@@ -98,14 +108,6 @@ public class AgendaService {
             agenda.setComment(dto.getComment());
         }
 
-        if (dto.getUserId() != null) {
-            agenda.setUser(usuarioService.getUsuarioOrThrow(dto.getUserId(), true));
-        }
-
-        if (dto.getRoutineId() != null) {
-            agenda.setRoutine(rutinaService.getRutinaOrThrow(dto.getRoutineId()));
-        }
-
         return agendaMapper.toResponseDTO(agendaRepository.save(agenda));
     }
 
@@ -123,5 +125,53 @@ public class AgendaService {
     public Agenda getAgendaOrThrow(Long id) {
         return agendaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Agenda con el id " + id + " no encontrada"));
+    }
+
+    /**
+     * Calcula la fecha de inicio de la agenda basándose en los días de las sesiones de la rutina.
+     * Toma el domingo como primer día de la semana.
+     *
+     * @param rutina La rutina a agendar
+     * @return La fecha de inicio calculada
+     */
+    private LocalDateTime calculateStartDate(Rutina rutina) {
+        LocalDate today = LocalDate.now();
+        DayOfWeek currentDayOfWeek = today.getDayOfWeek();
+
+        // Obtener el primer día de sesión (el más cercano al inicio de la semana)
+        DayOfWeek firstSessionDay = rutina.getSessions().stream()
+                .map(Sesion::getDayOfWeek)
+                .min(Comparator.comparingInt(this::dayOfWeekToSundayBasedOrder))
+                .orElseThrow(() -> new IllegalStateException("La rutina no tiene sesiones definidas"));
+
+        // Convertir el día actual a orden basado en domingo (Domingo=0, Lunes=1, ..., Sábado=6)
+        int currentDayOrder = dayOfWeekToSundayBasedOrder(currentDayOfWeek);
+        int firstSessionDayOrder = dayOfWeekToSundayBasedOrder(firstSessionDay);
+
+        LocalDate startDate;
+
+        // Si el primer día de sesión ya pasó en la semana actual, comenzar la próxima semana
+        if (firstSessionDayOrder < currentDayOrder) {
+            // Ir al próximo domingo y luego al día de la sesión
+            startDate = today.with(TemporalAdjusters.next(DayOfWeek.SUNDAY))
+                    .with(TemporalAdjusters.nextOrSame(firstSessionDay));
+        } else {
+            // El día de sesión es hoy o está más adelante en la semana actual
+            startDate = today.with(TemporalAdjusters.nextOrSame(firstSessionDay));
+        }
+
+        // Retornar la fecha con hora al inicio del día
+        return startDate.atStartOfDay();
+    }
+
+    /**
+     * Convierte DayOfWeek a un orden basado en domingo como primer día de la semana.
+     * Domingo = 0, Lunes = 1, Martes = 2, ..., Sábado = 6
+     *
+     * @param dayOfWeek El día de la semana
+     * @return El orden del día (0-6)
+     */
+    private int dayOfWeekToSundayBasedOrder(DayOfWeek dayOfWeek) {
+        return dayOfWeek == DayOfWeek.SUNDAY ? 0 : dayOfWeek.getValue();
     }
 }
