@@ -72,8 +72,8 @@ workout-tracker-project/
 ## Requisitos previos
 - Java 21 (JDK)
 - Gradle (o usar `./gradlew` incluido)
-- Docker + Docker Compose (para lanzar MySQL)
-- Cuenta y aplicación en Auth0 (dominio, audiencia, issuer, etc.)
+- Docker + Docker Compose (para correr MySQL)
+- Cuenta y aplicación en Auth0 (dominio, audience, issuer, etc.)
 - Cuenta en Cloudinary (cloud name, API key/secret)
 
 ---
