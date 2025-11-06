@@ -1,6 +1,6 @@
 # Workout Tracker Project
 
-Aplicación backend en Java/Spring Boot para gestionar rutinas de entrenamiento: ejercicios, sesiones, agendas, progreso de peso, comentarios y más. Incluye autenticación y autorización con Auth0 (JWT), almacenamiento de imágenes con Cloudinary y persistencia en MySQL.
+API REST diseñada para gestionar rutinas de entrenamiento: ejercicios, sesiones, agendas, progreso de peso, comentarios y más. Incluye autenticación y autorización con Auth0 (JWT), almacenamiento de imágenes con Cloudinary y persistencia en MySQL.
 
 ---
 
